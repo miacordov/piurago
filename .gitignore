@@ -1,0 +1,37 @@
+# ---------- Secretos y configuración local (NUNCA subir) ----------
+.env
+.env.*
+!.env.example
+*-local.properties
+*.pem
+*.key
+*.jks
+*.keystore
+
+# ---------- Backend (Java / Maven) ----------
+target/
+logs/
+*.log
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+
+# ---------- Frontend (Flutter) ----------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+local.properties
+
+# ---------- Editores e IDEs ----------
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+
+# ---------- Sistema operativo ----------
+.DS_Store
+Thumbs.db
