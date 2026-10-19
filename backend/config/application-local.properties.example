@@ -1,0 +1,17 @@
+# Copia este archivo como "application-local.properties" (en esta misma carpeta, backend/config/)
+# y reemplaza los valores entre < >.
+# El archivo real esta ignorado por Git: NUNCA lo subas.
+# Vive en config/ y no en src/main/resources/ para que no se empaquete dentro del .jar.
+#
+# Se activa con:  ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+
+# Endpoint DIRECTO de Neon (el host SIN "-pooler") para desarrollo
+spring.datasource.url=jdbc:postgresql://<HOST_DE_NEON>/neondb?sslmode=require
+spring.datasource.username=<USUARIO_DE_NEON>
+spring.datasource.password=<PASSWORD_DE_NEON>
+
+# Genera una nueva con:  openssl rand -base64 36   (sin comillas)
+jwt.secret=<CADENA_ALEATORIA_DE_AL_MENOS_32_CARACTERES>
+
+# Solo en desarrollo: ver las consultas SQL en consola
+spring.jpa.show-sql=true
