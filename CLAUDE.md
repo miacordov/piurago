@@ -6,7 +6,7 @@ App multiplataforma de rutas de transporte urbano en Piura. El GPS colaborativo 
 ## Estructura
 - backend/  → API REST en Java 21 + Spring Boot (Maven Wrapper, sin instalar Maven)
 - frontend/ → Flutter (móvil y web), mapas con flutter_map + OpenStreetMap
-- docs/     → informes, diagramas, diseño y evidencias
+- docs/     → informes, diagramas, diseño y evidencias (docs/diseno/guia-visual.md es la referencia del frontend)
 
 ## Arquitectura del backend (exigida por el curso)
 MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → repository → model. Los DTO van separados de las entidades.
@@ -38,3 +38,14 @@ MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → r
 - Commits en español: tipo(ámbito): descripción. Tipos: feat, fix, docs, test, refactor, chore. Ámbitos: backend, frontend, docs.
 - Con TDD: primero el commit test(...) que falla y luego el feat(...) que lo hace pasar.
 - Antes de abrir un PR del backend: ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest'
+
+## Frontend (Flutter)
+- Proyecto en frontend/ (web y Android). Ejecutar: cd frontend && flutter run -d chrome. Revisar: flutter analyze y flutter test.
+- Referencia visual: docs/diseno/guia-visual.md y docs/diseno/capturas/. El prototipo de Lovable (repo piura-route-buddy) es solo diseño: no se reutiliza su código.
+- Color primario propuesto: #342EC1 (el del prototipo). Fuente: la que trae Flutter por defecto.
+- Mientras no haya paraderos reales, la app usa un repositorio de datos de prueba intercambiable con el real.
+- Backend local: http://localhost:8080 (en el emulador de Android: http://10.0.2.2:8080).
+
+## Seguridad al trabajar con Claude Code
+- No leer ni mostrar backend/config/application-local.properties, archivos .env ni ninguna credencial. Si hace falta una, pedírsela a la usuaria.
+- Pedir confirmación antes de hacer push, abrir un Pull Request o ejecutar comandos que cambien el repositorio remoto.
