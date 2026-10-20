@@ -30,6 +30,11 @@ MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → r
 - Pruebas unitarias: ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest'
 
 ## Pendiente
-- Convención de ramas, commits y Pull Requests.
 - Antes del despliegue: rotar la contraseña de Neon (la cuenta la administra otra persona del equipo) y generar un JWT_SECRET nuevo.
 - Al final: datos reales de rutas y paraderos, y la decisión sobre el ETA simulado.
+
+## Flujo de trabajo (detalle en CONTRIBUTING.md)
+- Nadie hace push directo a main: cada cambio va en una rama (feature/, fix/, docs/, test/, chore/) y entra por Pull Request con al menos una aprobación.
+- Commits en español: tipo(ámbito): descripción. Tipos: feat, fix, docs, test, refactor, chore. Ámbitos: backend, frontend, docs.
+- Con TDD: primero el commit test(...) que falla y luego el feat(...) que lo hace pasar.
+- Antes de abrir un PR del backend: ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest'
