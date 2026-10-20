@@ -23,13 +23,22 @@ Arquitectura del backend: MVC + DAO bajo principios SOLID, desarrollado con TDD.
 
 ## Estado
 
-- Backend: pendiente de migrar a este repositorio.
+- Backend: importado y funcionando. Las 39 pruebas unitarias pasan y la API conecta a Neon.
 - Frontend: por construir.
+- Despliegue: pendiente.
 
 ## Cómo ejecutarlo
 
-Se completará al migrar el código. Cada carpeta tendrá su propio README con sus pasos.
+- Backend: ver [`backend/README.md`](backend/README.md). Las credenciales se guardan en `backend/config/application-local.properties`, que Git ignora.
+- Frontend: se completará al crear el proyecto Flutter.
+
+## Documentación
+
+- [`docs/guia-backend.md`](docs/guia-backend.md): guía técnica del backend.
+- `docs/informes/`: avances del proyecto (APF1, APF2), cronograma y presentación.
+- `docs/diagramas/`: diagrama entidad-relación.
+- `docs/diseno/`: wireframe y referencia del prototipo.
 
 ## Seguridad
 
-Nunca se suben credenciales al repositorio (contraseñas de la base de datos, claves JWT, tokens). Se configuran con variables de entorno.
+Nunca se suben credenciales al repositorio (contraseñas de la base de datos, claves JWT, tokens). Se configuran con variables de entorno o con un archivo local ignorado por Git.

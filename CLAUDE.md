@@ -24,5 +24,12 @@ MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → r
 - Los datos reales de rutas y paraderos se cargan al final: las rutas de Piura cambian seguido por cierres de avenidas.
 - El tema del ETA simulado (cuando no hay colaboradores) se resuelve al final.
 
-## Pendiente de definir
+## Configuración local del backend
+- Las credenciales viven en backend/config/application-local.properties (ignorado por Git; hay una plantilla .example).
+- Arrancar: cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+- Pruebas unitarias: ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest'
+
+## Pendiente
 - Convención de ramas, commits y Pull Requests.
+- Antes del despliegue: rotar la contraseña de Neon (la cuenta la administra otra persona del equipo) y generar un JWT_SECRET nuevo.
+- Al final: datos reales de rutas y paraderos, y la decisión sobre el ETA simulado.
