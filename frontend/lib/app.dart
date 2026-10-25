@@ -6,6 +6,7 @@ import 'data/lugares/buscador_lugares.dart';
 import 'data/models/lugar.dart';
 import 'data/rutas_repository.dart';
 import 'features/auth/login_page.dart';
+import 'features/congestion/congestion_page.dart';
 import 'features/location/location_page.dart';
 import 'features/map/map_page.dart';
 import 'features/routes/routes_page.dart';
@@ -56,6 +57,7 @@ class PiuraGoApp extends StatelessWidget {
             mostrarMapa: mostrarMapaBase,
           );
         },
+        AppRoutes.congestion: (_) => const CongestionPage(),
       },
     );
   }
