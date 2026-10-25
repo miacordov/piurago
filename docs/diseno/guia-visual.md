@@ -105,17 +105,23 @@ Modo del panel del mapa que responde qué líneas tomar entre dos puntos. Códig
    - **Un destino rápido:** botones con los 6 lugares por los que pasan más líneas. Se muestran mientras el campo activo está vacío.
    - **Un punto del mapa** ("Toca el mapa para fijar tu destino." / "… tu origen."). El punto toma el nombre de la calle conocida más cercana, a menos de 250 m: "Cerca de Calle Lima". Si no hay ninguna, se llama "Punto en el mapa". No usa la red.
    - Al elegir el destino, el foco pasa solo al origen. Hay botones para intercambiar origen y destino y para limpiar.
-3. Con el origen y el destino definidos, **la búsqueda corre sola**: no hay botón "Buscar ruta". La mejor línea queda elegida y se dibuja en el mapa con:
-   - el paradero donde se sube y el de bajada;
-   - el origen (verde) y el destino (rojo);
-   - las caminatas punteadas.
-4. Cada tarjeta muestra:
+3. Con el origen y el destino definidos, **la búsqueda corre sola**: no hay botón "Buscar ruta".
+   - **Barra resumen:** como en Moovit, los campos se resumen en una barra "Desde … / Hasta …" con intercambiar, limpiar y **"Cambiar"** (vuelve a mostrar los campos). Así queda espacio para los resultados.
+   - La mejor línea queda elegida y se dibuja en el mapa con el paradero donde se sube y el de bajada, el origen (verde), el destino (rojo) y las caminatas punteadas.
+4. Cada tarjeta, como en Moovit, muestra de arriba abajo:
+   - la **duración aproximada** del viaje en grande ("≈ 14 min", con "aprox.") y el **pasaje** a la derecha;
+   - la **tira del recorrido**: 🚶 minutos a pie › [🚌 código de la línea, con su color] › 🚶 minutos a pie;
    - la línea, la empresa y el tipo de servicio;
    - "Sube en {paradero} · {m} m a pie ({min} min)" y "Baja en {paradero} · {m} m a pie ({min} min)";
-   - el pasaje y la frecuencia.
+   - "Pasa cada ~{n} min".
 
    Un clic en otra tarjeta la elige y cambia el mapa. La tarjeta elegida se resalta y muestra el botón **"Iniciar viaje"**.
-5. **Iniciar viaje** abre una guía de 4 pasos que el pasajero avanza a mano. **No usa el GPS ni comparte la ubicación**, así que el opt-in queda intacto:
+
+   **Cómo se estima la duración** (en `busqueda_viaje.dart`; es aproximada):
+   - **Caminatas:** 80 m por minuto.
+   - **Espera:** la mitad de la frecuencia de la línea; 0 si no se conoce.
+   - **Tramo en bus:** la distancia en línea recta entre los dos paraderos × 1.3 (`factorRecorridoBus`), a 300 m por minuto, unos 18 km/h (`velocidadBusMetrosPorMinuto`).
+5. **Iniciar viaje** abre una guía de 4 pasos que el pasajero avanza a mano, con una **barra de progreso** de 4 tramos. **No usa el GPS ni comparte la ubicación**, así que el opt-in queda intacto:
 
    | Paso | Texto | Botón |
    |---|---|---|
@@ -126,7 +132,10 @@ Modo del panel del mapa que responde qué líneas tomar entre dos puntos. Códig
    | Final | "Llegaste" | "Listo" |
 
    En todo momento está "Salir del viaje".
-6. El mapa se reencuadra cada vez que cambian el origen, el destino o la línea elegida:
+6. **Disposición:**
+   - **Escritorio** (700 px o más): el mapa y, a la derecha, el panel de 359 px.
+   - **Celular:** como en Moovit y piuratransporta, el mapa ocupa toda la pantalla y el panel es una **hoja que se desliza desde abajo**. Empieza a media pantalla y se puede bajar (para ver el mapa) o subir (para ver todos los resultados).
+7. El mapa se reencuadra cada vez que cambian el origen, el destino o la línea elegida:
    - con dos o más puntos distintos, se encuadran todos con margen;
    - con un solo punto, o varios casi iguales (a menos de 30 m), se centra con zoom 15.
 
