@@ -14,6 +14,7 @@ class RutaPanel extends StatelessWidget {
     required this.ruta,
     required this.paraderos,
     this.onPlanificarViaje,
+    this.onCompartirRuta,
   });
 
   final Ruta ruta;
@@ -21,6 +22,9 @@ class RutaPanel extends StatelessWidget {
 
   /// Si se indica, el panel muestra el botón "Planificar viaje".
   final VoidCallback? onPlanificarViaje;
+
+  /// Callback al presionar "Compartir ruta" para iniciar el flujo de abordaje.
+  final VoidCallback? onCompartirRuta;
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +157,8 @@ class RutaPanel extends StatelessWidget {
           ],
           const SizedBox(height: 24),
           FilledButton.icon(
-            onPressed: () => mostrarProximamente(context, 'Compartir la ruta'),
+            onPressed: onCompartirRuta ??
+                () => mostrarProximamente(context, 'Compartir la ruta'),
             style: appFilledButtonStyle(),
             icon: const Icon(Icons.share_outlined, size: 18),
             label: const Text('Compartir ruta'),

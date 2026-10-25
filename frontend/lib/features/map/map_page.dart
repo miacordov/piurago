@@ -16,8 +16,11 @@ import '../shell/shell_scaffold.dart';
 import '../viaje/mapa_viaje.dart';
 import '../viaje/planificador_viaje.dart';
 import '../viaje/planificar_panel.dart';
+import 'confirmar_abordaje_dialog.dart';
 import 'ruta_map.dart';
 import 'ruta_panel.dart';
+import 'viaje_en_vivo_panel.dart';
+import 'viaje_finalizado_dialog.dart';
 
 /// Pantalla del mapa, con dos modos de panel:
 /// - Planificar viaje ("¿A dónde vas?"), si no se indica una ruta (por
@@ -177,7 +180,7 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-class _Contenido extends StatelessWidget {
+class _Contenido extends StatefulWidget {
   const _Contenido({
     required this.ruta,
     required this.paraderos,
@@ -195,20 +198,54 @@ class _Contenido extends StatelessWidget {
   final VoidCallback onPlanificarViaje;
 
   @override
+  State<_Contenido> createState() => _ContenidoState();
+}
+
+class _ContenidoState extends State<_Contenido> {
+  bool _enViaje = false;
+
+  Future<void> _iniciarViaje() async {
+    final confirmado = await ConfirmarAbordajeDialog.mostrar(context, widget.ruta);
+    if (confirmado == true && mounted) {
+      setState(() => _enViaje = true);
+    }
+  }
+
+  Future<void> _finalizarViaje() async {
+    await ViajeFinalizadoDialog.mostrar(
+      context,
+      ruta: widget.ruta,
+      paraderosVisitados: widget.paraderos.length,
+    );
+    if (mounted) {
+      setState(() => _enViaje = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Widget mapa = mostrarMapa
+    final Widget mapa = widget.mostrarMapa
         ? RutaMap(
-            key: ValueKey(ruta.idRuta),
-            paraderos: paraderos,
-            trazado: trazado,
-            esDemostracion: esDemostracion,
+            key: ValueKey(widget.ruta.idRuta),
+            paraderos: widget.paraderos,
+            trazado: widget.trazado,
+            esDemostracion: widget.esDemostracion,
           )
         : const ColoredBox(color: AppColors.field);
-    final panel = RutaPanel(
-      ruta: ruta,
-      paraderos: paraderos,
-      onPlanificarViaje: onPlanificarViaje,
-    );
+
+    final Widget panel = _enViaje
+        ? ViajeEnVivoPanel(
+            ruta: widget.ruta,
+            paraderos: widget.paraderos,
+            onFinalizarViaje: _finalizarViaje,
+          )
+        : RutaPanel(
+            ruta: widget.ruta,
+            paraderos: widget.paraderos,
+            onPlanificarViaje: widget.onPlanificarViaje,
+            onCompartirRuta: _iniciarViaje,
+          );
+
     return _Disposicion(mapa: mapa, panel: panel);
   }
 }
