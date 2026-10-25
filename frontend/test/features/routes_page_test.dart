@@ -54,7 +54,7 @@ void main() {
     expect(find.text('EMTRUBAPI · Interurbana'), findsOneWidget);
     expect(find.text('S/ 3.00'), findsWidgets);
     expect(find.text('cada ~10 min'), findsWidgets);
-    expect(find.text('20 líneas'), findsOneWidget);
+    expect(find.text('24 líneas'), findsOneWidget);
     expect(find.text('Modo demostración'), findsOneWidget);
     // Cada línea es una fila baja: caben varias en la pantalla.
     expect(
@@ -69,9 +69,9 @@ void main() {
     fijarPantalla(tester, escritorio);
     await abrir(tester, const FakeRutasRepository());
 
-    expect(find.text('Todas (20)'), findsOneWidget);
+    expect(find.text('Todas (24)'), findsOneWidget);
     expect(find.text('Urbanas (4)'), findsOneWidget);
-    expect(find.text('Reguladas (13)'), findsOneWidget);
+    expect(find.text('Reguladas (17)'), findsOneWidget);
     expect(find.text('Interurbanas (3)'), findsOneWidget);
 
     await tester.tap(find.text('Interurbanas (3)'));
@@ -81,9 +81,9 @@ void main() {
     expect(find.text('I-18'), findsOneWidget);
     expect(find.text('RD-01'), findsNothing);
 
-    await tester.tap(find.text('Todas (20)'));
+    await tester.tap(find.text('Todas (24)'));
     await tester.pumpAndSettle();
-    expect(find.text('20 líneas'), findsOneWidget);
+    expect(find.text('24 líneas'), findsOneWidget);
   });
 
   testWidgets('el buscador filtra por código, zona o empresa', (tester) async {
@@ -97,9 +97,10 @@ void main() {
     expect(find.text('I-18'), findsNothing);
     expect(find.text('1 línea'), findsOneWidget);
 
+    // I-19, RD-08 y RD-21 (piuratransporta) y RD-07 (plan regulador).
     await tester.enterText(find.byType(TextField), '6M Buss');
     await tester.pumpAndSettle();
-    expect(find.text('3 líneas'), findsOneWidget);
+    expect(find.text('4 líneas'), findsOneWidget);
 
     // El código vale sin guion.
     await tester.enterText(find.byType(TextField), 'rd01');
@@ -186,7 +187,7 @@ void main() {
     expect(find.text('No encontramos rutas'), findsOneWidget);
     await tester.tap(find.text('Limpiar búsqueda'));
     await tester.pumpAndSettle();
-    expect(find.text('20 líneas'), findsOneWidget);
+    expect(find.text('24 líneas'), findsOneWidget);
   });
 
   testWidgets('muestra un error con opción de reintentar', (tester) async {
