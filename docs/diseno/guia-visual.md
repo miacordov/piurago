@@ -87,6 +87,90 @@ Modal: círculo verde con check, "Viaje finalizado", nombre de la línea, franja
 "ESTADO DEL TRÁNSITO", "Congestión en Piura", pestañas Ahora / Mañana / Tarde / Noche, tarjeta "Nivel general" con chip ("Tránsito lento") y barras por hora (6h a 20h) en verde, primario y rojo; tres tarjetas ("Demora promedio", "Velocidad promedio", "Puntos críticos") y la lista "TRAMOS CRÍTICOS" con nivel ("Alta") y demora, y el botón "Ver mapa".
 Backend: `GET /api/historico-congestion/ruta/{idRuta}`.
 
+## Planificar viaje ("¿A dónde vas?")
+
+Modo del panel del mapa que responde qué líneas tomar entre dos puntos. Código en `frontend/lib/features/viaje/`. El flujo toma como referencia el buscador de https://piuratransporta.com/: se pide primero el destino, se elige con un solo clic y la búsqueda corre sola.
+
+### Flujo
+
+1. Se abre al entrar por "Mapa" en la barra lateral (sin ruta indicada). El mapa se centra en Piura y no dibuja ninguna línea. Desde el panel "Ruta seleccionada" se llega con el botón "Planificar viaje", sin cambiar de pantalla.
+2. **Destino primero** ("Escribe tu destino…") y luego el **origen** ("Escribe el punto de partida…"). Cada lugar se elige con un clic:
+   - **Una sugerencia**, como en Google Maps. La lista tiene dos secciones:
+     - **"Lugares con líneas de bus":** los paraderos. Salen al instante desde la 1.ª letra, sin red.
+     - **"Otros lugares":** desde la 2.ª letra, 300 ms después de la última tecla, se suman calles, barrios, negocios y sitios conocidos del buscador en línea (Photon, sobre OpenStreetMap). Salen primero los de Piura, pero también los de fuera.
+     - Cada lugar muestra su nombre, dónde queda (por ejemplo, "Urbanización 4 de Enero, Piura, Perú") y un ícono de paradero, calle, zona u otro lugar.
+     - Debajo, en pequeño: "Búsqueda de lugares: Photon · © OpenStreetMap contributors".
+     - **Abreviaturas:** "jr" = jirón, "av" = avenida, "psje" = pasaje, "urb" = urbanización, "ca" = calle; se completan antes de buscar.
+     - **Cómo se elige:** con un clic del mouse, un toque o las flechas ↑/↓ y Enter. Enter sin resaltar elige la primera sugerencia; Escape cierra la lista.
+     - **Al elegir:** el mapa marca el punto y lo centra.
+   - **Un lugar frecuente:** botones con los lugares por los que pasan más líneas. Se muestran mientras el campo activo está vacío.
+   - **Un punto del mapa** ("O toca el mapa para fijar tu destino / tu origen"). El punto se llama "Punto en el mapa".
+   - Al elegir el destino, el foco pasa solo al origen. Hay botones para intercambiar origen y destino y para limpiar.
+3. Con el origen y el destino definidos, **la búsqueda corre sola**: no hay botón "Buscar ruta". La mejor línea queda elegida y se dibuja en el mapa con:
+   - el paradero donde se sube y el de bajada;
+   - el origen (verde) y el destino (rojo);
+   - las caminatas punteadas.
+4. Cada tarjeta muestra:
+   - la línea, la empresa y el tipo de servicio;
+   - "Sube en {paradero} · {m} m a pie ({min} min)" y "Baja en {paradero} · {m} m a pie ({min} min)";
+   - el pasaje y la frecuencia.
+
+   Un clic en otra tarjeta la elige y cambia el mapa. La tarjeta elegida se resalta y muestra el botón **"Iniciar viaje"**.
+5. **Iniciar viaje** abre una guía de 4 pasos que el pasajero avanza a mano. **No usa el GPS ni comparte la ubicación**, así que el opt-in queda intacto:
+
+   | Paso | Texto | Botón |
+   |---|---|---|
+   | 1 | "Camina a la parada" | "Ya llegué" |
+   | 2 | "Espera el bus {código}" | "Ya subí" |
+   | 3 | "Vas a bordo" y "Bájate cerca de {paradero}" | "Ya bajé" |
+   | 4 | "Camina a tu destino" | "Ya llegué" |
+   | Final | "Llegaste" | "Listo" |
+
+   En todo momento está "Salir del viaje".
+6. El mapa se reencuadra cada vez que cambian el origen, el destino o la línea elegida:
+   - con dos o más puntos distintos, se encuadran todos con margen;
+   - con un solo punto, o varios casi iguales (a menos de 30 m), se centra con zoom 15.
+
+Mensajes:
+
+| Caso | Mensaje |
+|---|---|
+| Ninguna línea sirve | "Ninguna línea pasa cerca. Prueba con otro punto." |
+| Origen y destino a menos de 300 m | "Están a menos de 300 m: puedes ir caminando." |
+| Falla la carga de las rutas | "No pudimos cargar las rutas." con el botón "Reintentar" |
+
+### Reglas de búsqueda
+
+- **Lugares locales:** son los paraderos que entrega `RutasRepository`, con nombres únicos sin distinguir mayúsculas ni tildes. Si un nombre se repite, se usa la coordenada del primero.
+- **Otros lugares:** vienen de `BuscadorLugares` (ver `docs/diseno/mapa-osm.md`). No se repite un lugar que ya está entre los paraderos.
+- **Respuestas guardadas:** cada respuesta se guarda por texto, así que volver a escribir lo mismo no hace otra petición.
+- **Respuestas tardías:** si llega la respuesta de un texto anterior, se ignora.
+- **Si el buscador falla** (sin red, 429 o 5xx), quedan los paraderos y la nota "No pudimos buscar más lugares. Revisa tu conexión."
+- **Reintentos:** nunca reintenta solo. Tras un 429 no pide nada durante 5 segundos.
+- **Privacidad:** solo se envía el texto escrito y un punto fijo de Piura (-5.1945, -80.6328). Nunca la ubicación real del usuario.
+- **Carga:** los paraderos de todas las rutas se piden en paralelo una sola vez y quedan en memoria.
+- **Distancia:** en línea recta, con la fórmula de Haversine.
+- **Paraderos de cada ruta:** en cada ruta activa con al menos 2 paraderos se toma el paradero más cercano al origen (sube) y el más cercano al destino (baja).
+- **Rutas que sirven:** la ruta sirve si las dos caminatas miden 600 m o menos (`caminataMaximaMetros`) y si sube y baja en paraderos distintos.
+- **Tiempo a pie:** 80 m por minuto (`velocidadCaminataMetrosPorMinuto`), redondeado hacia arriba.
+- **Sentido:** no se filtra por orden ni por sentido, porque las líneas son de ida y vuelta y el orden de los paraderos es aproximado. Tampoco se muestran las paradas intermedias.
+- **Orden de los resultados:** primero por caminata total; a igual caminata, por frecuencia (la menor primero), luego por pasaje (el menor primero) y al final por nombre. Si falta la frecuencia o el pasaje, la ruta va al final.
+- **Rutas fuera de servicio:** no se incluyen en los resultados ni en los lugares frecuentes.
+- **Lugares frecuentes:** los 6 lugares por los que pasan más líneas activas.
+
+### Límites
+
+- **No sigue el recorrido real.** La búsqueda es por cercanía a los paraderos, que hoy son **propuestos** (ver `docs/datos/paraderos-propuestos.md`). Una línea puede salir como resultado aunque su recorrido real no pase por ese tramo.
+- **OpenStreetMap en Piura está menos completo que Google.** Faltan negocios y números de puerta, y algunos sitios tienen otro nombre (por ejemplo, "utp" no encuentra la sede de Piura).
+- **Un punto por calle.** Photon devuelve un solo punto por calle (su centro). En una avenida larga, las líneas se buscan alrededor de ese punto, no a lo largo de toda la avenida.
+- **Lugares lejanos.** Un lugar elegido lejos de todas las líneas (por ejemplo, en Lima) da "Ninguna línea pasa cerca. Prueba con otro punto."
+- **Servicio de uso justo.** El servicio público de Photon no garantiza disponibilidad; para producción conviene un servidor propio o pasar por el backend.
+- **Caminata en línea recta.** No sigue las calles, así que la caminata real es más larga.
+- **Una sola línea.** No combina dos líneas (transbordos).
+- **Sin "Mi ubicación".** Requiere geolocalización y queda para otra tarea: el origen se elige como el destino.
+- **La guía de viaje es manual.** No sigue al bus ni calcula el ETA; el viaje en vivo con GPS colaborativo es otra tarea.
+- **Puntos del mapa sin nombre.** Se llaman "Punto en el mapa", porque no se hace geocodificación inversa.
+
 ## Diferencias entre el prototipo y el backend (decisiones pendientes)
 
 | Tema | Detalle |
