@@ -1,0 +1,2246 @@
+{
+  "fuente": "Lugares: https://piuratransporta.com/rutas. Coordenadas: OpenStreetMap (© OpenStreetMap contributors, ODbL), consultado 2026-10-24.",
+  "aviso": "Paraderos PROPUESTOS y aproximados: son lugares conocidos junto al recorrido, no paraderos oficiales. El orden se calculó por cercanía y hay que validarlo en campo.",
+  "rutas": [
+    {
+      "idRuta": 1,
+      "codigo": "I-18",
+      "nombre": "Terminal Satélite (Piura) - Terminal La Unión",
+      "paraderos": [
+        {
+          "nombre": "Terminal Satélite (Piura)",
+          "latitud": -5.20368,
+          "longitud": -80.64697,
+          "osm": "Terminal Satélite Bajo Piura",
+          "tipo": "extremo",
+          "idParadero": 1,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "I.E. Nuestra Señora del Carmen",
+          "latitud": -5.23362,
+          "longitud": -80.65822,
+          "osm": "Institución Educativa Nuestra Señora Del Carmen",
+          "tipo": "lugar",
+          "nota": "Hay dos con ese nombre: se eligió la que está camino a La Unión",
+          "idParadero": 2,
+          "ordenSecuencial": 2
+        }
+      ]
+    },
+    {
+      "idRuta": 2,
+      "codigo": "I-19",
+      "nombre": "Piura - Catacaos",
+      "paraderos": [
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 3,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 4,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Gobierno Regional",
+          "latitud": -5.18203,
+          "longitud": -80.62822,
+          "osm": "Gobierno Regional de Piura",
+          "tipo": "lugar",
+          "idParadero": 5,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 6,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 7,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 8,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Plaza Tres Culturas",
+          "latitud": -5.19851,
+          "longitud": -80.62585,
+          "osm": "Plaza Tres Culturas",
+          "tipo": "lugar",
+          "idParadero": 9,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Mercado de Castilla",
+          "latitud": -5.19988,
+          "longitud": -80.62278,
+          "osm": "Mercado Central de Castilla",
+          "tipo": "lugar",
+          "idParadero": 10,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 11,
+          "ordenSecuencial": 9
+        },
+        {
+          "nombre": "Catacaos",
+          "latitud": -5.2655,
+          "longitud": -80.67607,
+          "osm": "Plaza de Armas de Catacaos",
+          "tipo": "extremo",
+          "idParadero": 12,
+          "ordenSecuencial": 10
+        }
+      ]
+    },
+    {
+      "idRuta": 3,
+      "codigo": "RD-01",
+      "nombre": "Ruta Urbana U-09 Guadalupe",
+      "paraderos": [
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 13,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 14,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 15,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 16,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 17,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 18,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 19,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "I.E. Militar Pedro Ruiz Gallo",
+          "latitud": -5.18827,
+          "longitud": -80.60056,
+          "osm": "Institución Educativa Militar Pedro Ruiz Gallo",
+          "tipo": "lugar",
+          "idParadero": 20,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 4,
+      "codigo": "RD-02",
+      "nombre": "Veintiséis de Octubre - Terela",
+      "paraderos": [
+        {
+          "nombre": "Hospital Santa Rosa",
+          "latitud": -5.18401,
+          "longitud": -80.66562,
+          "osm": "Hospital de Apoyo Santa Rosa",
+          "tipo": "lugar",
+          "idParadero": 21,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Clínica Oftalmológica Pongo",
+          "latitud": -5.19416,
+          "longitud": -80.63526,
+          "osm": "Clínica Oftalmológica Pongo",
+          "tipo": "lugar",
+          "idParadero": 22,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Establecimiento de Salud I-4 Pachitea",
+          "latitud": -5.18608,
+          "longitud": -80.63116,
+          "osm": "Establecimiento de Salud I-4 Pachitea",
+          "tipo": "lugar",
+          "idParadero": 23,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Instituto Médico Soy Diabético",
+          "latitud": -5.18321,
+          "longitud": -80.62606,
+          "osm": "Instituto Médico Soy Diabético",
+          "tipo": "lugar",
+          "idParadero": 24,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 25,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 26,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Plaza de Armas",
+          "latitud": -5.19712,
+          "longitud": -80.62662,
+          "osm": "Plaza Mayor de Piura",
+          "tipo": "lugar",
+          "idParadero": 27,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Terela",
+          "latitud": -5.07934,
+          "longitud": -80.59414,
+          "osm": "Terela",
+          "tipo": "extremo",
+          "idParadero": 28,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 5,
+      "codigo": "RD-03",
+      "nombre": "Ruta Urbana U-08 EMUTSA Calle García",
+      "paraderos": [
+        {
+          "nombre": "I.E. Coar Piura",
+          "latitud": -5.19092,
+          "longitud": -80.66806,
+          "osm": "Institución Educativa Coar Piura",
+          "tipo": "lugar",
+          "idParadero": 29,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "I.E. Susana Wesley",
+          "latitud": -5.19977,
+          "longitud": -80.63773,
+          "osm": "Institución Educativa Susana Wesley",
+          "tipo": "lugar",
+          "idParadero": 30,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Carita feliz",
+          "latitud": -5.19616,
+          "longitud": -80.63226,
+          "osm": "Carita feliz",
+          "tipo": "lugar",
+          "idParadero": 31,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Parque Miguel Cortés/Infantil",
+          "latitud": -5.19548,
+          "longitud": -80.63199,
+          "osm": "Parque Miguel Cortés",
+          "tipo": "lugar",
+          "idParadero": 32,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 33,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Mercado de Castilla",
+          "latitud": -5.19988,
+          "longitud": -80.62278,
+          "osm": "Mercado Central de Castilla",
+          "tipo": "lugar",
+          "idParadero": 34,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 35,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 36,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 6,
+      "codigo": "RD-05",
+      "nombre": "Parcela J (Piura) - Terminal Las Lomas",
+      "paraderos": [
+        {
+          "nombre": "Parque Néstor Martos Garridos",
+          "latitud": -5.18995,
+          "longitud": -80.64407,
+          "osm": "Parque Néstor Martos Garridos",
+          "tipo": "lugar",
+          "idParadero": 37,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 38,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 39,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 40,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 41,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Catedral de Piura",
+          "latitud": -5.1963,
+          "longitud": -80.62674,
+          "osm": "Catedral de Piura",
+          "tipo": "lugar",
+          "idParadero": 42,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 43,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "I.E. Militar Pedro Ruiz Gallo",
+          "latitud": -5.18827,
+          "longitud": -80.60056,
+          "osm": "Institución Educativa Militar Pedro Ruiz Gallo",
+          "tipo": "lugar",
+          "idParadero": 44,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 7,
+      "codigo": "RD-08",
+      "nombre": "Piura - Catacaos",
+      "paraderos": [
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 45,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 46,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Gobierno Regional",
+          "latitud": -5.18203,
+          "longitud": -80.62822,
+          "osm": "Gobierno Regional de Piura",
+          "tipo": "lugar",
+          "idParadero": 47,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 48,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 49,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Plaza Tres Culturas",
+          "latitud": -5.19851,
+          "longitud": -80.62585,
+          "osm": "Plaza Tres Culturas",
+          "tipo": "lugar",
+          "idParadero": 50,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Mercado de Castilla",
+          "latitud": -5.19988,
+          "longitud": -80.62278,
+          "osm": "Mercado Central de Castilla",
+          "tipo": "lugar",
+          "idParadero": 51,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 52,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Catacaos",
+          "latitud": -5.2655,
+          "longitud": -80.67607,
+          "osm": "Plaza de Armas de Catacaos",
+          "tipo": "extremo",
+          "idParadero": 53,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 8,
+      "codigo": "RD-09",
+      "nombre": "Fundo Vicentenario - Tacala - Miraflores - Los Portales",
+      "paraderos": [
+        {
+          "nombre": "I.E. Militar Pedro Ruiz Gallo",
+          "latitud": -5.18827,
+          "longitud": -80.60056,
+          "osm": "Institución Educativa Militar Pedro Ruiz Gallo",
+          "tipo": "lugar",
+          "idParadero": 54,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 55,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 56,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 57,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 58,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 59,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Parque Néstor Martos Garridos",
+          "latitud": -5.18995,
+          "longitud": -80.64407,
+          "osm": "Parque Néstor Martos Garridos",
+          "tipo": "lugar",
+          "idParadero": 60,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Universidad Cesar Vallejo - UCV",
+          "latitud": -5.17447,
+          "longitud": -80.66334,
+          "osm": "Universidad César Vallejo",
+          "tipo": "lugar",
+          "idParadero": 61,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 9,
+      "codigo": "RD-10",
+      "nombre": "UPIS San Gabriel Arcángel - Av. Raúl Mata La Cruz",
+      "paraderos": [
+        {
+          "nombre": "UPIS San Gabriel Arcángel",
+          "latitud": -5.20146,
+          "longitud": -80.57463,
+          "osm": "Upis San Gabriel Arcángel",
+          "tipo": "extremo",
+          "idParadero": 62,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 63,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 64,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Instituto Médico Soy Diabético",
+          "latitud": -5.18321,
+          "longitud": -80.62606,
+          "osm": "Instituto Médico Soy Diabético",
+          "tipo": "lugar",
+          "idParadero": 65,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Centro de Rehabilitación Profesional Piura",
+          "latitud": -5.18348,
+          "longitud": -80.63453,
+          "osm": "Centro de Rehabilitación Profesional Piura",
+          "tipo": "lugar",
+          "idParadero": 66,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de la Paz",
+          "latitud": -5.18193,
+          "longitud": -80.63574,
+          "osm": "Institución Educativa Nuestra Señora De La Paz",
+          "tipo": "lugar",
+          "idParadero": 67,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Clínica San Miguel",
+          "latitud": -5.19466,
+          "longitud": -80.63198,
+          "osm": "Clínica San Miguel",
+          "tipo": "lugar",
+          "idParadero": 68,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Clínica San Miguel II",
+          "latitud": -5.19484,
+          "longitud": -80.63141,
+          "osm": "Clínica San Miguel II",
+          "tipo": "lugar",
+          "idParadero": 69,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Plaza de Armas",
+          "latitud": -5.19712,
+          "longitud": -80.62662,
+          "osm": "Plaza Mayor de Piura",
+          "tipo": "lugar",
+          "idParadero": 70,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 10,
+      "codigo": "RD-11",
+      "nombre": "A.H. Los Almendros - Av. José Aguilar Santisteban",
+      "paraderos": [
+        {
+          "nombre": "A.H. Los Almendros",
+          "latitud": -5.18961,
+          "longitud": -80.59587,
+          "osm": "Asentamiento Humano Los Almendros",
+          "tipo": "extremo",
+          "idParadero": 71,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "I.E. Militar Pedro Ruiz Gallo",
+          "latitud": -5.18827,
+          "longitud": -80.60056,
+          "osm": "Institución Educativa Militar Pedro Ruiz Gallo",
+          "tipo": "lugar",
+          "idParadero": 72,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 73,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado de Castilla",
+          "latitud": -5.19988,
+          "longitud": -80.62278,
+          "osm": "Mercado Central de Castilla",
+          "tipo": "lugar",
+          "idParadero": 74,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plaza Tres Culturas",
+          "latitud": -5.19851,
+          "longitud": -80.62585,
+          "osm": "Plaza Tres Culturas",
+          "tipo": "lugar",
+          "idParadero": 75,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Plaza del Sol (Centro)",
+          "latitud": -5.19686,
+          "longitud": -80.6282,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la del centro",
+          "idParadero": 76,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Parque Miguel Cortés/Infantil",
+          "latitud": -5.19548,
+          "longitud": -80.63199,
+          "osm": "Parque Miguel Cortés",
+          "tipo": "lugar",
+          "idParadero": 77,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Carita feliz",
+          "latitud": -5.19616,
+          "longitud": -80.63226,
+          "osm": "Carita feliz",
+          "tipo": "lugar",
+          "idParadero": 78,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 79,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 11,
+      "codigo": "RD-14",
+      "nombre": "A.H. El Indio - Curumuy / Ejidos de Huan",
+      "paraderos": [
+        {
+          "nombre": "A.H. El Indio",
+          "latitud": -5.22534,
+          "longitud": -80.61867,
+          "osm": "El Indio",
+          "tipo": "extremo",
+          "idParadero": 80,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Centro Médico Essalud Castilla",
+          "latitud": -5.22041,
+          "longitud": -80.62096,
+          "osm": "Centro Médico Essalud Castilla",
+          "tipo": "lugar",
+          "idParadero": 81,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "I.E. 14116 San Martin de Porras",
+          "latitud": -5.21736,
+          "longitud": -80.6265,
+          "osm": "Institución Educativa 14116 San Martin De Porras",
+          "tipo": "lugar",
+          "idParadero": 82,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "I.E. Nuestra Señora del Transito",
+          "latitud": -5.20646,
+          "longitud": -80.62188,
+          "osm": "Institución Educativa Nuestra Señora Del Transito",
+          "tipo": "lugar",
+          "idParadero": 83,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Aeropuerto de Piura",
+          "latitud": -5.2064,
+          "longitud": -80.61381,
+          "osm": "Aeropuerto Capitán FAP Guillermo Concha Iberico",
+          "tipo": "lugar",
+          "nota": "Coordenada del centro del aeropuerto: el paradero va en la entrada",
+          "idParadero": 84,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Plaza de Armas",
+          "latitud": -5.19712,
+          "longitud": -80.62662,
+          "osm": "Plaza Mayor de Piura",
+          "tipo": "lugar",
+          "idParadero": 85,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Establecimiento de Salud I-4 Pachitea",
+          "latitud": -5.18608,
+          "longitud": -80.63116,
+          "osm": "Establecimiento de Salud I-4 Pachitea",
+          "tipo": "lugar",
+          "idParadero": 86,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Univ. de Piura (UDEP)",
+          "latitud": -5.17302,
+          "longitud": -80.6388,
+          "osm": "Universidad de Piura",
+          "tipo": "lugar",
+          "nota": "Coordenada del centro del campus: el paradero va en la puerta",
+          "idParadero": 87,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Puesto de Salud Convenio Ejidos de Huan",
+          "latitud": -5.13077,
+          "longitud": -80.64129,
+          "osm": "Puesto de Salud Convenio Ejidos de Huan (POSTA)",
+          "tipo": "lugar",
+          "idParadero": 88,
+          "ordenSecuencial": 9
+        },
+        {
+          "nombre": "Curumuy / Ejidos de Huan",
+          "latitud": -5.13022,
+          "longitud": -80.64051,
+          "osm": "Ejidos de Huan",
+          "tipo": "extremo",
+          "idParadero": 89,
+          "ordenSecuencial": 10
+        }
+      ]
+    },
+    {
+      "idRuta": 12,
+      "codigo": "RD-15",
+      "nombre": "Montebello",
+      "paraderos": [
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 90,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 91,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 92,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Plaza del Sol (Av. Grau-Gulman)",
+          "latitud": -5.19248,
+          "longitud": -80.63955,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la de Av. Grau con Gulman",
+          "idParadero": 93,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Parque Miguel Cortés/Infantil",
+          "latitud": -5.19548,
+          "longitud": -80.63199,
+          "osm": "Parque Miguel Cortés",
+          "tipo": "lugar",
+          "idParadero": 94,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 95,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 96,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Univ. de Piura (UDEP)",
+          "latitud": -5.17302,
+          "longitud": -80.6388,
+          "osm": "Universidad de Piura",
+          "tipo": "lugar",
+          "nota": "Coordenada del centro del campus: el paradero va en la puerta",
+          "idParadero": 97,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 13,
+      "codigo": "RD-16",
+      "nombre": "A.H. Nuevo Horizonte - Miraflores Country Club",
+      "paraderos": [
+        {
+          "nombre": "A.H. Nuevo Horizonte",
+          "latitud": -5.18198,
+          "longitud": -80.58941,
+          "osm": "Nuevo Horizonte",
+          "tipo": "extremo",
+          "idParadero": 98,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Terminal Terrestre",
+          "latitud": -5.1922,
+          "longitud": -80.61217,
+          "osm": "Terminal Terrestre Castilla",
+          "tipo": "lugar",
+          "nota": "Hay varios terminales: se eligió el Terminal Terrestre de Castilla, verificar",
+          "idParadero": 99,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 100,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Instituto Médico Soy Diabético",
+          "latitud": -5.18321,
+          "longitud": -80.62606,
+          "osm": "Instituto Médico Soy Diabético",
+          "tipo": "lugar",
+          "idParadero": 101,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Establecimiento de Salud I-4 Pachitea",
+          "latitud": -5.18608,
+          "longitud": -80.63116,
+          "osm": "Establecimiento de Salud I-4 Pachitea",
+          "tipo": "lugar",
+          "idParadero": 102,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Centro de Rehabilitación Profesional Piura",
+          "latitud": -5.18348,
+          "longitud": -80.63453,
+          "osm": "Centro de Rehabilitación Profesional Piura",
+          "tipo": "lugar",
+          "idParadero": 103,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de la Paz",
+          "latitud": -5.18193,
+          "longitud": -80.63574,
+          "osm": "Institución Educativa Nuestra Señora De La Paz",
+          "tipo": "lugar",
+          "idParadero": 104,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 105,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Unidad Médico Legal Piura",
+          "latitud": -5.1848,
+          "longitud": -80.64808,
+          "osm": "Unidad Médico Legal Piura",
+          "tipo": "lugar",
+          "idParadero": 106,
+          "ordenSecuencial": 9
+        },
+        {
+          "nombre": "Miraflores Country Club",
+          "latitud": -5.1724,
+          "longitud": -80.61037,
+          "osm": "Urbanización Miraflores Country Club",
+          "tipo": "extremo",
+          "idParadero": 107,
+          "ordenSecuencial": 10
+        }
+      ]
+    },
+    {
+      "idRuta": 14,
+      "codigo": "RD-18",
+      "nombre": "Granja de Colores",
+      "paraderos": [
+        {
+          "nombre": "Plaza Tres Culturas",
+          "latitud": -5.19851,
+          "longitud": -80.62585,
+          "osm": "Plaza Tres Culturas",
+          "tipo": "lugar",
+          "idParadero": 108,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Plaza de Armas",
+          "latitud": -5.19712,
+          "longitud": -80.62662,
+          "osm": "Plaza Mayor de Piura",
+          "tipo": "lugar",
+          "idParadero": 109,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Plaza del Sol (Centro)",
+          "latitud": -5.19686,
+          "longitud": -80.6282,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la del centro",
+          "idParadero": 110,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Parque Miguel Cortés/Infantil",
+          "latitud": -5.19548,
+          "longitud": -80.63199,
+          "osm": "Parque Miguel Cortés",
+          "tipo": "lugar",
+          "idParadero": 111,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 112,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Plaza del Sol (Av. Grau-Gulman)",
+          "latitud": -5.19248,
+          "longitud": -80.63955,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la de Av. Grau con Gulman",
+          "idParadero": 113,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 114,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Terminal Terrestre",
+          "latitud": -5.1922,
+          "longitud": -80.61217,
+          "osm": "Terminal Terrestre Castilla",
+          "tipo": "lugar",
+          "nota": "Hay varios terminales: se eligió el Terminal Terrestre de Castilla, verificar",
+          "idParadero": 115,
+          "ordenSecuencial": 8
+        }
+      ]
+    },
+    {
+      "idRuta": 15,
+      "codigo": "RD-19",
+      "nombre": "A.H. El Indio - Vía Colectora Norte",
+      "paraderos": [
+        {
+          "nombre": "A.H. El Indio",
+          "latitud": -5.22534,
+          "longitud": -80.61867,
+          "osm": "El Indio",
+          "tipo": "extremo",
+          "idParadero": 116,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Establecimiento de Salud I-3 el Indio",
+          "latitud": -5.22449,
+          "longitud": -80.62059,
+          "osm": "Establecimiento de Salud I-3 El Indio",
+          "tipo": "lugar",
+          "idParadero": 117,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "I.E. Maria Auxiliadora",
+          "latitud": -5.21246,
+          "longitud": -80.62265,
+          "osm": "Institución Educativa Maria Auxiliadora",
+          "tipo": "lugar",
+          "nota": "Hay tres con ese nombre: se eligió la de Castilla, cerca de El Indio",
+          "idParadero": 118,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Aeropuerto de Piura",
+          "latitud": -5.2064,
+          "longitud": -80.61381,
+          "osm": "Aeropuerto Capitán FAP Guillermo Concha Iberico",
+          "tipo": "lugar",
+          "nota": "Coordenada del centro del aeropuerto: el paradero va en la entrada",
+          "idParadero": 119,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 120,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 121,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Instituto Médico Soy Diabético",
+          "latitud": -5.18321,
+          "longitud": -80.62606,
+          "osm": "Instituto Médico Soy Diabético",
+          "tipo": "lugar",
+          "idParadero": 122,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 123,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Clínica Bello Horizonte",
+          "latitud": -5.18061,
+          "longitud": -80.64983,
+          "osm": "Clínica Bello Horizonte",
+          "tipo": "lugar",
+          "idParadero": 124,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 16,
+      "codigo": "RD-20",
+      "nombre": "A.H. Chiclayito - CP Monte Castillo",
+      "paraderos": [
+        {
+          "nombre": "A.H. Chiclayito",
+          "latitud": -5.224,
+          "longitud": -80.62693,
+          "osm": "Chiclayito",
+          "tipo": "extremo",
+          "idParadero": 125,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Mercado de Castilla",
+          "latitud": -5.19988,
+          "longitud": -80.62278,
+          "osm": "Mercado Central de Castilla",
+          "tipo": "lugar",
+          "idParadero": 126,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Plaza Tres Culturas",
+          "latitud": -5.19851,
+          "longitud": -80.62585,
+          "osm": "Plaza Tres Culturas",
+          "tipo": "lugar",
+          "idParadero": 127,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 128,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 129,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 130,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 131,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Hospital Jorge Reátegui Delgado",
+          "latitud": -5.19319,
+          "longitud": -80.63634,
+          "osm": "Hospital Jorge Reátegui Delgado",
+          "tipo": "lugar",
+          "idParadero": 132,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Plaza del Sol (Av. Grau-Gulman)",
+          "latitud": -5.19248,
+          "longitud": -80.63955,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la de Av. Grau con Gulman",
+          "idParadero": 133,
+          "ordenSecuencial": 9
+        },
+        {
+          "nombre": "CP Monte Castillo",
+          "latitud": -5.27917,
+          "longitud": -80.71307,
+          "osm": "Monte Castillo",
+          "tipo": "extremo",
+          "idParadero": 134,
+          "ordenSecuencial": 10
+        }
+      ]
+    },
+    {
+      "idRuta": 17,
+      "codigo": "RD-21",
+      "nombre": "Piura - Catacaos",
+      "paraderos": [
+        {
+          "nombre": "Parque Néstor Martos Garridos",
+          "latitud": -5.18995,
+          "longitud": -80.64407,
+          "osm": "Parque Néstor Martos Garridos",
+          "tipo": "lugar",
+          "idParadero": 135,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Plaza del Sol (Av. Grau-Gulman)",
+          "latitud": -5.19248,
+          "longitud": -80.63955,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la de Av. Grau con Gulman",
+          "idParadero": 136,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Hospital Jorge Reátegui Delgado",
+          "latitud": -5.19319,
+          "longitud": -80.63634,
+          "osm": "Hospital Jorge Reátegui Delgado",
+          "tipo": "lugar",
+          "idParadero": 137,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 138,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 139,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Parque Miguel Cortés/Infantil",
+          "latitud": -5.19548,
+          "longitud": -80.63199,
+          "osm": "Parque Miguel Cortés",
+          "tipo": "lugar",
+          "idParadero": 140,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 141,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 142,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Catacaos",
+          "latitud": -5.2655,
+          "longitud": -80.67607,
+          "osm": "Plaza de Armas de Catacaos",
+          "tipo": "extremo",
+          "idParadero": 143,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 18,
+      "codigo": "RD-22",
+      "nombre": "III Etapa de Enace - A.H. Cossío del Pomar",
+      "paraderos": [
+        {
+          "nombre": "III Etapa de Enace",
+          "latitud": -5.17665,
+          "longitud": -80.68338,
+          "osm": "Parque Central Enace 3ª Etapa",
+          "tipo": "extremo",
+          "idParadero": 144,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Hospital Santa Rosa",
+          "latitud": -5.18401,
+          "longitud": -80.66562,
+          "osm": "Hospital de Apoyo Santa Rosa",
+          "tipo": "lugar",
+          "idParadero": 145,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 146,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 147,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 148,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 149,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 150,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 151,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "I.E. Militar Pedro Ruiz Gallo",
+          "latitud": -5.18827,
+          "longitud": -80.60056,
+          "osm": "Institución Educativa Militar Pedro Ruiz Gallo",
+          "tipo": "lugar",
+          "idParadero": 152,
+          "ordenSecuencial": 9
+        },
+        {
+          "nombre": "A.H. Cossío del Pomar",
+          "latitud": -5.18556,
+          "longitud": -80.59381,
+          "osm": "Cossío del Pomar",
+          "tipo": "extremo",
+          "idParadero": 153,
+          "ordenSecuencial": 10
+        }
+      ]
+    },
+    {
+      "idRuta": 19,
+      "codigo": "U-03",
+      "nombre": "Urbanización Santa Margarita - Centro histórico / Av. Luis A. Eguiguren (Distrito de Piura)",
+      "paraderos": [
+        {
+          "nombre": "Urbanización Santa Margarita",
+          "latitud": -5.16667,
+          "longitud": -80.66183,
+          "osm": "Santa Margarita",
+          "tipo": "extremo",
+          "idParadero": 154,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Universidad Cesar Vallejo - UCV",
+          "latitud": -5.17447,
+          "longitud": -80.66334,
+          "osm": "Universidad César Vallejo",
+          "tipo": "lugar",
+          "idParadero": 155,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "Real Plaza",
+          "latitud": -5.1847,
+          "longitud": -80.64196,
+          "osm": "Real Plaza Piura",
+          "tipo": "lugar",
+          "idParadero": 156,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 157,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 158,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Catedral de Piura",
+          "latitud": -5.1963,
+          "longitud": -80.62674,
+          "osm": "Catedral de Piura",
+          "tipo": "lugar",
+          "idParadero": 159,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 160,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 161,
+          "ordenSecuencial": 8
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 162,
+          "ordenSecuencial": 9
+        }
+      ]
+    },
+    {
+      "idRuta": 20,
+      "codigo": "U-04",
+      "nombre": "Ruta Urbana U-04 El Sol de Piura",
+      "paraderos": [
+        {
+          "nombre": "Plaza del Sol (Av. Grau-Gulman)",
+          "latitud": -5.19248,
+          "longitud": -80.63955,
+          "osm": "Plaza del Sol",
+          "tipo": "lugar",
+          "nota": "Hay dos Plaza del Sol: esta es la de Av. Grau con Gulman",
+          "idParadero": 163,
+          "ordenSecuencial": 1
+        },
+        {
+          "nombre": "Hospital Jorge Reátegui Delgado",
+          "latitud": -5.19319,
+          "longitud": -80.63634,
+          "osm": "Hospital Jorge Reátegui Delgado",
+          "tipo": "lugar",
+          "idParadero": 164,
+          "ordenSecuencial": 2
+        },
+        {
+          "nombre": "I.E. Nuestra Señora de Fatima",
+          "latitud": -5.18962,
+          "longitud": -80.63691,
+          "osm": "Institución Educativa Nuestra Señora de Fatima",
+          "tipo": "lugar",
+          "idParadero": 165,
+          "ordenSecuencial": 3
+        },
+        {
+          "nombre": "Mercado Modelo",
+          "latitud": -5.18864,
+          "longitud": -80.63387,
+          "osm": "Mercado Modelo",
+          "tipo": "lugar",
+          "idParadero": 166,
+          "ordenSecuencial": 4
+        },
+        {
+          "nombre": "Plazuela Merino",
+          "latitud": -5.19325,
+          "longitud": -80.6255,
+          "osm": "Plazuela Merino",
+          "tipo": "lugar",
+          "idParadero": 167,
+          "ordenSecuencial": 5
+        },
+        {
+          "nombre": "Estadio Miguel Grau",
+          "latitud": -5.19274,
+          "longitud": -80.61709,
+          "osm": "Estadio Miguel Grau",
+          "tipo": "lugar",
+          "idParadero": 168,
+          "ordenSecuencial": 6
+        },
+        {
+          "nombre": "Open Plaza",
+          "latitud": -5.18171,
+          "longitud": -80.62217,
+          "osm": "Mallplaza Piura",
+          "tipo": "lugar",
+          "nota": "En OSM figura como Mallplaza Piura (antes Open Plaza): verificar",
+          "idParadero": 169,
+          "ordenSecuencial": 7
+        },
+        {
+          "nombre": "Univ. Nacional de Piura",
+          "latitud": -5.17754,
+          "longitud": -80.61776,
+          "osm": "Universidad Nacional de Piura",
+          "tipo": "lugar",
+          "idParadero": 170,
+          "ordenSecuencial": 8
+        }
+      ]
+    }
+  ],
+  "lugaresMasConcurridos": [
+    {
+      "lugar": "Mercado Modelo",
+      "lineas": 13,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-05",
+        "RD-08",
+        "RD-09",
+        "RD-11",
+        "RD-15",
+        "RD-18",
+        "RD-20",
+        "RD-21",
+        "RD-22",
+        "U-03",
+        "U-04"
+      ],
+      "latitud": -5.18864,
+      "longitud": -80.63387,
+      "osm": "Mercado Modelo"
+    },
+    {
+      "lugar": "Open Plaza",
+      "lineas": 12,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-02",
+        "RD-08",
+        "RD-09",
+        "RD-10",
+        "RD-15",
+        "RD-16",
+        "RD-19",
+        "RD-22",
+        "U-03",
+        "U-04"
+      ],
+      "latitud": -5.18171,
+      "longitud": -80.62217,
+      "osm": "Mallplaza Piura"
+    },
+    {
+      "lugar": "Real Plaza",
+      "lineas": 11,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-05",
+        "RD-08",
+        "RD-09",
+        "RD-15",
+        "RD-16",
+        "RD-18",
+        "RD-19",
+        "RD-21",
+        "U-03"
+      ],
+      "latitud": -5.1847,
+      "longitud": -80.64196,
+      "osm": "Real Plaza Piura"
+    },
+    {
+      "lugar": "I.E. Nuestra Señora de Fatima",
+      "lineas": 10,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-05",
+        "RD-08",
+        "RD-09",
+        "RD-15",
+        "RD-20",
+        "RD-21",
+        "RD-22",
+        "U-04"
+      ],
+      "latitud": -5.18962,
+      "longitud": -80.63691,
+      "osm": "Institución Educativa Nuestra Señora de Fatima"
+    },
+    {
+      "lugar": "Plazuela Merino",
+      "lineas": 10,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-03",
+        "RD-05",
+        "RD-08",
+        "RD-20",
+        "RD-21",
+        "RD-22",
+        "U-03",
+        "U-04"
+      ],
+      "latitud": -5.19325,
+      "longitud": -80.6255,
+      "osm": "Plazuela Merino"
+    },
+    {
+      "lugar": "Univ. Nacional de Piura",
+      "lineas": 10,
+      "codigos": [
+        "I-19",
+        "RD-01",
+        "RD-02",
+        "RD-03",
+        "RD-09",
+        "RD-10",
+        "RD-15",
+        "RD-22",
+        "U-03",
+        "U-04"
+      ],
+      "latitud": -5.17754,
+      "longitud": -80.61776,
+      "osm": "Universidad Nacional de Piura"
+    },
+    {
+      "lugar": "Estadio Miguel Grau",
+      "lineas": 9,
+      "codigos": [
+        "RD-01",
+        "RD-03",
+        "RD-05",
+        "RD-11",
+        "RD-19",
+        "RD-20",
+        "RD-22",
+        "U-03",
+        "U-04"
+      ],
+      "latitud": -5.19274,
+      "longitud": -80.61709,
+      "osm": "Estadio Miguel Grau"
+    },
+    {
+      "lugar": "Plaza Tres Culturas",
+      "lineas": 5,
+      "codigos": [
+        "I-19",
+        "RD-08",
+        "RD-11",
+        "RD-18",
+        "RD-20"
+      ],
+      "latitud": -5.19851,
+      "longitud": -80.62585,
+      "osm": "Plaza Tres Culturas"
+    },
+    {
+      "lugar": "Mercado de Castilla",
+      "lineas": 5,
+      "codigos": [
+        "I-19",
+        "RD-03",
+        "RD-08",
+        "RD-11",
+        "RD-20"
+      ],
+      "latitud": -5.19988,
+      "longitud": -80.62278,
+      "osm": "Mercado Central de Castilla"
+    },
+    {
+      "lugar": "I.E. Militar Pedro Ruiz Gallo",
+      "lineas": 5,
+      "codigos": [
+        "RD-01",
+        "RD-05",
+        "RD-09",
+        "RD-11",
+        "RD-22"
+      ],
+      "latitud": -5.18827,
+      "longitud": -80.60056,
+      "osm": "Institución Educativa Militar Pedro Ruiz Gallo"
+    },
+    {
+      "lugar": "Parque Miguel Cortés/Infantil",
+      "lineas": 5,
+      "codigos": [
+        "RD-03",
+        "RD-11",
+        "RD-15",
+        "RD-18",
+        "RD-21"
+      ],
+      "latitud": -5.19548,
+      "longitud": -80.63199,
+      "osm": "Parque Miguel Cortés"
+    },
+    {
+      "lugar": "Plaza del Sol (Av. Grau-Gulman)",
+      "lineas": 5,
+      "codigos": [
+        "RD-15",
+        "RD-18",
+        "RD-20",
+        "RD-21",
+        "U-04"
+      ],
+      "latitud": -5.19248,
+      "longitud": -80.63955,
+      "osm": "Plaza del Sol"
+    },
+    {
+      "lugar": "Instituto Médico Soy Diabético",
+      "lineas": 4,
+      "codigos": [
+        "RD-02",
+        "RD-10",
+        "RD-16",
+        "RD-19"
+      ],
+      "latitud": -5.18321,
+      "longitud": -80.62606,
+      "osm": "Instituto Médico Soy Diabético"
+    },
+    {
+      "lugar": "Plaza de Armas",
+      "lineas": 4,
+      "codigos": [
+        "RD-02",
+        "RD-10",
+        "RD-14",
+        "RD-18"
+      ],
+      "latitud": -5.19712,
+      "longitud": -80.62662,
+      "osm": "Plaza Mayor de Piura"
+    },
+    {
+      "lugar": "Establecimiento de Salud I-4 Pachitea",
+      "lineas": 3,
+      "codigos": [
+        "RD-02",
+        "RD-14",
+        "RD-16"
+      ],
+      "latitud": -5.18608,
+      "longitud": -80.63116,
+      "osm": "Establecimiento de Salud I-4 Pachitea"
+    },
+    {
+      "lugar": "Parque Néstor Martos Garridos",
+      "lineas": 3,
+      "codigos": [
+        "RD-05",
+        "RD-09",
+        "RD-21"
+      ],
+      "latitud": -5.18995,
+      "longitud": -80.64407,
+      "osm": "Parque Néstor Martos Garridos"
+    },
+    {
+      "lugar": "Hospital Jorge Reátegui Delgado",
+      "lineas": 3,
+      "codigos": [
+        "RD-20",
+        "RD-21",
+        "U-04"
+      ],
+      "latitud": -5.19319,
+      "longitud": -80.63634,
+      "osm": "Hospital Jorge Reátegui Delgado"
+    },
+    {
+      "lugar": "Gobierno Regional",
+      "lineas": 2,
+      "codigos": [
+        "I-19",
+        "RD-08"
+      ],
+      "latitud": -5.18203,
+      "longitud": -80.62822,
+      "osm": "Gobierno Regional de Piura"
+    },
+    {
+      "lugar": "Hospital Santa Rosa",
+      "lineas": 2,
+      "codigos": [
+        "RD-02",
+        "RD-22"
+      ],
+      "latitud": -5.18401,
+      "longitud": -80.66562,
+      "osm": "Hospital de Apoyo Santa Rosa"
+    },
+    {
+      "lugar": "Carita feliz",
+      "lineas": 2,
+      "codigos": [
+        "RD-03",
+        "RD-11"
+      ],
+      "latitud": -5.19616,
+      "longitud": -80.63226,
+      "osm": "Carita feliz"
+    },
+    {
+      "lugar": "Catedral de Piura",
+      "lineas": 2,
+      "codigos": [
+        "RD-05",
+        "U-03"
+      ],
+      "latitud": -5.1963,
+      "longitud": -80.62674,
+      "osm": "Catedral de Piura"
+    },
+    {
+      "lugar": "Universidad Cesar Vallejo - UCV",
+      "lineas": 2,
+      "codigos": [
+        "RD-09",
+        "U-03"
+      ],
+      "latitud": -5.17447,
+      "longitud": -80.66334,
+      "osm": "Universidad César Vallejo"
+    },
+    {
+      "lugar": "Centro de Rehabilitación Profesional Piura",
+      "lineas": 2,
+      "codigos": [
+        "RD-10",
+        "RD-16"
+      ],
+      "latitud": -5.18348,
+      "longitud": -80.63453,
+      "osm": "Centro de Rehabilitación Profesional Piura"
+    },
+    {
+      "lugar": "I.E. Nuestra Señora de la Paz",
+      "lineas": 2,
+      "codigos": [
+        "RD-10",
+        "RD-16"
+      ],
+      "latitud": -5.18193,
+      "longitud": -80.63574,
+      "osm": "Institución Educativa Nuestra Señora De La Paz"
+    },
+    {
+      "lugar": "Plaza del Sol (Centro)",
+      "lineas": 2,
+      "codigos": [
+        "RD-11",
+        "RD-18"
+      ],
+      "latitud": -5.19686,
+      "longitud": -80.6282,
+      "osm": "Plaza del Sol"
+    },
+    {
+      "lugar": "Aeropuerto de Piura",
+      "lineas": 2,
+      "codigos": [
+        "RD-14",
+        "RD-19"
+      ],
+      "latitud": -5.2064,
+      "longitud": -80.61381,
+      "osm": "Aeropuerto Capitán FAP Guillermo Concha Iberico"
+    },
+    {
+      "lugar": "Univ. de Piura (UDEP)",
+      "lineas": 2,
+      "codigos": [
+        "RD-14",
+        "RD-15"
+      ],
+      "latitud": -5.17302,
+      "longitud": -80.6388,
+      "osm": "Universidad de Piura"
+    },
+    {
+      "lugar": "Terminal Terrestre",
+      "lineas": 2,
+      "codigos": [
+        "RD-16",
+        "RD-18"
+      ],
+      "latitud": -5.1922,
+      "longitud": -80.61217,
+      "osm": "Terminal Terrestre Castilla"
+    },
+    {
+      "lugar": "I.E. Nuestra Señora del Carmen",
+      "lineas": 1,
+      "codigos": [
+        "I-18"
+      ],
+      "latitud": -5.23362,
+      "longitud": -80.65822,
+      "osm": "Institución Educativa Nuestra Señora Del Carmen"
+    },
+    {
+      "lugar": "Hospital de Apoyo Santa Rosa",
+      "lineas": 1,
+      "codigos": [
+        "RD-02"
+      ],
+      "latitud": -5.18401,
+      "longitud": -80.66562,
+      "osm": "Hospital de Apoyo Santa Rosa"
+    },
+    {
+      "lugar": "Clínica Oftalmológica Pongo",
+      "lineas": 1,
+      "codigos": [
+        "RD-02"
+      ],
+      "latitud": -5.19416,
+      "longitud": -80.63526,
+      "osm": "Clínica Oftalmológica Pongo"
+    },
+    {
+      "lugar": "I.E. Coar Piura",
+      "lineas": 1,
+      "codigos": [
+        "RD-03"
+      ],
+      "latitud": -5.19092,
+      "longitud": -80.66806,
+      "osm": "Institución Educativa Coar Piura"
+    },
+    {
+      "lugar": "I.E. Susana Wesley",
+      "lineas": 1,
+      "codigos": [
+        "RD-03"
+      ],
+      "latitud": -5.19977,
+      "longitud": -80.63773,
+      "osm": "Institución Educativa Susana Wesley"
+    },
+    {
+      "lugar": "Clínica San Miguel II",
+      "lineas": 1,
+      "codigos": [
+        "RD-10"
+      ],
+      "latitud": -5.19484,
+      "longitud": -80.63141,
+      "osm": "Clínica San Miguel II"
+    },
+    {
+      "lugar": "Clínica San Miguel",
+      "lineas": 1,
+      "codigos": [
+        "RD-10"
+      ],
+      "latitud": -5.19466,
+      "longitud": -80.63198,
+      "osm": "Clínica San Miguel"
+    },
+    {
+      "lugar": "Centro Médico Essalud Castilla",
+      "lineas": 1,
+      "codigos": [
+        "RD-14"
+      ],
+      "latitud": -5.22041,
+      "longitud": -80.62096,
+      "osm": "Centro Médico Essalud Castilla"
+    },
+    {
+      "lugar": "I.E. 14116 San Martin de Porras",
+      "lineas": 1,
+      "codigos": [
+        "RD-14"
+      ],
+      "latitud": -5.21736,
+      "longitud": -80.6265,
+      "osm": "Institución Educativa 14116 San Martin De Porras"
+    },
+    {
+      "lugar": "I.E. Nuestra Señora del Transito",
+      "lineas": 1,
+      "codigos": [
+        "RD-14"
+      ],
+      "latitud": -5.20646,
+      "longitud": -80.62188,
+      "osm": "Institución Educativa Nuestra Señora Del Transito"
+    },
+    {
+      "lugar": "Puesto de Salud Convenio Ejidos de Huan",
+      "lineas": 1,
+      "codigos": [
+        "RD-14"
+      ],
+      "latitud": -5.13077,
+      "longitud": -80.64129,
+      "osm": "Puesto de Salud Convenio Ejidos de Huan (POSTA)"
+    },
+    {
+      "lugar": "Unidad Médico Legal Piura",
+      "lineas": 1,
+      "codigos": [
+        "RD-16"
+      ],
+      "latitud": -5.1848,
+      "longitud": -80.64808,
+      "osm": "Unidad Médico Legal Piura"
+    },
+    {
+      "lugar": "Establecimiento de Salud I-3 el Indio",
+      "lineas": 1,
+      "codigos": [
+        "RD-19"
+      ],
+      "latitud": -5.22449,
+      "longitud": -80.62059,
+      "osm": "Establecimiento de Salud I-3 El Indio"
+    },
+    {
+      "lugar": "Clínica Bello Horizonte",
+      "lineas": 1,
+      "codigos": [
+        "RD-19"
+      ],
+      "latitud": -5.18061,
+      "longitud": -80.64983,
+      "osm": "Clínica Bello Horizonte"
+    },
+    {
+      "lugar": "I.E. Maria Auxiliadora",
+      "lineas": 1,
+      "codigos": [
+        "RD-19"
+      ],
+      "latitud": -5.21246,
+      "longitud": -80.62265,
+      "osm": "Institución Educativa Maria Auxiliadora"
+    }
+  ]
+}

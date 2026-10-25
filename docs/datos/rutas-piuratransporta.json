@@ -1,0 +1,589 @@
+{
+  "fuente": "https://piuratransporta.com/rutas",
+  "consultado": "2026-10-24",
+  "nota": "Datos publicos de PiuraTransporta (mantenidos por su comunidad). Sin coordenadas: los paraderos y el trazado se cargan despues.",
+  "rutas": [
+    {
+      "idRuta": 1,
+      "codigo": "I-18",
+      "nombre": "Terminal Satélite (Piura) - Terminal La Unión",
+      "empresa": "EMTRUBAPI",
+      "tipoServicio": "Interurbana",
+      "puntoInicio": "Terminal Satélite (Piura)",
+      "puntoFinal": "Terminal La Unión",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–21:00",
+      "pasaje": 3.0,
+      "pasajeEstudiante": 1.5,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Nuestra Señora del Carmen"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/terminal-satelite-piura-terminal-la-union"
+    },
+    {
+      "idRuta": 2,
+      "codigo": "I-19",
+      "nombre": "Piura - Catacaos",
+      "empresa": "6M Buss SAA",
+      "tipoServicio": "Interurbana",
+      "puntoInicio": "Piura",
+      "puntoFinal": "Catacaos",
+      "activa": true,
+      "frecuenciaMinutos": 15,
+      "horario": "05:30–22:00",
+      "pasaje": 3.0,
+      "pasajeEstudiante": 1.5,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Nuestra Señora de Fatima",
+        "Plazuela Merino",
+        "Plaza Tres Culturas",
+        "Mercado de Castilla",
+        "Open Plaza",
+        "Univ. Nacional de Piura",
+        "Gobierno Regional",
+        "Mercado Modelo",
+        "Real Plaza"
+      ],
+      "registroMunicipal": "La Municipalidad Provincial de Piura tiene esta línea registrada con el código RD-07 (OM 092-02-CMPP).",
+      "fuente": "https://piuratransporta.com/ruta/piura-catacaos"
+    },
+    {
+      "idRuta": 3,
+      "codigo": "RD-01",
+      "nombre": "Ruta Urbana U-09 Guadalupe",
+      "empresa": "Guadalupe",
+      "tipoServicio": "Urbana",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Nuestra Señora de Fatima",
+        "Plazuela Merino",
+        "I.E. Militar Pedro Ruiz Gallo",
+        "Estadio Miguel Grau",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "Mercado Modelo",
+        "Real Plaza"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ruta-urbana-u-09-guadalupe"
+    },
+    {
+      "idRuta": 4,
+      "codigo": "RD-02",
+      "nombre": "Veintiséis de Octubre - Terela",
+      "empresa": "Super Star",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "Veintiséis de Octubre",
+      "puntoFinal": "Terela",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo",
+        "Yape",
+        "Plin"
+      ],
+      "lugaresDestacados": [
+        "Hospital Santa Rosa",
+        "Hospital de Apoyo Santa Rosa",
+        "Clínica Oftalmológica Pongo",
+        "Establecimiento de Salud I-4 Pachitea",
+        "Instituto Médico Soy Diabético",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "Plaza de Armas"
+      ],
+      "registroMunicipal": "La Municipalidad Provincial de Piura tiene esta línea registrada con el código RD-02 (OM 092-02-CMPP).",
+      "fuente": "https://piuratransporta.com/ruta/veintises-de-octubre-terela"
+    },
+    {
+      "idRuta": 5,
+      "codigo": "RD-03",
+      "nombre": "Ruta Urbana U-08 EMUTSA Calle García",
+      "empresa": "EMUTSA",
+      "tipoServicio": "Regulada",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Coar Piura",
+        "I.E. Susana Wesley",
+        "Carita feliz",
+        "Parque Miguel Cortés/Infantil",
+        "Plazuela Merino",
+        "Univ. Nacional de Piura",
+        "Estadio Miguel Grau",
+        "Mercado de Castilla"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ruta-urbana-u-08-emutsa-calle-garcia"
+    },
+    {
+      "idRuta": 6,
+      "codigo": "RD-05",
+      "nombre": "Parcela J (Piura) - Terminal Las Lomas",
+      "empresa": "Rutas del Norte SAC",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "Parcela J (Piura)",
+      "puntoFinal": "Terminal Las Lomas",
+      "activa": true,
+      "frecuenciaMinutos": 30,
+      "horario": "05:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Parque Néstor Martos Garridos",
+        "I.E. Nuestra Señora de Fatima",
+        "Plazuela Merino",
+        "Catedral de Piura",
+        "I.E. Militar Pedro Ruiz Gallo",
+        "Estadio Miguel Grau",
+        "Mercado Modelo",
+        "Real Plaza"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/parcela-j-piura-terminal-las-lomas"
+    },
+    {
+      "idRuta": 7,
+      "codigo": "RD-08",
+      "nombre": "Piura - Catacaos",
+      "empresa": "6M Buss SAA",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "Piura",
+      "puntoFinal": "Catacaos",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Nuestra Señora de Fatima",
+        "Plazuela Merino",
+        "Plaza Tres Culturas",
+        "Mercado de Castilla",
+        "Open Plaza",
+        "Gobierno Regional",
+        "Mercado Modelo",
+        "Real Plaza"
+      ],
+      "registroMunicipal": "La Municipalidad Provincial de Piura tiene esta línea registrada con el código RD-07 (OM 092-02-CMPP).",
+      "fuente": "https://piuratransporta.com/ruta/piura-catacaos-rd-08"
+    },
+    {
+      "idRuta": 8,
+      "codigo": "RD-09",
+      "nombre": "Fundo Vicentenario - Tacala - Miraflores - Los Portales",
+      "empresa": "Olas del Pacífico",
+      "tipoServicio": "Interurbana",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": true,
+      "frecuenciaMinutos": 4,
+      "horario": "06:00–22:00",
+      "pasaje": 3.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Militar Pedro Ruiz Gallo",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "I.E. Nuestra Señora de Fatima",
+        "Real Plaza",
+        "Universidad Cesar Vallejo - UCV",
+        "Parque Néstor Martos Garridos",
+        "Mercado Modelo"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/fundo-vicentenario-tacala-miraflores-los-portales"
+    },
+    {
+      "idRuta": 9,
+      "codigo": "RD-10",
+      "nombre": "UPIS San Gabriel Arcángel - Av. Raúl Mata La Cruz",
+      "empresa": "Bolognesi 6C SA",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "UPIS San Gabriel Arcángel",
+      "puntoFinal": "Av. Raúl Mata La Cruz",
+      "activa": true,
+      "frecuenciaMinutos": 20,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Plaza de Armas",
+        "Centro de Rehabilitación Profesional Piura",
+        "Instituto Médico Soy Diabético",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "I.E. Nuestra Señora de la Paz",
+        "Clínica San Miguel II",
+        "Clínica San Miguel"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/upis-san-gabriel-arcangel-av-raul-mata-la-cruz"
+    },
+    {
+      "idRuta": 10,
+      "codigo": "RD-11",
+      "nombre": "A.H. Los Almendros - Av. José Aguilar Santisteban",
+      "empresa": "Lugueda",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "A.H. Los Almendros",
+      "puntoFinal": "Av. José Aguilar Santisteban",
+      "activa": true,
+      "frecuenciaMinutos": 25,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "I.E. Militar Pedro Ruiz Gallo",
+        "Estadio Miguel Grau",
+        "Plaza Tres Culturas",
+        "Carita feliz",
+        "Parque Miguel Cortés/Infantil",
+        "Plaza del Sol (Centro)",
+        "Mercado Modelo",
+        "Mercado de Castilla"
+      ],
+      "registroMunicipal": "La Municipalidad Provincial de Piura tiene esta línea registrada con el código RD-11 (OM 092-02-CMPP).",
+      "fuente": "https://piuratransporta.com/ruta/ah-los-almendros-av-jose-aguilar-santisteban"
+    },
+    {
+      "idRuta": 11,
+      "codigo": "RD-14",
+      "nombre": "A.H. El Indio - Curumuy / Ejidos de Huan",
+      "empresa": "Nueva Alternativa",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "A.H. El Indio",
+      "puntoFinal": "Curumuy / Ejidos de Huan",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo",
+        "Yape",
+        "Plin"
+      ],
+      "lugaresDestacados": [
+        "Centro Médico Essalud Castilla",
+        "I.E. 14116 San Martin de Porras",
+        "I.E. Nuestra Señora del Transito",
+        "Aeropuerto de Piura",
+        "Plaza de Armas",
+        "Establecimiento de Salud I-4 Pachitea",
+        "Puesto de Salud Convenio Ejidos de Huan",
+        "Univ. de Piura (UDEP)"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ah-el-indio-curumuy-ejidos-de-huan"
+    },
+    {
+      "idRuta": 12,
+      "codigo": "RD-15",
+      "nombre": "Montebello",
+      "empresa": "El Piuranito",
+      "tipoServicio": "Regulada",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": true,
+      "frecuenciaMinutos": 7,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Real Plaza",
+        "Plaza del Sol (Av. Grau-Gulman)",
+        "I.E. Nuestra Señora de Fatima",
+        "Mercado Modelo",
+        "Parque Miguel Cortés/Infantil",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "Univ. de Piura (UDEP)"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/montebello"
+    },
+    {
+      "idRuta": 13,
+      "codigo": "RD-16",
+      "nombre": "A.H. Nuevo Horizonte - Miraflores Country Club",
+      "empresa": "Nueva Alternativa",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "A.H. Nuevo Horizonte",
+      "puntoFinal": "Miraflores Country Club",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo",
+        "Yape",
+        "Plin"
+      ],
+      "lugaresDestacados": [
+        "Establecimiento de Salud I-4 Pachitea",
+        "Instituto Médico Soy Diabético",
+        "Open Plaza",
+        "Centro de Rehabilitación Profesional Piura",
+        "I.E. Nuestra Señora de la Paz",
+        "Real Plaza",
+        "Unidad Médico Legal Piura",
+        "Terminal Terrestre"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ah-nuevo-horizonte-miraflores-country-club"
+    },
+    {
+      "idRuta": 14,
+      "codigo": "RD-18",
+      "nombre": "Granja de Colores",
+      "empresa": "Crucero del Norte",
+      "tipoServicio": "Regulada",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": false,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–20:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo",
+        "Yape",
+        "Plin"
+      ],
+      "lugaresDestacados": [
+        "Plaza Tres Culturas",
+        "Plaza de Armas",
+        "Parque Miguel Cortés/Infantil",
+        "Plaza del Sol (Av. Grau-Gulman)",
+        "Mercado Modelo",
+        "Real Plaza",
+        "Terminal Terrestre",
+        "Plaza del Sol (Centro)"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/granja-de-colores"
+    },
+    {
+      "idRuta": 15,
+      "codigo": "RD-19",
+      "nombre": "A.H. El Indio - Vía Colectora Norte",
+      "empresa": "Corredor Morado SAA",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "A.H. El Indio",
+      "puntoFinal": "Vía Colectora Norte",
+      "activa": false,
+      "frecuenciaMinutos": 20,
+      "horario": "06:00–19:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Establecimiento de Salud I-3 el Indio",
+        "Aeropuerto de Piura",
+        "Estadio Miguel Grau",
+        "Open Plaza",
+        "Clínica Bello Horizonte",
+        "Real Plaza",
+        "Instituto Médico Soy Diabético",
+        "I.E. Maria Auxiliadora"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ah-el-indio-via-colectora-norte"
+    },
+    {
+      "idRuta": 16,
+      "codigo": "RD-20",
+      "nombre": "A.H. Chiclayito - CP Monte Castillo",
+      "empresa": "Sicán Bus",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "A.H. Chiclayito",
+      "puntoFinal": "CP Monte Castillo",
+      "activa": true,
+      "frecuenciaMinutos": 8,
+      "horario": "06:00–21:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Plaza del Sol (Av. Grau-Gulman)",
+        "Hospital Jorge Reátegui Delgado",
+        "Plazuela Merino",
+        "Plaza Tres Culturas",
+        "Mercado de Castilla",
+        "Estadio Miguel Grau",
+        "Mercado Modelo",
+        "I.E. Nuestra Señora de Fatima"
+      ],
+      "registroMunicipal": "La Municipalidad Provincial de Piura tiene esta línea registrada con el código RD-20 (OM 092-02-CMPP).",
+      "fuente": "https://piuratransporta.com/ruta/ah-chiclayito-cp-monte-castillo"
+    },
+    {
+      "idRuta": 17,
+      "codigo": "RD-21",
+      "nombre": "Piura - Catacaos",
+      "empresa": "6M Buss SAA",
+      "tipoServicio": "Regulada",
+      "puntoInicio": "Piura",
+      "puntoFinal": "Catacaos",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Parque Néstor Martos Garridos",
+        "I.E. Nuestra Señora de Fatima",
+        "Plaza del Sol (Av. Grau-Gulman)",
+        "Hospital Jorge Reátegui Delgado",
+        "Parque Miguel Cortés/Infantil",
+        "Plazuela Merino",
+        "Mercado Modelo",
+        "Real Plaza"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/piura-catacaos-rd-21"
+    },
+    {
+      "idRuta": 18,
+      "codigo": "RD-22",
+      "nombre": "III Etapa de Enace - A.H. Cossío del Pomar",
+      "empresa": "Urban 3 (U-12)",
+      "tipoServicio": "Urbana",
+      "puntoInicio": "III Etapa de Enace",
+      "puntoFinal": "A.H. Cossío del Pomar",
+      "activa": true,
+      "frecuenciaMinutos": 20,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Hospital Santa Rosa",
+        "I.E. Nuestra Señora de Fatima",
+        "Plazuela Merino",
+        "I.E. Militar Pedro Ruiz Gallo",
+        "Estadio Miguel Grau",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "Mercado Modelo"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/iii-etapa-de-enace-ah-cossio-del-pomar"
+    },
+    {
+      "idRuta": 19,
+      "codigo": "U-03",
+      "nombre": "Urbanización Santa Margarita - Centro histórico / Av. Luis A. Eguiguren (Distrito de Piura)",
+      "empresa": "El Sol de Piura",
+      "tipoServicio": "Urbana",
+      "puntoInicio": "Urbanización Santa Margarita",
+      "puntoFinal": "Centro histórico / Av. Luis A. Eguiguren (Distrito de Piura)",
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Universidad Cesar Vallejo - UCV",
+        "Real Plaza",
+        "Mercado Modelo",
+        "Plazuela Merino",
+        "Catedral de Piura",
+        "Estadio Miguel Grau",
+        "Univ. Nacional de Piura",
+        "Open Plaza"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/urbanizacion-santa-margarita-centro-historico-av-luis-a-eguiguren-distrito-de-piura"
+    },
+    {
+      "idRuta": 20,
+      "codigo": "U-04",
+      "nombre": "Ruta Urbana U-04 El Sol de Piura",
+      "empresa": "El Sol de Piura",
+      "tipoServicio": "Urbana",
+      "puntoInicio": null,
+      "puntoFinal": null,
+      "activa": true,
+      "frecuenciaMinutos": 10,
+      "horario": "06:00–22:00",
+      "pasaje": 2.0,
+      "pasajeEstudiante": 1.0,
+      "mediosPago": [
+        "Efectivo"
+      ],
+      "lugaresDestacados": [
+        "Plaza del Sol (Av. Grau-Gulman)",
+        "Hospital Jorge Reátegui Delgado",
+        "Plazuela Merino",
+        "Estadio Miguel Grau",
+        "Univ. Nacional de Piura",
+        "Open Plaza",
+        "Mercado Modelo",
+        "I.E. Nuestra Señora de Fatima"
+      ],
+      "registroMunicipal": null,
+      "fuente": "https://piuratransporta.com/ruta/ruta-urbana-u-04-el-sol-de-piura"
+    }
+  ]
+}
