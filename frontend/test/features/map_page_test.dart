@@ -100,13 +100,13 @@ void main() {
     expect(find.text('RUTA SELECCIONADA'), findsNothing);
   });
 
-  testWidgets('Ver en mapa abre la ruta elegida', (tester) async {
+  testWidgets('tocar una línea en Rutas abre la ruta elegida', (tester) async {
     fijarPantalla(tester, escritorio);
     final navegador = await abrirApp(tester);
     navegador.pushReplacementNamed(AppRoutes.rutas);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ver en mapa').at(1));
+    await tester.tap(find.byKey(const ValueKey('ruta-2')));
     await tester.pumpAndSettle();
 
     expect(find.text('RUTA SELECCIONADA'), findsOneWidget);

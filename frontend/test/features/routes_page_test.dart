@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:piurago/app.dart';
+import 'package:piurago/core/routes.dart';
 import 'package:piurago/core/theme/app_theme.dart';
 import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
@@ -37,7 +39,9 @@ void main() {
   const escritorio = Size(1366, 768);
   const celular = Size(390, 844);
 
-  testWidgets('muestra las líneas de Piura y su total', (tester) async {
+  testWidgets('muestra las líneas de Piura en una lista compacta', (
+    tester,
+  ) async {
     fijarPantalla(tester, escritorio);
     await abrir(tester, const FakeRutasRepository());
 
@@ -47,10 +51,39 @@ void main() {
       find.text('Terminal Satélite (Piura) - Terminal La Unión'),
       findsOneWidget,
     );
-    expect(find.text('EMTRUBAPI · Interurbana · S/ 3.00'), findsOneWidget);
+    expect(find.text('EMTRUBAPI · Interurbana'), findsOneWidget);
+    expect(find.text('S/ 3.00'), findsWidgets);
     expect(find.text('cada ~10 min'), findsWidgets);
     expect(find.text('20 líneas'), findsOneWidget);
     expect(find.text('Modo demostración'), findsOneWidget);
+    // Cada línea es una fila baja: caben varias en la pantalla.
+    expect(
+      tester.getSize(find.byKey(const ValueKey('ruta-1'))).height,
+      lessThan(130),
+    );
+  });
+
+  testWidgets('los filtros por tipo muestran cuántas líneas hay', (
+    tester,
+  ) async {
+    fijarPantalla(tester, escritorio);
+    await abrir(tester, const FakeRutasRepository());
+
+    expect(find.text('Todas (20)'), findsOneWidget);
+    expect(find.text('Urbanas (4)'), findsOneWidget);
+    expect(find.text('Reguladas (13)'), findsOneWidget);
+    expect(find.text('Interurbanas (3)'), findsOneWidget);
+
+    await tester.tap(find.text('Interurbanas (3)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('3 líneas'), findsOneWidget);
+    expect(find.text('I-18'), findsOneWidget);
+    expect(find.text('RD-01'), findsNothing);
+
+    await tester.tap(find.text('Todas (20)'));
+    await tester.pumpAndSettle();
+    expect(find.text('20 líneas'), findsOneWidget);
   });
 
   testWidgets('el buscador filtra por código, zona o empresa', (tester) async {
@@ -66,8 +99,71 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '6M Buss');
     await tester.pumpAndSettle();
-
     expect(find.text('3 líneas'), findsOneWidget);
+
+    // El código vale sin guion.
+    await tester.enterText(find.byType(TextField), 'rd01');
+    await tester.pumpAndSettle();
+    expect(find.text('RD-01'), findsOneWidget);
+    expect(find.text('1 línea'), findsOneWidget);
+  });
+
+  testWidgets('buscar un lugar dice por dónde pasa cada línea', (tester) async {
+    fijarPantalla(tester, escritorio);
+    await abrir(tester, const FakeRutasRepository());
+
+    await tester.enterText(find.byType(TextField), 'mercado modelo');
+    await tester.pumpAndSettle();
+
+    expect(find.text('13 líneas'), findsOneWidget);
+    expect(find.text('Pasa por Mercado Modelo'), findsWidgets);
+
+    // Sin tildes también.
+    await tester.enterText(find.byType(TextField), 'fatima');
+    await tester.pumpAndSettle();
+    expect(find.text('No encontramos rutas'), findsNothing);
+  });
+
+  testWidgets('Planificar viaje lleva al buscador del mapa', (tester) async {
+    fijarPantalla(tester, escritorio);
+    await tester.pumpWidget(
+      const PiuraGoApp(
+        rutasRepository: FakeRutasRepository(),
+        mostrarMapaBase: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester
+        .state<NavigatorState>(find.byType(Navigator).first)
+        .pushReplacementNamed(AppRoutes.rutas);
+    await tester.pumpAndSettle();
+
+    expect(find.text('¿No sabes qué línea tomar?'), findsOneWidget);
+    await tester.tap(find.text('Planificar viaje'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
+  });
+
+  testWidgets('tocar una línea la abre en el mapa', (tester) async {
+    fijarPantalla(tester, escritorio);
+    await tester.pumpWidget(
+      const PiuraGoApp(
+        rutasRepository: FakeRutasRepository(),
+        mostrarMapaBase: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester
+        .state<NavigatorState>(find.byType(Navigator).first)
+        .pushReplacementNamed(AppRoutes.rutas);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('ruta-2')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('RUTA SELECCIONADA'), findsOneWidget);
+    expect(find.text('Piura - Catacaos'), findsOneWidget);
   });
 
   testWidgets('avisa las líneas fuera de servicio', (tester) async {
@@ -88,6 +184,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No encontramos rutas'), findsOneWidget);
+    await tester.tap(find.text('Limpiar búsqueda'));
+    await tester.pumpAndSettle();
+    expect(find.text('20 líneas'), findsOneWidget);
   });
 
   testWidgets('muestra un error con opción de reintentar', (tester) async {
