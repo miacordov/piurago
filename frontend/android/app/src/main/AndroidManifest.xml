@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Mapa (teselas de OpenStreetMap) y buscador de lugares (Photon). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="piurago"
         android:name="${applicationName}"
