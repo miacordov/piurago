@@ -16,13 +16,14 @@ String textoBajada(OpcionViaje o) =>
     'Baja en ${o.baja.nombre} · ${o.metrosBajada.round()} m a pie '
     '(${o.minutosBajada} min)';
 
-/// "S/ 1.50 · cada ~10 min", con los datos que existan.
-String textoServicio(OpcionViaje o) => [
-  if (o.pasaje != null) 'S/ ${o.pasaje!.toStringAsFixed(2)}',
-  if (o.frecuenciaMinutos != null) 'cada ~${o.frecuenciaMinutos} min',
-].join(' · ');
+/// "Pasa cada ~10 min", si se conoce la frecuencia.
+String? textoFrecuencia(OpcionViaje o) => o.frecuenciaMinutos == null
+    ? null
+    : 'Pasa cada ~${o.frecuenciaMinutos} min';
 
-/// Tarjeta de una línea que sirve para el viaje. Un clic la elige (se
+/// Tarjeta de una línea que sirve para el viaje, como en Moovit: arriba la
+/// duración aproximada y el pasaje, luego el recorrido en una tira
+/// (a pie › línea › a pie) y dónde subir y bajar. Un clic la elige (se
 /// dibuja en el mapa); la elegida se resalta y muestra "Iniciar viaje".
 class OpcionViajeCard extends StatelessWidget {
   const OpcionViajeCard({
@@ -41,16 +42,16 @@ class OpcionViajeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ruta = opcion.ruta;
-    final colores = ColoresDeTono.de(ruta.tono);
     final detalle = [
       opcion.empresa,
       opcion.tipoServicio,
     ].whereType<String>().join(' · ');
-    final servicio = textoServicio(opcion);
+    final frecuencia = textoFrecuencia(opcion);
+    final pasaje = opcion.pasaje;
     return Material(
-      color: AppColors.surface,
+      color: elegida ? AppColors.background : AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         side: elegida
             ? const BorderSide(color: AppColors.primary, width: 2)
             : const BorderSide(color: AppColors.border),
@@ -65,48 +66,54 @@ class OpcionViajeCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    constraints: const BoxConstraints(minWidth: 38),
-                    height: 32,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colores.fondo,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      ruta.codigo ?? '—',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: colores.icono,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          ruta.nombre,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.label,
-                        ),
-                        if (detalle.isNotEmpty)
-                          Text(
-                            detalle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '≈ ${opcion.minutosTotales} min',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: '  aprox.',
                             style: AppText.small,
                           ),
-                      ],
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  if (pasaje != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      'S/ ${pasaje.toStringAsFixed(2)}',
+                      style: AppText.label,
+                    ),
+                  ],
                 ],
               ),
+              const SizedBox(height: 8),
+              _Itinerario(opcion: opcion),
               const SizedBox(height: 10),
+              Text(
+                ruta.nombre,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.label,
+              ),
+              if (detalle.isNotEmpty)
+                Text(
+                  detalle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.small,
+                ),
+              const SizedBox(height: 8),
               _FilaTramo(
                 icono: Icons.directions_walk,
                 texto: textoSubida(opcion),
@@ -116,10 +123,10 @@ class OpcionViajeCard extends StatelessWidget {
                 icono: Icons.flag_outlined,
                 texto: textoBajada(opcion),
               ),
-              if (servicio.isNotEmpty) ...[
+              if (frecuencia != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  servicio,
+                  frecuencia,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.small,
@@ -138,6 +145,81 @@ class OpcionViajeCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Tira del recorrido: minutos a pie › línea (con su color) › minutos a pie.
+class _Itinerario extends StatelessWidget {
+  const _Itinerario({required this.opcion});
+
+  final OpcionViaje opcion;
+
+  @override
+  Widget build(BuildContext context) {
+    final colores = ColoresDeTono.de(opcion.ruta.tono);
+    const flecha = Icon(
+      Icons.chevron_right,
+      size: 18,
+      color: AppColors.textMuted,
+    );
+    return Semantics(
+      label:
+          '${opcion.minutosSubida} minutos a pie, línea '
+          '${opcion.ruta.codigo ?? opcion.ruta.nombre}, '
+          '${opcion.minutosBajada} minutos a pie',
+      child: ExcludeSemantics(
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 2,
+          runSpacing: 4,
+          children: [
+            _APie(minutos: opcion.minutosSubida),
+            flecha,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: colores.fondo,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.directions_bus, size: 15, color: colores.icono),
+                  const SizedBox(width: 4),
+                  Text(
+                    opcion.ruta.codigo ?? '—',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: colores.icono,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            flecha,
+            _APie(minutos: opcion.minutosBajada),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _APie extends StatelessWidget {
+  const _APie({required this.minutos});
+
+  final int minutos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.directions_walk, size: 16, color: AppColors.textMuted),
+        Text('$minutos', style: AppText.small),
+      ],
     );
   }
 }

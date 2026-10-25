@@ -123,6 +123,12 @@ class _MapPageState extends State<MapPage> {
             buscadorLugares: widget.buscadorLugares,
             esDemostracion: widget.repository.esDemostracion,
           ),
+          panelEnHoja: (controlador) => PlanificarPanel(
+            planificador: planificador,
+            buscadorLugares: widget.buscadorLugares,
+            esDemostracion: widget.repository.esDemostracion,
+            controladorScroll: controlador,
+          ),
         ),
       );
     }
@@ -201,15 +207,69 @@ class _Contenido extends StatelessWidget {
 /// Mapa y panel: en pantallas de 700 px o más, el panel de 359 px va a la
 /// derecha; en las angostas, el mapa arriba (hasta 420 px) y el panel debajo.
 class _Disposicion extends StatelessWidget {
-  const _Disposicion({required this.mapa, required this.panel});
+  const _Disposicion({
+    required this.mapa,
+    required this.panel,
+    this.panelEnHoja,
+  });
 
   final Widget mapa;
   final Widget panel;
+
+  /// Si se indica, en pantallas angostas el mapa ocupa todo y el panel es
+  /// una hoja que se desliza desde abajo (como en Moovit y piuratransporta).
+  final Widget Function(ScrollController controlador)? panelEnHoja;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final enHoja = panelEnHoja;
+        if (constraints.maxWidth < 700 && enHoja != null) {
+          return Stack(
+            children: [
+              Positioned.fill(child: mapa),
+              DraggableScrollableSheet(
+                initialChildSize: 0.55,
+                minChildSize: 0.2,
+                maxChildSize: 0.95,
+                snap: true,
+                snapSizes: const [0.55],
+                builder: (context, controlador) => Material(
+                  color: AppColors.surface,
+                  elevation: 8,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      enHoja(controlador),
+                      // Asa para arrastrar la hoja.
+                      Positioned(
+                        top: 8,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppColors.track,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
         if (constraints.maxWidth >= 700) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
