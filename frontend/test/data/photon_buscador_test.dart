@@ -50,7 +50,30 @@ void main() {
       'limit': '$maximoLugaresEnLinea',
       'zoom': '12',
       'location_bias_scale': '0.1',
+      // Solo Piura metropolitana: lo de fuera no sirve para las líneas.
+      'bbox': '-80.8,-5.35,-80.5,-5.05',
     });
+  });
+
+  test('con un tipo de vía busca solo calles de Piura', () async {
+    final pedidos = <Uri>[];
+    final buscador = PhotonBuscadorLugares(
+      cliente: MockClient((request) async {
+        pedidos.add(request.url);
+        return http.Response(respuestaPhoton([]), 200);
+      }),
+    );
+
+    await buscador.buscar('jr lima');
+    await buscador.buscar('Av. Grau');
+
+    // "Jr. Lima" es "Calle Lima" en OpenStreetMap: se busca solo el nombre
+    // entre las calles de Piura metropolitana.
+    expect(pedidos[0].queryParameters['q'], 'lima');
+    expect(pedidos[0].queryParameters['osm_tag'], 'highway');
+    expect(pedidos[0].queryParameters['bbox'], '-80.8,-5.35,-80.5,-5.05');
+    expect(pedidos[1].queryParameters['q'], 'Grau');
+    expect(pedidos[1].queryParameters['osm_tag'], 'highway');
   });
 
   test('la dirección del servicio se puede cambiar', () async {

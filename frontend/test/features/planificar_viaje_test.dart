@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
+import 'package:piurago/data/lugares/lugares_piura.dart';
 import 'package:piurago/data/models/lugar.dart';
 
 import '../viaje/repositorio_prueba.dart';
@@ -103,8 +104,8 @@ void main() {
     expect(find.text('Escribe el punto de partida…'), findsOneWidget);
     expect(find.byTooltip('Intercambiar origen y destino'), findsOneWidget);
     expect(find.byTooltip('Limpiar'), findsOneWidget);
-    expect(find.text('O toca el mapa para fijar tu destino'), findsOneWidget);
-    expect(find.text('Lugares frecuentes'), findsOneWidget);
+    expect(find.text('Toca el mapa para fijar tu destino.'), findsOneWidget);
+    expect(find.text('Destinos rápidos'), findsOneWidget);
     expect(frecuente('Mercado Central'), findsOneWidget);
     // Ya no hace falta un botón para buscar.
     expect(find.text('Buscar ruta'), findsNothing);
@@ -132,7 +133,7 @@ void main() {
 
     expect(textoDe(tester, campoHasta), 'Hospital Sur');
     expect(sugerencia('Hospital Sur'), findsNothing);
-    expect(find.text('O toca el mapa para fijar tu origen'), findsOneWidget);
+    expect(find.text('Toca el mapa para fijar tu origen.'), findsOneWidget);
     expect(tester.widget<TextField>(campoDesde).focusNode!.hasFocus, isTrue);
   });
 
@@ -146,13 +147,12 @@ void main() {
     await tester.enterText(campoHasta, 'h');
     await esperarBusqueda(tester);
 
-    expect(find.text('Lugares con líneas de bus'), findsOneWidget);
     expect(sugerencia('Hospital Sur'), findsOneWidget);
-    expect(find.text('Otros lugares'), findsNothing);
+    expect(find.text('Buscando más lugares…'), findsNothing);
     expect(buscador.pedidos, isEmpty);
   });
 
-  testWidgets('desde la 2.ª letra suma "Otros lugares" del buscador', (
+  testWidgets('desde la 2.ª letra completa la lista con el buscador', (
     tester,
   ) async {
     fijarPantalla(tester, escritorio);
@@ -169,13 +169,16 @@ void main() {
 
     await tester.enterText(campoHasta, 'hosp');
     await tester.pump();
-    expect(find.text('Buscando lugares…'), findsOneWidget);
+    expect(find.text('Buscando más lugares…'), findsOneWidget);
     await esperarBusqueda(tester);
 
     expect(buscador.pedidos, ['hosp']);
-    expect(find.text('Lugares con líneas de bus'), findsOneWidget);
     expect(sugerencia('Hospital Sur'), findsOneWidget);
-    expect(find.text('Otros lugares'), findsOneWidget);
+    // Los paraderos van primero.
+    expect(
+      tester.getTopLeft(sugerencia('Hospital Sur')).dy,
+      lessThan(tester.getTopLeft(sugerencia('Hospital Rebagliati')).dy),
+    );
     expect(
       sugerencia('Hospital Regional · Avenida Grau, Piura, Perú'),
       findsOneWidget,
@@ -203,18 +206,15 @@ void main() {
     await clic(tester, sugerencia('Lima · Lima, Perú'));
 
     expect(textoDe(tester, campoHasta), 'Lima');
-    expect(find.text('Otros lugares'), findsNothing);
+    expect(find.text('Buscando más lugares…'), findsNothing);
     expect(tester.widget<TextField>(campoDesde).focusNode!.hasFocus, isTrue);
 
     await elegir(tester, campoDesde, 'merc', 'Mercado Central');
 
-    expect(
-      find.text('Ninguna línea pasa cerca. Prueba con otro punto.'),
-      findsOneWidget,
-    );
+    expect(find.text('No encontramos una ruta directa'), findsOneWidget);
   });
 
-  testWidgets('un lugar de "Otros lugares" cerca de una línea da resultados', (
+  testWidgets('un lugar del buscador cerca de una línea da resultados', (
     tester,
   ) async {
     fijarPantalla(tester, escritorio);
@@ -274,6 +274,33 @@ void main() {
     expect(sugerencia('Mercado Central'), findsOneWidget);
     await clic(tester, sugerencia('Mercado Central'));
     expect(textoDe(tester, campoHasta), 'Mercado Central');
+  });
+
+  testWidgets('con la base de Piura, "jr lima" sugiere la Calle Lima sin red', (
+    tester,
+  ) async {
+    fijarPantalla(tester, escritorio);
+    await tester.pumpWidget(
+      PiuraGoApp(
+        rutasRepository: RepositorioPrueba(),
+        buscadorLugares: BuscadorFalso(),
+        lugaresConocidos: lugaresPiura,
+        mostrarMapaBase: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester
+        .state<NavigatorState>(find.byType(Navigator).first)
+        .pushReplacementNamed(AppRoutes.mapa);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(campoHasta, 'jr lima');
+    await tester.pump();
+
+    expect(find.text('Calle Lima'), findsWidgets);
+    final lima = lugaresPiura.firstWhere((l) => l.nombre == 'Calle Lima');
+    await clic(tester, sugerencia('Calle Lima · ${lima.detalle}'));
+    expect(textoDe(tester, campoHasta), 'Calle Lima');
   });
 
   testWidgets('un clic en un lugar frecuente fija el campo activo', (
@@ -408,10 +435,7 @@ void main() {
 
     await viajar(tester, 'Estadio Lejano', 'Plaza Norte');
 
-    expect(
-      find.text('Ninguna línea pasa cerca. Prueba con otro punto.'),
-      findsOneWidget,
-    );
+    expect(find.text('No encontramos una ruta directa'), findsOneWidget);
   });
 
   testWidgets('a menos de 300 m sugiere ir caminando', (tester) async {
@@ -420,10 +444,7 @@ void main() {
 
     await viajar(tester, 'Mercado Chico', 'Mercado Central');
 
-    expect(
-      find.text('Están a menos de 300 m: puedes ir caminando.'),
-      findsOneWidget,
-    );
+    expect(find.text('Todo el trayecto es caminando (222 m).'), findsOneWidget);
   });
 
   testWidgets('intercambiar invierte origen y destino', (tester) async {
@@ -451,7 +472,7 @@ void main() {
     expect(textoDe(tester, campoDesde), isEmpty);
     expect(textoDe(tester, campoHasta), isEmpty);
     expect(find.text('Línea A'), findsNothing);
-    expect(find.text('Lugares frecuentes'), findsOneWidget);
+    expect(find.text('Destinos rápidos'), findsOneWidget);
   });
 
   testWidgets('en el celular el panel va debajo del mapa', (tester) async {
