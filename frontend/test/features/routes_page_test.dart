@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
 import 'package:piurago/core/theme/app_theme.dart';
@@ -14,6 +15,9 @@ class _RepositorioConFalla implements RutasRepository {
 
   @override
   Future<List<Paradero>> paraderos(int idRuta) async => const <Paradero>[];
+
+  @override
+  Future<List<LatLng>> trazado(int idRuta) async => const <LatLng>[];
 
   @override
   bool get esDemostracion => false;

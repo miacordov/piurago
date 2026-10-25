@@ -48,13 +48,16 @@ void main() {
     }
   });
 
-  test('las líneas sin recorrido oficial lo dicen y no tienen paraderos', () async {
-    for (final codigo in ['RD-07', 'RD-13']) {
-      final ruta = await linea(codigo);
-      expect(ruta.descripcion, contains('Recorrido pendiente'));
-      expect(await repositorio.paraderos(ruta.idRuta), isEmpty);
-    }
-  });
+  test(
+    'las líneas sin recorrido oficial lo dicen y no tienen paraderos',
+    () async {
+      for (final codigo in ['RD-07', 'RD-13']) {
+        final ruta = await linea(codigo);
+        expect(ruta.descripcion, contains('Recorrido pendiente'));
+        expect(await repositorio.paraderos(ruta.idRuta), isEmpty);
+      }
+    },
+  );
 
   test('Planificar viaje ya puede sugerir la RD-12', () async {
     final rutas = await repositorio.listar();
