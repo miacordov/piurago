@@ -14,10 +14,22 @@ class RutaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colores = _ColoresDeTono.de(ruta.tono);
-    final puntos = ruta.paraderosDestacados.isNotEmpty
-        ? ruta.paraderosDestacados.take(3).toList()
+    final puntos = ruta.lugaresDestacados.isNotEmpty
+        ? ruta.lugaresDestacados.take(3).toList()
         : [ruta.puntoInicio, ruta.puntoFinal].whereType<String>().toList();
-    final eta = ruta.etaMinutos == null ? '—' : '${ruta.etaMinutos} min';
+    final subtitulo = [
+      ruta.empresa,
+      ruta.tipoServicio,
+      if (ruta.pasaje != null) 'S/ ${ruta.pasaje!.toStringAsFixed(2)}',
+    ].whereType<String>().join(' · ');
+    // Sin ETA en vivo se muestra cada cuánto pasa la línea.
+    final (etiqueta, valor) = !ruta.activa
+        ? ('Estado', 'Fuera de servicio')
+        : ruta.etaMinutos != null
+        ? ('Próxima unidad', '${ruta.etaMinutos} min')
+        : ruta.frecuenciaMinutos != null
+        ? ('Frecuencia', 'cada ~${ruta.frecuenciaMinutos} min')
+        : ('Próxima unidad', '—');
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -33,17 +45,28 @@ class RutaCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 38,
+                constraints: const BoxConstraints(minWidth: 38),
                 height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: colores.fondo,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(
-                  Icons.directions_bus_outlined,
-                  size: 20,
-                  color: colores.icono,
-                ),
+                child: ruta.codigo == null
+                    ? Icon(
+                        Icons.directions_bus_outlined,
+                        size: 20,
+                        color: colores.icono,
+                      )
+                    : Text(
+                        ruta.codigo!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: colores.icono,
+                        ),
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -62,7 +85,7 @@ class RutaCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      ruta.descripcion ?? '',
+                      subtitulo.isNotEmpty ? subtitulo : ruta.descripcion ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -113,23 +136,25 @@ class RutaCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Próxima unidad',
+                    Text(
+                      etiqueta,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textMuted,
                       ),
                     ),
                     Text(
-                      eta,
+                      valor,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                        color: ruta.activa
+                            ? AppColors.primary
+                            : AppColors.danger,
                       ),
                     ),
                   ],
