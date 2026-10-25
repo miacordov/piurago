@@ -16,6 +16,14 @@ class RutaPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tramo = ruta.puntoInicio != null && ruta.puntoFinal != null
+        ? '${ruta.puntoInicio} → ${ruta.puntoFinal}'
+        : null;
+    final detalle = [
+      ruta.codigo,
+      ruta.empresa,
+      ruta.tipoServicio,
+    ].whereType<String>().join(' · ');
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -39,7 +47,13 @@ class RutaPanel extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(ruta.descripcion ?? '', style: AppText.small),
+                    Text(
+                      [detalle, tramo ?? ruta.descripcion]
+                          .whereType<String>()
+                          .where((t) => t.isNotEmpty)
+                          .join('\n'),
+                      style: AppText.small,
+                    ),
                   ],
                 ),
               ),
@@ -60,7 +74,7 @@ class RutaPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _CajaEta(eta: ruta.etaMinutos, paraderos: paraderos.length),
+          _CajaEta(ruta: ruta, paraderos: paraderos.length),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -88,7 +102,19 @@ class RutaPanel extends StatelessWidget {
           else
             for (final (i, paradero) in paraderos.indexed)
               _FilaParadero(indice: i, paradero: paradero),
-
+          if (ruta.lugaresDestacados.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            const Text(
+              'Lugares por los que pasa',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.text,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(ruta.lugaresDestacados.join(' · '), style: AppText.body),
+          ],
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: () => mostrarProximamente(context, 'Compartir la ruta'),
@@ -119,14 +145,29 @@ class RutaPanel extends StatelessWidget {
 }
 
 class _CajaEta extends StatelessWidget {
-  const _CajaEta({required this.eta, required this.paraderos});
+  const _CajaEta({required this.ruta, required this.paraderos});
 
-  final int? eta;
+  final Ruta ruta;
   final int paraderos;
 
   @override
   Widget build(BuildContext context) {
-    final minutos = eta == null ? '—' : '$eta min';
+    final eta = ruta.etaMinutos;
+    // Sin ETA en vivo se muestran la frecuencia, el horario y el pasaje.
+    final sinEta = eta == null && ruta.frecuenciaMinutos != null;
+    final titulo = !ruta.activa
+        ? 'Fuera de servicio'
+        : sinEta
+        ? 'Pasa cada ~${ruta.frecuenciaMinutos} min'
+        : 'Próxima unidad estimada';
+    final valor = sinEta || !ruta.activa
+        ? [
+            ruta.horario,
+            if (ruta.pasaje != null) 'S/ ${ruta.pasaje!.toStringAsFixed(2)}',
+            if (ruta.pasajeEstudiante != null)
+              'Estudiante S/ ${ruta.pasajeEstudiante!.toStringAsFixed(2)}',
+          ].whereType<String>().join(' · ')
+        : '${eta == null ? '—' : '$eta min'} · $paraderos paraderos';
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -141,15 +182,15 @@ class _CajaEta extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Próxima unidad estimada',
+                Text(
+                  titulo,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.small,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$minutos · $paraderos paraderos',
+                  valor,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

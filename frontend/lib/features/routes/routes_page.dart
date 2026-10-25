@@ -167,15 +167,19 @@ class _Encabezado extends StatelessWidget {
         const SizedBox(height: 32),
         Row(
           children: [
-            const Text(
-              'Rutas cercanas',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w500,
-                color: AppColors.text,
+            const Expanded(
+              child: Text(
+                'Todas las rutas',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.text,
+                ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             if (total != null) Text(total!, style: AppText.small),
           ],
         ),

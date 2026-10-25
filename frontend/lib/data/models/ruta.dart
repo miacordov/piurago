@@ -17,7 +17,11 @@ class Ruta {
     this.activa = true,
     this.tiempoEstimado,
     this.frecuenciaMinutos,
-    this.paraderosDestacados = const [],
+    this.tipoServicio,
+    this.horario,
+    this.pasaje,
+    this.pasajeEstudiante,
+    this.lugaresDestacados = const [],
     this.etaMinutos,
   });
 
@@ -35,6 +39,10 @@ class Ruta {
       activa: json['activa'] as bool? ?? true,
       tiempoEstimado: (json['tiempoEstimado'] as num?)?.toInt(),
       frecuenciaMinutos: (json['frecuenciaMinutos'] as num?)?.toInt(),
+      tipoServicio: json['tipoServicio'] as String?,
+      horario: json['horario'] as String?,
+      pasaje: (json['pasaje'] as num?)?.toDouble(),
+      pasajeEstudiante: (json['pasajeEstudiante'] as num?)?.toDouble(),
     );
   }
 
@@ -51,14 +59,33 @@ class Ruta {
   final int? tiempoEstimado;
   final int? frecuenciaMinutos;
 
-  /// Paraderos que se muestran en la tarjeta. El backend todavía no los
-  /// entrega junto con la ruta: se piden aparte (`/api/rutas/{id}/paraderos`).
-  final List<String> paraderosDestacados;
+  // Datos de servicio de PiuraTransporta (ver docs/datos/rutas-piuratransporta.json).
+
+  /// Tipo de servicio: Urbana, Regulada o Interurbana.
+  final String? tipoServicio;
+
+  /// Horario de servicio, por ejemplo "06:00–22:00".
+  final String? horario;
+
+  /// Pasaje general y de estudiante, en soles.
+  final double? pasaje;
+  final double? pasajeEstudiante;
+
+  /// Lugares conocidos por los que pasa. No son paraderos: esos se piden
+  /// aparte (`/api/rutas/{id}/paraderos`). El backend no los entrega todavía
+  /// por separado (van como texto en `recorrido`).
+  final List<String> lugaresDestacados;
 
   /// Minutos hasta la próxima unidad, si se conocen.
   final int? etaMinutos;
 
-  RutaTono get tono => RutaTono.values[(idRuta - 1) % RutaTono.values.length];
+  /// El color depende del tipo de servicio; sin tipo, rota según el id.
+  RutaTono get tono => switch (tipoServicio) {
+    'Regulada' => RutaTono.azul,
+    'Urbana' => RutaTono.verde,
+    'Interurbana' => RutaTono.naranja,
+    _ => RutaTono.values[(idRuta - 1) % RutaTono.values.length],
+  };
 
   /// Indica si la ruta coincide con lo que escribió el usuario en el buscador.
   bool coincideCon(String consulta) {
@@ -71,7 +98,8 @@ class Ruta {
       puntoInicio,
       puntoFinal,
       descripcion,
-      ...paraderosDestacados,
+      tipoServicio,
+      ...lugaresDestacados,
     ];
     return campos.any((c) => c != null && c.toLowerCase().contains(q));
   }
