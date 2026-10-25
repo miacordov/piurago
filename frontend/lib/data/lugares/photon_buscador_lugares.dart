@@ -7,13 +7,38 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/lugar.dart';
 import 'buscador_lugares.dart';
+import 'indice_lugares.dart';
+
+/// Palabras con las que empieza el nombre de una vía.
+const _tiposDeVia = {
+  'jr',
+  'jiron',
+  'calle',
+  'ca',
+  'cl',
+  'av',
+  'avenida',
+  'avda',
+  'psje',
+  'pasaje',
+  'pje',
+  'prol',
+  'prolongacion',
+  'carr',
+  'carretera',
+};
+
+/// Recuadro de Piura metropolitana y alrededores (oeste, sur, este, norte):
+/// Piura, Castilla, Veintiséis de Octubre y Catacaos. Lo de fuera no sirve
+/// para viajar en las líneas, así que no se sugiere.
+const recuadroPiura = '-80.8,-5.35,-80.5,-5.05';
 
 /// Buscador de lugares con Photon (https://photon.komoot.io), un
 /// geocodificador de OpenStreetMap hecho para sugerir mientras se escribe.
 ///
-/// Solo envía el texto escrito y el punto fijo de Piura
-/// ([centroBusquedaPiura]) para ordenar los resultados: nunca la ubicación
-/// del usuario. El servicio público es de uso justo; la dirección se cambia
+/// Solo envía el texto escrito, el punto fijo de Piura
+/// ([centroBusquedaPiura]) para ordenar los resultados y el recuadro de
+/// Piura metropolitana ([recuadroPiura]): nunca la ubicación del usuario. El servicio público es de uso justo; la dirección se cambia
 /// con --dart-define=GEOCODER_URL. Ver docs/diseno/mapa-osm.md.
 class PhotonBuscadorLugares implements BuscadorLugares {
   PhotonBuscadorLugares({http.Client? cliente, Uri? url})
@@ -32,19 +57,30 @@ class PhotonBuscadorLugares implements BuscadorLugares {
   String get atribucion =>
       'Búsqueda de lugares: Photon · © OpenStreetMap contributors';
 
+  /// Si el texto empieza con un tipo de vía ("jr lima", "Av. Grau"), devuelve
+  /// solo el nombre: en OpenStreetMap el Jr. Lima del centro es "Calle Lima",
+  /// así que se busca "lima" entre las calles de Piura.
+  static String? _nombreDeVia(String texto) {
+    final palabras = texto.trim().split(RegExp(r'\s+'));
+    if (palabras.length < 2) return null;
+    final tipo = normalizar(palabras.first).replaceAll('.', '');
+    return _tiposDeVia.contains(tipo) ? palabras.skip(1).join(' ') : null;
+  }
+
   @override
   Future<List<Lugar>> buscar(String texto) async {
+    final via = _nombreDeVia(texto);
     final pedido = url.replace(
       queryParameters: {
-        'q': expandirAbreviaturas(texto),
+        'q': via ?? expandirAbreviaturas(texto),
         'lat': '${centroBusquedaPiura.latitude}',
         'lon': '${centroBusquedaPiura.longitude}',
         'limit': '$maximoLugaresEnLinea',
-        // Radio de la ciudad y más peso a la cercanía que a la fama: así la
-        // Catedral de Piura sale antes que la de Buenos Aires, sin ocultar
-        // los lugares de fuera.
+        // Radio de la ciudad y más peso a la cercanía que a la fama.
         'zoom': '12',
         'location_bias_scale': '0.1',
+        'bbox': recuadroPiura,
+        if (via != null) 'osm_tag': 'highway',
       },
     );
     final http.Response respuesta;

@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
 import '../../data/lugares/buscador_lugares.dart';
+import '../../data/models/lugar.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
@@ -27,6 +28,7 @@ class MapPage extends StatefulWidget {
     super.key,
     required this.repository,
     this.buscadorLugares,
+    this.lugaresConocidos = const [],
     this.idRuta,
     this.mostrarMapa = true,
   });
@@ -35,6 +37,9 @@ class MapPage extends StatefulWidget {
 
   /// Buscador de lugares en línea de Planificar viaje (opcional).
   final BuscadorLugares? buscadorLugares;
+
+  /// Base propia de calles y lugares de Piura para las sugerencias.
+  final List<Lugar> lugaresConocidos;
   final int? idRuta;
 
   /// Permite reemplazar el mapa real por un recuadro vacío (para las pruebas,
@@ -73,7 +78,10 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _iniciarPlanificador() {
-    _planificador = PlanificadorViaje(widget.repository)..cargar();
+    _planificador = PlanificadorViaje(
+      widget.repository,
+      lugaresConocidos: widget.lugaresConocidos,
+    )..cargar();
   }
 
   void _planificarViaje() {

@@ -1,10 +1,11 @@
 import '../models/lugar.dart';
 
-/// Búsqueda por nombre entre lugares conocidos (los paraderos y el buscador
-/// de prueba): compara sin tildes ni mayúsculas y entiende abreviaturas.
+/// Búsqueda por nombre entre lugares conocidos (los paraderos y la base
+/// propia de Piura): compara sin tildes ni mayúsculas y entiende
+/// abreviaturas.
 
-/// Cantidad máxima de sugerencias del autocompletado.
-const maximoSugerencias = 6;
+/// Cantidad máxima de sugerencias del autocompletado (como piuratransporta).
+const maximoSugerencias = 5;
 
 /// Texto en minúsculas y sin tildes, para comparar nombres.
 String normalizar(String texto) {
@@ -19,11 +20,14 @@ String normalizar(String texto) {
 }
 
 /// Formas cortas de las palabras de las direcciones de Piura: así "jr" o
-/// "jr." encuentran "Jirón" y "av" encuentra "Avenida".
+/// "jr." encuentran "Jirón" y "av" encuentra "Avenida". En Piura la gente
+/// dice "jirón" o "calle" para la misma vía (el Jr. Lima del centro es
+/// "Calle Lima" en OpenStreetMap), así que las dos valen lo mismo.
 const _abreviaturas = {
   'avenida': 'av',
   'avda': 'av',
-  'jiron': 'jr',
+  'jiron': 'ca',
+  'jr': 'ca',
   'pasaje': 'psje',
   'pje': 'psje',
   'pj': 'psje',
