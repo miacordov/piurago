@@ -105,15 +105,16 @@ class PlanificadorViaje extends ChangeNotifier {
         for (final (i, ruta) in rutas.indexed) ruta.idRuta: listas[i],
       };
       // Primero los paraderos (por ahí pasan las líneas) y luego la base de
-      // Piura, sin repetir un nombre que ya es paradero.
+      // Piura, sin repetir un nombre que ya es paradero. El índice de la
+      // base se arma una sola vez y se reutiliza al volver al mapa.
       final paraderos = construirCatalogo(_rutas, _paraderos);
       final nombres = {for (final l in paraderos) normalizar(l.nombre)};
-      _catalogo = [
-        ...paraderos,
-        for (final l in lugaresConocidos)
-          if (!nombres.contains(normalizar(l.nombre))) l,
-      ];
-      _indice = IndiceLugares(_catalogo);
+      _indice = IndiceLugares.unir(
+        IndiceLugares(paraderos),
+        IndiceLugares.de(lugaresConocidos),
+        excluir: (l) => nombres.contains(normalizar(l.nombre)),
+      );
+      _catalogo = _indice.lugares;
       _frecuentes = lugaresFrecuentes(_rutas, _paraderos);
       _cargado = true;
       _estado = EstadoViaje.vacio;

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/lugar.dart';
 
 /// Búsqueda por nombre entre lugares conocidos (los paraderos y la base
@@ -75,20 +77,56 @@ class _Forma {
   final String texto;
 }
 
+/// Formas de un nombre para comparar: tal cual y con las abreviaturas (una
+/// sola si son iguales), y todo su texto junto para descartar rápido.
+class _Nombre {
+  factory _Nombre(String nombre) {
+    final tal = _Forma(_palabras(nombre));
+    final cortas = _Forma(_abreviadas(tal.palabras));
+    final formas = cortas.texto == tal.texto ? [tal] : [tal, cortas];
+    return _Nombre._(formas, formas.map((f) => f.texto).join(' '));
+  }
+
+  const _Nombre._(this.formas, this.todo);
+
+  final List<_Forma> formas;
+  final String todo;
+}
+
 /// Catálogo preparado para sugerir lugares mientras se escribe: las
 /// palabras de cada nombre (tal cual y abreviadas) se calculan una sola vez.
 class IndiceLugares {
   IndiceLugares(this.lugares)
-    : _formas = [
-        for (final l in lugares)
-          [
-            _Forma(_palabras(l.nombre)),
-            _Forma(_abreviadas(_palabras(l.nombre))),
-          ],
-      ];
+    : _nombres = [for (final l in lugares) _Nombre(l.nombre)];
+
+  IndiceLugares._(this.lugares, this._nombres);
+
+  /// Índice de una lista que no cambia (como la base propia de Piura): se
+  /// arma la primera vez y se reutiliza al volver a abrir el mapa.
+  factory IndiceLugares.de(List<Lugar> lugares) =>
+      _guardados[lugares] ??= IndiceLugares(lugares);
+
+  static final _guardados = Expando<IndiceLugares>('indices de lugares');
+
+  /// Primero los lugares de [primero] y luego los de [despues], salvo los
+  /// que [excluir] descarta. No vuelve a preparar los nombres.
+  factory IndiceLugares.unir(
+    IndiceLugares primero,
+    IndiceLugares despues, {
+    bool Function(Lugar lugar)? excluir,
+  }) {
+    final lugares = [...primero.lugares];
+    final nombres = [...primero._nombres];
+    for (final (i, lugar) in despues.lugares.indexed) {
+      if (excluir != null && excluir(lugar)) continue;
+      lugares.add(lugar);
+      nombres.add(despues._nombres[i]);
+    }
+    return IndiceLugares._(lugares, nombres);
+  }
 
   final List<Lugar> lugares;
-  final List<List<_Forma>> _formas;
+  final List<_Nombre> _nombres;
 
   /// Lugares que coinciden con [consulta], como máximo [maximoSugerencias]:
   /// primero los que empiezan con lo escrito, luego los que tienen cada
@@ -96,16 +134,32 @@ class IndiceLugares {
   /// coincidencia, en el orden del catálogo (paraderos primero y luego las
   /// calles más importantes). Compara las palabras tal cual y abreviadas:
   /// "jir" y "jr" encuentran "Jirón".
-  List<Lugar> sugerir(String consulta) {
+  List<Lugar> sugerir(String consulta) => _sugerir(consulta, descartar: true);
+
+  /// Igual que [sugerir], sin el descarte rápido (para probar que da lo
+  /// mismo).
+  @visibleForTesting
+  List<Lugar> sugerirSinDescarte(String consulta) =>
+      _sugerir(consulta, descartar: false);
+
+  List<Lugar> _sugerir(String consulta, {required bool descartar}) {
     final palabras = _palabras(consulta);
     if (palabras.isEmpty) return const [];
-    final consultas = [_Forma(palabras), _Forma(_abreviadas(palabras))];
+    final tal = _Forma(palabras);
+    final cortas = _Forma(_abreviadas(palabras));
+    final consultas = cortas.texto == tal.texto ? [tal] : [tal, cortas];
     final encontrados = <(int, int)>[];
-    for (final (i, formas) in _formas.indexed) {
+    for (final (i, nombre) in _nombres.indexed) {
+      // Toda coincidencia necesita que cada palabra escrita esté en el
+      // nombre: con eso se descarta casi todo el catálogo de una vez.
+      if (descartar &&
+          !consultas.any((q) => q.palabras.every(nombre.todo.contains))) {
+        continue;
+      }
       int? mejor;
-      for (final nombre in formas) {
+      for (final forma in nombre.formas) {
         for (final q in consultas) {
-          final puntaje = _coincidencia(nombre, q);
+          final puntaje = _coincidencia(forma, q);
           if (puntaje != null && (mejor == null || puntaje < mejor)) {
             mejor = puntaje;
           }
