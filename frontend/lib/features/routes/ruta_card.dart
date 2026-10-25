@@ -1,0 +1,183 @@
+import 'package:flutter/material.dart';
+
+import '../../core/routes.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_styles.dart';
+import '../../data/models/ruta.dart';
+
+/// Tarjeta de una línea en la lista de rutas.
+class RutaCard extends StatelessWidget {
+  const RutaCard({super.key, required this.ruta});
+
+  final Ruta ruta;
+
+  @override
+  Widget build(BuildContext context) {
+    final colores = _ColoresDeTono.de(ruta.tono);
+    final puntos = ruta.paraderosDestacados.isNotEmpty
+        ? ruta.paraderosDestacados.take(3).toList()
+        : [ruta.puntoInicio, ruta.puntoFinal].whereType<String>().toList();
+    final eta = ruta.etaMinutos == null ? '—' : '${ruta.etaMinutos} min';
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: colores.fondo,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.directions_bus_outlined,
+                  size: 20,
+                  color: colores.icono,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ruta.nombre,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      ruta.descripcion ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          for (final punto in puntos)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      punto,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const Spacer(),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Próxima unidad',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      eta,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: () => Navigator.of(
+                  context,
+                ).pushReplacementNamed(AppRoutes.mapa, arguments: ruta.idRuta),
+                style: appCompactButtonStyle(),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Ver en mapa'),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_right, size: 16),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColoresDeTono {
+  const _ColoresDeTono(this.fondo, this.icono);
+
+  final Color fondo;
+  final Color icono;
+
+  static _ColoresDeTono de(RutaTono tono) {
+    return switch (tono) {
+      RutaTono.azul => const _ColoresDeTono(
+        AppColors.blueTile,
+        AppColors.primary,
+      ),
+      RutaTono.verde => const _ColoresDeTono(
+        AppColors.greenTile,
+        AppColors.success,
+      ),
+      RutaTono.naranja => const _ColoresDeTono(
+        AppColors.orangeTile,
+        AppColors.warning,
+      ),
+    };
+  }
+}
