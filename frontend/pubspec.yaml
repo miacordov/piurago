@@ -34,10 +34,16 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_map: ^8.3.2
+  # Cliente HTTP del buscador de lugares (Photon). Ya venía con flutter_map.
+  http: ^1.6.0
+  latlong2: ^0.10.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Controla el tiempo en las pruebas (espera de 300 ms, pausa tras un 429).
+  fake_async: ^1.3.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
