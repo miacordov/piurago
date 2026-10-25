@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../data/models/paradero.dart';
+import '../viaje/busqueda_viaje.dart';
 
 /// Mapa de OpenStreetMap con el recorrido y los paraderos de una ruta.
 ///
@@ -15,12 +17,37 @@ class RutaMap extends StatefulWidget {
     super.key,
     required this.paraderos,
     this.esDemostracion = false,
+    this.paraderosDestacados,
+    this.marcadoresExtra = const [],
+    this.lineasExtra = const [],
+    this.encuadre,
+    this.alTocar,
   });
 
+  /// Paraderos de la ruta: con dos o más se dibuja el recorrido.
   final List<Paradero> paraderos;
 
   /// Si es true, avisa que el recorrido es ilustrativo.
   final bool esDemostracion;
+
+  /// Si se indica, solo se marcan estos paraderos (sin número) en lugar de
+  /// todos los de la ruta.
+  final List<Paradero>? paraderosDestacados;
+
+  /// Marcadores y líneas adicionales (por ejemplo, origen, destino y
+  /// caminatas de Planificar viaje).
+  final List<Marker> marcadoresExtra;
+  final List<Polyline> lineasExtra;
+
+  /// Puntos que el mapa debe mostrar. Si cambian, el mapa se reencuadra. Si
+  /// no se indica, se encuadran los paraderos.
+  final List<LatLng>? encuadre;
+
+  /// Se llama con la coordenada tocada en el mapa.
+  final ValueChanged<LatLng>? alTocar;
+
+  /// Zoom al centrar un solo punto (o varios casi iguales).
+  static const zoomPuntoUnico = 15.0;
 
   static const urlTeselas = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   static const identificadorApp = 'com.piurago.piurago';
@@ -34,9 +61,22 @@ class RutaMap extends StatefulWidget {
 
 class _RutaMapState extends State<RutaMap> {
   final _controller = MapController();
+  bool _listo = false;
 
-  List<LatLng> get _puntos =>
-      widget.paraderos.map((p) => LatLng(p.latitud, p.longitud)).toList();
+  List<LatLng> get _puntos => widget.paraderos.map(posicionDe).toList();
+
+  List<LatLng> get _puntosEncuadre => widget.encuadre ?? _puntos;
+
+  @override
+  void didUpdateWidget(RutaMap anterior) {
+    super.didUpdateWidget(anterior);
+    if (!listEquals(anterior.encuadre, widget.encuadre)) {
+      // El controlador se usa después del frame, cuando el mapa ya se dibujó.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _listo) _encuadrar();
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -44,14 +84,28 @@ class _RutaMapState extends State<RutaMap> {
     super.dispose();
   }
 
-  /// Encuadre que muestra toda la ruta, o null si hay menos de dos puntos.
+  /// Encuadre con margen para dos o más puntos distintos. Con uno solo (o
+  /// varios casi iguales) se centra con zoom fijo, porque el encuadre
+  /// acercaría el mapa al máximo.
   CameraFit? _encuadre() {
-    final puntos = _puntos;
-    if (puntos.length < 2) return null;
-    return CameraFit.bounds(
-      bounds: LatLngBounds.fromPoints(puntos),
+    final puntos = _puntosEncuadre;
+    if (puntos.length < 2 || puntosCasiIguales(puntos)) return null;
+    return CameraFit.coordinates(
+      coordinates: puntos,
       padding: const EdgeInsets.all(72),
     );
+  }
+
+  void _encuadrar() {
+    final puntos = _puntosEncuadre;
+    final encuadre = _encuadre();
+    if (encuadre != null) {
+      _controller.fitCamera(encuadre);
+    } else if (puntos.isNotEmpty) {
+      _controller.move(puntos.first, RutaMap.zoomPuntoUnico);
+    } else {
+      _controller.move(RutaMap.centroPiura, 14);
+    }
   }
 
   void _zoom(double cambio) {
@@ -60,26 +114,25 @@ class _RutaMapState extends State<RutaMap> {
     _controller.move(camara.center, nuevo);
   }
 
-  void _centrarRuta() {
-    final encuadre = _encuadre();
-    if (encuadre != null) {
-      _controller.fitCamera(encuadre);
-    } else {
-      _controller.move(RutaMap.centroPiura, 14);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final puntos = _puntos;
+    final iniciales = _puntosEncuadre;
+    final destacados = widget.paraderosDestacados;
+    final marcados = destacados ?? widget.paraderos;
+    final alTocar = widget.alTocar;
     return Stack(
       children: [
         FlutterMap(
           mapController: _controller,
           options: MapOptions(
-            initialCenter: RutaMap.centroPiura,
-            initialZoom: 14,
+            initialCenter: iniciales.isEmpty
+                ? RutaMap.centroPiura
+                : iniciales.first,
+            initialZoom: iniciales.isEmpty ? 14 : RutaMap.zoomPuntoUnico,
             initialCameraFit: _encuadre(),
+            onMapReady: () => _listo = true,
+            onTap: alTocar == null ? null : (_, punto) => alTocar(punto),
             minZoom: 5,
             maxZoom: 19,
             interactionOptions: const InteractionOptions(
@@ -107,19 +160,22 @@ class _RutaMapState extends State<RutaMap> {
                   ),
                 ],
               ),
+            if (widget.lineasExtra.isNotEmpty)
+              PolylineLayer(polylines: widget.lineasExtra),
             MarkerLayer(
               markers: [
-                for (final (i, p) in widget.paraderos.indexed)
+                for (final (i, p) in marcados.indexed)
                   Marker(
-                    point: LatLng(p.latitud, p.longitud),
+                    point: posicionDe(p),
                     width: 32,
                     height: 32,
                     child: _MarcadorParadero(
-                      numero: i + 1,
+                      numero: destacados == null ? i + 1 : null,
                       nombre: p.nombre,
-                      primero: i == 0,
+                      primero: destacados != null || i == 0,
                     ),
                   ),
+                ...widget.marcadoresExtra,
               ],
             ),
             const RichAttributionWidget(
@@ -151,9 +207,9 @@ class _RutaMapState extends State<RutaMap> {
               ),
               const SizedBox(height: 8),
               _BotonMapa(
-                icono: Icons.my_location,
-                ayuda: 'Centrar la ruta',
-                onPressed: _centrarRuta,
+                icono: Icons.fit_screen,
+                ayuda: 'Centrar el mapa',
+                onPressed: _encuadrar,
               ),
             ],
           ),
@@ -170,7 +226,8 @@ class _MarcadorParadero extends StatelessWidget {
     required this.primero,
   });
 
-  final int numero;
+  /// Número del paradero en la ruta; sin número se muestra un bus.
+  final int? numero;
   final String nombre;
   final bool primero;
 
@@ -185,14 +242,20 @@ class _MarcadorParadero extends StatelessWidget {
           color: primero ? AppColors.primary : Colors.white,
           border: Border.all(color: AppColors.primary, width: 3),
         ),
-        child: Text(
-          '$numero',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: primero ? Colors.white : AppColors.primary,
-          ),
-        ),
+        child: numero == null
+            ? Icon(
+                Icons.directions_bus,
+                size: 16,
+                color: primero ? Colors.white : AppColors.primary,
+              )
+            : Text(
+                '$numero',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: primero ? Colors.white : AppColors.primary,
+                ),
+              ),
       ),
     );
   }
