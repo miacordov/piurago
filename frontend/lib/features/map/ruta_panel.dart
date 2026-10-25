@@ -9,10 +9,18 @@ import '../../data/models/ruta.dart';
 
 /// Panel con el detalle de la ruta seleccionada y sus paraderos.
 class RutaPanel extends StatelessWidget {
-  const RutaPanel({super.key, required this.ruta, required this.paraderos});
+  const RutaPanel({
+    super.key,
+    required this.ruta,
+    required this.paraderos,
+    this.onPlanificarViaje,
+  });
 
   final Ruta ruta;
   final List<Paradero> paraderos;
+
+  /// Si se indica, el panel muestra el botón "Planificar viaje".
+  final VoidCallback? onPlanificarViaje;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +83,15 @@ class RutaPanel extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _CajaEta(ruta: ruta, paraderos: paraderos.length),
+          if (onPlanificarViaje != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onPlanificarViaje,
+              style: appOutlinedButtonStyle(),
+              icon: const Icon(Icons.alt_route, size: 18),
+              label: const Text('Planificar viaje'),
+            ),
+          ],
           const SizedBox(height: 24),
           Row(
             children: [
@@ -126,15 +143,7 @@ class RutaPanel extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () =>
                 mostrarProximamente(context, 'Marcar la ruta como superada'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
-              foregroundColor: AppColors.text,
-              backgroundColor: AppColors.background,
-              side: const BorderSide(color: Color(0xFFCFDBEC)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
+            style: appOutlinedButtonStyle(),
             icon: const Icon(Icons.check, size: 18),
             label: const Text('Marcar como superada'),
           ),

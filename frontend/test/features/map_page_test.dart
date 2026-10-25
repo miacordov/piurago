@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
     tester
         .state<NavigatorState>(find.byType(Navigator).first)
-        .pushReplacementNamed(AppRoutes.mapa);
+        .pushReplacementNamed(AppRoutes.mapa, arguments: 1);
     await tester.pumpAndSettle();
 
     expect(
@@ -92,14 +92,12 @@ void main() {
     );
   });
 
-  testWidgets('sin ruta indicada abre la primera de la lista', (tester) async {
+  testWidgets('sin ruta indicada abre Planificar viaje', (tester) async {
     fijarPantalla(tester, escritorio);
     await irAlMapa(tester);
 
-    expect(
-      find.text('Terminal Satélite (Piura) - Terminal La Unión'),
-      findsOneWidget,
-    );
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
+    expect(find.text('RUTA SELECCIONADA'), findsNothing);
   });
 
   testWidgets('Ver en mapa abre la ruta elegida', (tester) async {

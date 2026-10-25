@@ -13,7 +13,7 @@ class RutaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colores = _ColoresDeTono.de(ruta.tono);
+    final colores = ColoresDeTono.de(ruta.tono);
     final puntos = ruta.lugaresDestacados.isNotEmpty
         ? ruta.lugaresDestacados.take(3).toList()
         : [ruta.puntoInicio, ruta.puntoFinal].whereType<String>().toList();
@@ -183,23 +183,24 @@ class RutaCard extends StatelessWidget {
   }
 }
 
-class _ColoresDeTono {
-  const _ColoresDeTono(this.fondo, this.icono);
+/// Colores de la ficha de una línea según su tono.
+class ColoresDeTono {
+  const ColoresDeTono(this.fondo, this.icono);
 
   final Color fondo;
   final Color icono;
 
-  static _ColoresDeTono de(RutaTono tono) {
+  static ColoresDeTono de(RutaTono tono) {
     return switch (tono) {
-      RutaTono.azul => const _ColoresDeTono(
+      RutaTono.azul => const ColoresDeTono(
         AppColors.blueTile,
         AppColors.primary,
       ),
-      RutaTono.verde => const _ColoresDeTono(
+      RutaTono.verde => const ColoresDeTono(
         AppColors.greenTile,
         AppColors.success,
       ),
-      RutaTono.naranja => const _ColoresDeTono(
+      RutaTono.naranja => const ColoresDeTono(
         AppColors.orangeTile,
         AppColors.warning,
       ),

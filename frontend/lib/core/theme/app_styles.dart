@@ -57,3 +57,14 @@ ButtonStyle appCompactButtonStyle() {
     textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
   );
 }
+
+/// Botón secundario: fondo claro con borde, del mismo alto que el principal.
+ButtonStyle appOutlinedButtonStyle() {
+  return OutlinedButton.styleFrom(
+    minimumSize: const Size.fromHeight(48),
+    foregroundColor: AppColors.text,
+    backgroundColor: AppColors.background,
+    side: const BorderSide(color: AppColors.secondaryBorder),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+  );
+}
