@@ -34,8 +34,12 @@ const puntosIgualesMetros = 30.0;
 /// Radio medio de la Tierra usado por la fórmula de Haversine.
 const radioTierraMetros = 6371000.0;
 
-/// Nombre de un punto tocado en el mapa (no se hace geocodificación inversa).
+/// Nombre de un punto tocado en el mapa lejos de toda calle conocida.
 const nombrePuntoEnMapa = 'Punto en el mapa';
+
+/// Un punto tocado a menos de esta distancia del centro de una calle conocida
+/// se llama "Cerca de {calle}".
+const distanciaNombreCalleMetros = 250.0;
 
 /// Distancia en línea recta entre dos puntos, en metros (fórmula de Haversine).
 double distanciaMetros(LatLng a, LatLng b) {
@@ -92,8 +96,11 @@ List<Lugar> construirCatalogo(
   return lugares.values.toList();
 }
 
+/// Cantidad de "Destinos rápidos" (accesos de un clic).
+const cantidadDestinosRapidos = 6;
+
 /// Lugares por los que pasan más líneas activas (accesos de un clic), como
-/// máximo [maximoSugerencias]. A igual número de líneas, en el orden en que
+/// máximo [cantidadDestinosRapidos]. A igual número de líneas, en el orden en que
 /// aparecen. Usa la coordenada del primer paradero con ese nombre.
 List<Lugar> lugaresFrecuentes(
   List<Ruta> rutas,
@@ -116,7 +123,7 @@ List<Lugar> lugaresFrecuentes(
     final porLineas = cantidad(b).compareTo(cantidad(a));
     return porLineas != 0 ? porLineas : indices[a]!.compareTo(indices[b]!);
   });
-  return catalogo.take(maximoSugerencias).toList();
+  return catalogo.take(cantidadDestinosRapidos).toList();
 }
 
 /// Una línea que sirve para el viaje: dónde subir, dónde bajar y cuánto

@@ -199,8 +199,8 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
   Widget _formulario() {
     final activo = _p.campoActivo;
     final indicacion = activo == CampoViaje.hasta
-        ? 'O toca el mapa para fijar tu destino'
-        : 'O toca el mapa para fijar tu origen';
+        ? 'Toca el mapa para fijar tu destino.'
+        : 'Toca el mapa para fijar tu origen.';
     final mostrarFrecuentes =
         _p.frecuentes.isNotEmpty &&
         _lugar(activo) == null &&
@@ -262,7 +262,7 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
         if (mostrarFrecuentes) ...[
           const SizedBox(height: 18),
           const Text(
-            'Lugares frecuentes',
+            'Destinos rápidos',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -360,12 +360,21 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
       ],
       EstadoViaje.sinResultados => [
         const SizedBox(height: 24),
-        _Aviso(
-          texto: _p.muyCerca
-              ? 'Están a menos de 300 m: puedes ir caminando.'
-              : 'Ninguna línea pasa cerca. Prueba con otro punto.',
-          icono: _p.muyCerca ? Icons.directions_walk : Icons.search_off,
-        ),
+        if (_p.muyCerca)
+          _Aviso(
+            texto:
+                'Todo el trayecto es caminando '
+                '(${distanciaMetros(_p.origen!.posicion, _p.destino!.posicion).round()} m).',
+            icono: Icons.directions_walk,
+          )
+        else
+          const _Aviso(
+            titulo: 'No encontramos una ruta directa',
+            texto:
+                'Puede que ese tramo no esté registrado todavía. Prueba con '
+                'un destino cercano o toca un punto en el mapa.',
+            icono: Icons.search_off,
+          ),
       ],
       _ => const [],
     };
@@ -403,8 +412,9 @@ IconData _iconoDe(TipoLugar tipo) => switch (tipo) {
   TipoLugar.lugar => Icons.place_outlined,
 };
 
-/// Lista de sugerencias: "Lugares con líneas de bus" (paraderos, al
-/// instante) y "Otros lugares" (buscador en línea), con la atribución.
+/// Lista de sugerencias, como en piuratransporta: hasta 5, primero los
+/// paraderos y la base propia de Piura (al instante) y, si faltan, los del
+/// buscador en línea, con su atribución.
 class _Sugerencias extends StatelessWidget {
   const _Sugerencias({required this.sugerencias, required this.onElegir});
 
@@ -414,7 +424,6 @@ class _Sugerencias extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = sugerencias;
-    final locales = s.locales;
     final atribucion = s.atribucion;
     return Container(
       margin: const EdgeInsets.only(top: 4),
@@ -427,73 +436,39 @@ class _Sugerencias extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (locales.isNotEmpty) ...[
-            const _TituloSeccion('Lugares con líneas de bus'),
-            for (final (i, lugar) in locales.indexed)
-              _FilaSugerencia(
-                lugar: lugar,
-                resaltada: s.resaltado == i,
-                onTap: () => onElegir(lugar),
-              ),
-          ],
-          if (s.buscaEnLinea) ...[
-            const _TituloSeccion('Otros lugares'),
-            for (final (i, lugar) in s.otros.indexed)
-              _FilaSugerencia(
-                lugar: lugar,
-                resaltada: s.resaltado == locales.length + i,
-                onTap: () => onElegir(lugar),
-              ),
-            if (s.buscando && s.otros.isEmpty)
-              const _NotaSugerencias(
-                'Buscando lugares…',
-                icono: Icons.travel_explore,
-              )
-            else if (s.fallo)
-              const _NotaSugerencias(
-                'No pudimos buscar más lugares. Revisa tu conexión.',
-                icono: Icons.cloud_off_outlined,
-              )
-            else if (s.otros.isEmpty)
-              const _NotaSugerencias('No encontramos otros lugares.'),
-            if (atribucion != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
-                child: Text(
-                  atribucion,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: AppColors.textMuted,
-                  ),
+          for (final (i, lugar) in s.todas.indexed)
+            _FilaSugerencia(
+              lugar: lugar,
+              resaltada: s.resaltado == i,
+              onTap: () => onElegir(lugar),
+            ),
+          if (s.buscaEnLinea && s.buscando)
+            const _NotaSugerencias(
+              'Buscando más lugares…',
+              icono: Icons.travel_explore,
+            )
+          else if (s.buscaEnLinea && s.fallo)
+            const _NotaSugerencias(
+              'No pudimos buscar más lugares. Revisa tu conexión.',
+              icono: Icons.cloud_off_outlined,
+            )
+          else if (s.todas.isEmpty)
+            const _NotaSugerencias('No encontramos lugares con ese nombre.'),
+          // Los resultados en línea llevan la atribución del servicio.
+          if (s.otros.isNotEmpty && atribucion != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 2),
+              child: Text(
+                atribucion,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textMuted,
                 ),
               ),
-          ],
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _TituloSeccion extends StatelessWidget {
-  const _TituloSeccion(this.texto);
-
-  final String texto;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
-      child: Text(
-        texto,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textMuted,
-        ),
       ),
     );
   }
@@ -639,8 +614,9 @@ class _Ficha extends StatelessWidget {
 }
 
 class _Aviso extends StatelessWidget {
-  const _Aviso({required this.texto, required this.icono});
+  const _Aviso({required this.texto, required this.icono, this.titulo});
 
+  final String? titulo;
   final String texto;
   final IconData icono;
 
@@ -656,7 +632,23 @@ class _Aviso extends StatelessWidget {
         children: [
           Icon(icono, size: 20, color: AppColors.primary),
           const SizedBox(width: 10),
-          Expanded(child: Text(texto, style: AppText.body)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (titulo != null)
+                  Text(
+                    titulo!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
+                    ),
+                  ),
+                Text(texto, style: AppText.body),
+              ],
+            ),
+          ),
         ],
       ),
     );

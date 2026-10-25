@@ -39,7 +39,16 @@ enum PasoViaje {
 /// pide el destino y luego el origen; con los dos, busca sola y elige la
 /// mejor línea. Solo depende de la interfaz RutasRepository.
 class PlanificadorViaje extends ChangeNotifier {
-  PlanificadorViaje(this._repository);
+  PlanificadorViaje(this._repository, {this.lugaresConocidos = const []})
+    : _calles = [
+        for (final l in lugaresConocidos)
+          if (l.tipo == TipoLugar.calle) l,
+      ];
+
+  /// Base propia de calles y lugares de Piura que se suma a los paraderos
+  /// en las sugerencias (lib/data/lugares/lugares_piura.dart).
+  final List<Lugar> lugaresConocidos;
+  final List<Lugar> _calles;
 
   final RutasRepository _repository;
 
@@ -95,7 +104,15 @@ class PlanificadorViaje extends ChangeNotifier {
       _paraderos = {
         for (final (i, ruta) in rutas.indexed) ruta.idRuta: listas[i],
       };
-      _catalogo = construirCatalogo(_rutas, _paraderos);
+      // Primero los paraderos (por ahí pasan las líneas) y luego la base de
+      // Piura, sin repetir un nombre que ya es paradero.
+      final paraderos = construirCatalogo(_rutas, _paraderos);
+      final nombres = {for (final l in paraderos) normalizar(l.nombre)};
+      _catalogo = [
+        ...paraderos,
+        for (final l in lugaresConocidos)
+          if (!nombres.contains(normalizar(l.nombre))) l,
+      ];
       _indice = IndiceLugares(_catalogo);
       _frecuentes = lugaresFrecuentes(_rutas, _paraderos);
       _cargado = true;
@@ -126,13 +143,34 @@ class PlanificadorViaje extends ChangeNotifier {
 
   /// Asigna un punto tocado en el mapa al campo activo.
   void fijarPunto(LatLng punto) {
-    final lugar = Lugar(nombrePuntoEnMapa, punto);
+    final lugar = _nombrarPunto(punto);
     if (_campoActivo == CampoViaje.hasta) {
       _destino = lugar;
     } else {
       _origen = lugar;
     }
     _actualizar();
+  }
+
+  /// Nombre de un punto tocado: la calle conocida más cercana (a menos de
+  /// [distanciaNombreCalleMetros]) o "Punto en el mapa". No usa la red.
+  Lugar _nombrarPunto(LatLng punto) {
+    Lugar? cercana;
+    var mejor = distanciaNombreCalleMetros;
+    for (final calle in _calles) {
+      final d = distanciaMetros(punto, calle.posicion);
+      if (d < mejor) {
+        mejor = d;
+        cercana = calle;
+      }
+    }
+    if (cercana == null) return Lugar(nombrePuntoEnMapa, punto);
+    return Lugar(
+      'Cerca de ${cercana.nombre}',
+      punto,
+      tipo: TipoLugar.calle,
+      detalle: cercana.detalle,
+    );
   }
 
   void intercambiar() {

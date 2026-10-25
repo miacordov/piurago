@@ -59,9 +59,12 @@ class SugerenciasLugares extends ChangeNotifier {
   /// Locales y otros, en el orden en que se muestran (para las flechas).
   List<Lugar> get todas => [..._locales, ..._otros];
 
-  /// Indica si para el texto actual se busca también en línea.
+  /// Indica si para el texto actual se busca también en línea: desde la 2.ª
+  /// letra y solo si la base local no llena las [maximoSugerencias].
   bool get buscaEnLinea =>
-      buscador != null && _clave(_texto).length >= minimoLetrasEnLinea;
+      buscador != null &&
+      _clave(_texto).length >= minimoLetrasEnLinea &&
+      _locales.length < maximoSugerencias;
 
   /// Hay una búsqueda en línea pendiente o en curso.
   bool get buscando => _buscando;
@@ -131,7 +134,8 @@ class SugerenciasLugares extends ChangeNotifier {
   }
 
   /// Quita los lugares en línea que ya salen entre los locales (mismo
-  /// nombre) y los repetidos (mismo nombre y detalle).
+  /// nombre) y los repetidos (mismo nombre y detalle), y solo completa hasta
+  /// [maximoSugerencias] en total.
   List<Lugar> _sinRepetir(List<Lugar> lugares) {
     final vistos = {for (final l in _locales) normalizar(l.nombre)};
     final repetidos = <String>{};
@@ -140,7 +144,7 @@ class SugerenciasLugares extends ChangeNotifier {
         if (!vistos.contains(normalizar(l.nombre)) &&
             repetidos.add('${normalizar(l.nombre)}|${l.detalle}'))
           l,
-    ];
+    ].take(maximoSugerencias - _locales.length).toList();
   }
 
   /// Mueve el resaltado (+1 abajo, -1 arriba), sin salirse de la lista.
