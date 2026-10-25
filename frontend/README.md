@@ -35,8 +35,9 @@ Aplicación Flutter (móvil y web) de PiuraGo. Mapas con flutter_map + OpenStree
       core/                rutas, tema (colores, textos, estilos) y avisos
       data/                modelos (Ruta, Paradero, Lugar) y repositorio de
                            rutas (hoy con datos de prueba)
-        lugares/           BuscadorLugares: Photon (en línea), uno de prueba
-                           sin red y el índice de los paraderos
+        lugares/           base propia de Piura (lugares_piura.dart), índice
+                           de búsqueda y BuscadorLugares: Photon (en línea)
+                           y uno de prueba sin red
       features/
         auth/              inicio de sesión
         location/          activar ubicación
@@ -51,6 +52,8 @@ Aplicación Flutter (móvil y web) de PiuraGo. Mapas con flutter_map + OpenStree
                                    caché, fallos y flechas)
           opcion_viaje_card.dart   tarjeta de un resultado
           mapa_viaje.dart          mapa con origen, destino y caminatas
+    tool/                  generar_lugares_piura.py y su consulta: regeneran
+                           la base propia de Piura desde OpenStreetMap
     test/                  pruebas de pantallas, del modelo y de la búsqueda
       viaje/               lógica y estado de Planificar viaje, con un
                            repositorio de prueba propio (no usa los datos reales)

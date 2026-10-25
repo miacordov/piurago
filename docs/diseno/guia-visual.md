@@ -95,16 +95,15 @@ Modo del panel del mapa que responde qué líneas tomar entre dos puntos. Códig
 
 1. Se abre al entrar por "Mapa" en la barra lateral (sin ruta indicada). El mapa se centra en Piura y no dibuja ninguna línea. Desde el panel "Ruta seleccionada" se llega con el botón "Planificar viaje", sin cambiar de pantalla.
 2. **Destino primero** ("Escribe tu destino…") y luego el **origen** ("Escribe el punto de partida…"). Cada lugar se elige con un clic:
-   - **Una sugerencia**, como en Google Maps. La lista tiene dos secciones:
-     - **"Lugares con líneas de bus":** los paraderos. Salen al instante desde la 1.ª letra, sin red.
-     - **"Otros lugares":** desde la 2.ª letra, 300 ms después de la última tecla, se suman calles, barrios, negocios y sitios conocidos del buscador en línea (Photon, sobre OpenStreetMap). Salen primero los de Piura, pero también los de fuera.
-     - Cada lugar muestra su nombre, dónde queda (por ejemplo, "Urbanización 4 de Enero, Piura, Perú") y un ícono de paradero, calle, zona u otro lugar.
-     - Debajo, en pequeño: "Búsqueda de lugares: Photon · © OpenStreetMap contributors".
-     - **Abreviaturas:** "jr" = jirón, "av" = avenida, "psje" = pasaje, "urb" = urbanización, "ca" = calle; se completan antes de buscar.
+   - **Una sugerencia**, como en piuratransporta.com. Es una sola lista de hasta 5 lugares:
+     - **Primero, al instante y sin red:** los paraderos y la **base propia de Piura**. La base tiene unas 2470 calles, avenidas, jirones, urbanizaciones, mercados, colegios, hospitales y otros lugares de Piura, Castilla y Veintiséis de Octubre, tomados de OpenStreetMap. Está en `lib/data/lugares/lugares_piura.dart`.
+     - **Si faltan para llegar a 5:** desde la 2.ª letra, 300 ms después de la última tecla, se completan con el buscador en línea (Photon, sobre OpenStreetMap), **solo dentro de Piura metropolitana**. Mientras tanto se ve "Buscando más lugares…" y, debajo de esos resultados, "Búsqueda de lugares: Photon · © OpenStreetMap contributors".
+     - **Cada lugar** muestra su nombre, dónde queda (por ejemplo, "José María Escrivá de Balaguer, Piura") y un ícono de paradero, calle, zona u otro lugar.
+     - **Abreviaturas:** "jr", "jirón" y "calle" valen lo mismo. En OpenStreetMap el Jr. Lima del centro se llama "Calle Lima", y lo mismo pasa con Tacna, Libertad o Ayacucho. "av" = avenida, "psje" = pasaje, "urb" = urbanización.
      - **Cómo se elige:** con un clic del mouse, un toque o las flechas ↑/↓ y Enter. Enter sin resaltar elige la primera sugerencia; Escape cierra la lista.
      - **Al elegir:** el mapa marca el punto y lo centra.
-   - **Un lugar frecuente:** botones con los lugares por los que pasan más líneas. Se muestran mientras el campo activo está vacío.
-   - **Un punto del mapa** ("O toca el mapa para fijar tu destino / tu origen"). El punto se llama "Punto en el mapa".
+   - **Un destino rápido:** botones con los 6 lugares por los que pasan más líneas. Se muestran mientras el campo activo está vacío.
+   - **Un punto del mapa** ("Toca el mapa para fijar tu destino." / "… tu origen."). El punto toma el nombre de la calle conocida más cercana, a menos de 250 m: "Cerca de Calle Lima". Si no hay ninguna, se llama "Punto en el mapa". No usa la red.
    - Al elegir el destino, el foco pasa solo al origen. Hay botones para intercambiar origen y destino y para limpiar.
 3. Con el origen y el destino definidos, **la búsqueda corre sola**: no hay botón "Buscar ruta". La mejor línea queda elegida y se dibuja en el mapa con:
    - el paradero donde se sube y el de bajada;
@@ -135,19 +134,23 @@ Mensajes:
 
 | Caso | Mensaje |
 |---|---|
-| Ninguna línea sirve | "Ninguna línea pasa cerca. Prueba con otro punto." |
-| Origen y destino a menos de 300 m | "Están a menos de 300 m: puedes ir caminando." |
+| Ninguna línea sirve | "No encontramos una ruta directa" y "Puede que ese tramo no esté registrado todavía. Prueba con un destino cercano o toca un punto en el mapa." |
+| Origen y destino a menos de 300 m | "Todo el trayecto es caminando ({m} m)." |
 | Falla la carga de las rutas | "No pudimos cargar las rutas." con el botón "Reintentar" |
 
 ### Reglas de búsqueda
 
-- **Lugares locales:** son los paraderos que entrega `RutasRepository`, con nombres únicos sin distinguir mayúsculas ni tildes. Si un nombre se repite, se usa la coordenada del primero.
-- **Otros lugares:** vienen de `BuscadorLugares` (ver `docs/diseno/mapa-osm.md`). No se repite un lugar que ya está entre los paraderos.
+- **Lugares locales:** primero los paraderos que entrega `RutasRepository`, con nombres únicos sin distinguir mayúsculas ni tildes. Si un nombre se repite, se usa la coordenada del primero.
+- **Base propia de Piura:** va después de los paraderos, sin repetir un nombre que ya es paradero. Las calles más importantes van primero.
+- **Orden de las sugerencias:** primero los nombres que empiezan con lo escrito, luego los que tienen cada palabra escrita y al final los que la contienen.
+- **Buscador en línea:** solo se consulta si los lugares locales no llenan las 5 sugerencias. Es `BuscadorLugares`; ver `docs/diseno/mapa-osm.md`.
+  - No repite un nombre que ya está entre los locales.
+  - Si el texto empieza con un tipo de vía ("jr lima", "Av. Grau"), busca solo el nombre entre las calles de Piura.
 - **Respuestas guardadas:** cada respuesta se guarda por texto, así que volver a escribir lo mismo no hace otra petición.
 - **Respuestas tardías:** si llega la respuesta de un texto anterior, se ignora.
 - **Si el buscador falla** (sin red, 429 o 5xx), quedan los paraderos y la nota "No pudimos buscar más lugares. Revisa tu conexión."
 - **Reintentos:** nunca reintenta solo. Tras un 429 no pide nada durante 5 segundos.
-- **Privacidad:** solo se envía el texto escrito y un punto fijo de Piura (-5.1945, -80.6328). Nunca la ubicación real del usuario.
+- **Privacidad:** solo se envía el texto escrito, un punto fijo de Piura (-5.1945, -80.6328) y el recuadro de Piura metropolitana. Nunca la ubicación real del usuario.
 - **Carga:** los paraderos de todas las rutas se piden en paralelo una sola vez y quedan en memoria.
 - **Distancia:** en línea recta, con la fórmula de Haversine.
 - **Paraderos de cada ruta:** en cada ruta activa con al menos 2 paraderos se toma el paradero más cercano al origen (sube) y el más cercano al destino (baja).
@@ -156,15 +159,16 @@ Mensajes:
 - **Sentido:** no se filtra por orden ni por sentido, porque las líneas son de ida y vuelta y el orden de los paraderos es aproximado. Tampoco se muestran las paradas intermedias.
 - **Orden de los resultados:** primero por caminata total; a igual caminata, por frecuencia (la menor primero), luego por pasaje (el menor primero) y al final por nombre. Si falta la frecuencia o el pasaje, la ruta va al final.
 - **Rutas fuera de servicio:** no se incluyen en los resultados ni en los lugares frecuentes.
-- **Lugares frecuentes:** los 6 lugares por los que pasan más líneas activas.
+- **Destinos rápidos:** los 6 lugares por los que pasan más líneas activas.
 
 ### Límites
 
 - **No sigue el recorrido real.** La búsqueda es por cercanía a los paraderos, que hoy son **propuestos** (ver `docs/datos/paraderos-propuestos.md`). Una línea puede salir como resultado aunque su recorrido real no pase por ese tramo.
 - **OpenStreetMap en Piura está menos completo que Google.** Faltan negocios y números de puerta, y algunos sitios tienen otro nombre (por ejemplo, "utp" no encuentra la sede de Piura).
-- **Un punto por calle.** Photon devuelve un solo punto por calle (su centro). En una avenida larga, las líneas se buscan alrededor de ese punto, no a lo largo de toda la avenida.
-- **Lugares lejanos.** Un lugar elegido lejos de todas las líneas (por ejemplo, en Lima) da "Ninguna línea pasa cerca. Prueba con otro punto."
-- **Servicio de uso justo.** El servicio público de Photon no garantiza disponibilidad; para producción conviene un servidor propio o pasar por el backend.
+- **Un punto por calle.** En la base propia y en Photon cada calle tiene un solo punto, cerca de su centro. Si una calle con el mismo nombre está en zonas separadas, aparece una vez por zona. En una avenida larga, las líneas se buscan alrededor de ese punto, no a lo largo de toda la avenida.
+- **Solo Piura metropolitana.** No se sugieren lugares fuera de Piura, Castilla, Veintiséis de Octubre y Catacaos: las líneas no llegan ahí.
+- **La base propia es una foto de OpenStreetMap.** Corresponde al 24/10/2026. Para actualizarla se vuelve a correr `frontend/tool/generar_lugares_piura.py`.
+- **Servicio de uso justo.** El servicio público de Photon no garantiza disponibilidad. Si falla, la base propia sigue funcionando. Para producción conviene un servidor propio o pasar por el backend.
 - **Caminata en línea recta.** No sigue las calles, así que la caminata real es más larga.
 - **Una sola línea.** No combina dos líneas (transbordos).
 - **Sin "Mi ubicación".** Requiere geolocalización y queda para otra tarea: el origen se elige como el destino.
