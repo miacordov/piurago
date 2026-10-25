@@ -1,6 +1,7 @@
 package com.piuragopiura.piuragopiura_backend.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,19 @@ public class Ruta {
     @Column(name = "frecuencia_minutos")
     private Integer frecuenciaMinutos;
 
+    // Urbana, Regulada o Interurbana, tal como lo publica el Plan Regulador de Rutas.
+    @Column(name = "tipo_servicio", length = 15)
+    private String tipoServicio;
+
+    @Column(name = "horario", length = 20)
+    private String horario;
+
+    @Column(name = "pasaje", precision = 5, scale = 2)
+    private BigDecimal pasaje;
+
+    @Column(name = "pasaje_estudiante", precision = 5, scale = 2)
+    private BigDecimal pasajeEstudiante;
+
     @OneToMany(mappedBy = "ruta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Paradero> paraderos = new ArrayList<>();
 
@@ -84,6 +98,18 @@ public class Ruta {
 
     public Integer getFrecuenciaMinutos() { return frecuenciaMinutos; }
     public void setFrecuenciaMinutos(Integer frecuenciaMinutos) { this.frecuenciaMinutos = frecuenciaMinutos; }
+
+    public String getTipoServicio() { return tipoServicio; }
+    public void setTipoServicio(String tipoServicio) { this.tipoServicio = tipoServicio; }
+
+    public String getHorario() { return horario; }
+    public void setHorario(String horario) { this.horario = horario; }
+
+    public BigDecimal getPasaje() { return pasaje; }
+    public void setPasaje(BigDecimal pasaje) { this.pasaje = pasaje; }
+
+    public BigDecimal getPasajeEstudiante() { return pasajeEstudiante; }
+    public void setPasajeEstudiante(BigDecimal pasajeEstudiante) { this.pasajeEstudiante = pasajeEstudiante; }
 
     public List<Paradero> getParaderos() { return paraderos; }
     public void setParaderos(List<Paradero> paraderos) { this.paraderos = paraderos; }

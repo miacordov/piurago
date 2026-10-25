@@ -71,7 +71,19 @@ Prueba rapida con la API corriendo (`http://localhost:8080`):
 
 - `db/schema.sql`: esquema completo. En la base compartida de Neon **ya esta aplicado**; no se ejecuta de nuevo ahi.
 - `db/migraciones/`: cambios posteriores al esquema, un archivo por cambio.
-- `db/seeds/`: datos iniciales (rutas, paraderos). Se cargan al final del proyecto, porque las rutas de Piura cambian seguido por cierres de avenidas.
+  - `001_ruta_datos_servicio.sql`: agrega a `ruta` el tipo de servicio, horario y pasaje.
+- `db/seeds/`: datos iniciales.
+  - `001_rutas_paraderos_piuratransporta.sql`: las 20 líneas de https://piuratransporta.com/rutas y 170 paraderos **propuestos** con coordenadas de OpenStreetMap (ver `docs/datos/paraderos-propuestos.md`). Se generó a partir de `docs/datos/*.json`.
+
+### Cargar las rutas y paraderos
+
+Con las credenciales de Neon configuradas (archivo local o variables de entorno):
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local,carga   # o solo carga, con variables de entorno
+```
+
+El perfil `carga` ejecuta la migración y el seed antes de que Hibernate valide el esquema, no levanta el servidor web y termina solo. Se puede repetir sin riesgo: actualiza las rutas por código, inserta las que falten y solo agrega paraderos a las rutas que no tienen. No borra nada.
 - `postman/`: coleccion de pruebas de punta a punta (pendiente de agregar).
 
 ## Estructura
