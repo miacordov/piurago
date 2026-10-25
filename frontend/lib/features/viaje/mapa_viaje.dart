@@ -34,6 +34,9 @@ class MapaViaje extends StatelessWidget {
           paraderos: elegida == null
               ? const []
               : planificador.paraderosDe(elegida.ruta.idRuta),
+          trazado: elegida == null
+              ? const []
+              : planificador.trazadoDe(elegida.ruta.idRuta),
           paraderosDestacados: elegida == null
               ? const []
               : [elegida.sube, elegida.baja],

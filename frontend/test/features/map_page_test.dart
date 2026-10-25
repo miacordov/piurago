@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
 import 'package:piurago/data/models/paradero.dart';
@@ -14,6 +15,9 @@ class _RepositorioSinParaderos implements RutasRepository {
 
   @override
   Future<List<Paradero>> paraderos(int idRuta) async => const <Paradero>[];
+
+  @override
+  Future<List<LatLng>> trazado(int idRuta) async => const <LatLng>[];
 
   @override
   bool get esDemostracion => true;
@@ -70,6 +74,19 @@ void main() {
     expect(find.text('Lugares por los que pasa'), findsOneWidget);
     expect(find.text('Compartir ruta'), findsOneWidget);
     expect(find.text('Marcar como superada'), findsOneWidget);
+  });
+
+  testWidgets('una ruta con recorrido oficial lo muestra', (tester) async {
+    fijarPantalla(tester, escritorio);
+    final rutas = await const FakeRutasRepository().listar();
+    final rd10 = rutas.firstWhere((r) => r.codigo == 'RD-10');
+    await irAlMapa(tester, idRuta: rd10.idRuta);
+
+    expect(
+      find.text('Recorrido oficial (Municipalidad de Piura)'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Vía Evitamiento Este'), findsOneWidget);
   });
 
   testWidgets('una ruta sin paraderos avisa que faltan datos', (tester) async {

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
@@ -51,10 +52,11 @@ class MapPage extends StatefulWidget {
 }
 
 class _DatosMapa {
-  const _DatosMapa(this.ruta, this.paraderos);
+  const _DatosMapa(this.ruta, this.paraderos, [this.trazado = const []]);
 
   final Ruta? ruta;
   final List<Paradero> paraderos;
+  final List<LatLng> trazado;
 }
 
 class _MapPageState extends State<MapPage> {
@@ -95,8 +97,11 @@ class _MapPageState extends State<MapPage> {
       (r) => r.idRuta == widget.idRuta,
       orElse: () => rutas.first,
     );
-    final paraderos = await widget.repository.paraderos(ruta.idRuta);
-    return _DatosMapa(ruta, paraderos);
+    final (paraderos, trazado) = await (
+      widget.repository.paraderos(ruta.idRuta),
+      widget.repository.trazado(ruta.idRuta),
+    ).wait;
+    return _DatosMapa(ruta, paraderos, trazado);
   }
 
   void _recargar() {
@@ -161,6 +166,7 @@ class _MapPageState extends State<MapPage> {
           return _Contenido(
             ruta: ruta,
             paraderos: snapshot.data!.paraderos,
+            trazado: snapshot.data!.trazado,
             esDemostracion: widget.repository.esDemostracion,
             mostrarMapa: widget.mostrarMapa,
             onPlanificarViaje: _planificarViaje,
@@ -175,6 +181,7 @@ class _Contenido extends StatelessWidget {
   const _Contenido({
     required this.ruta,
     required this.paraderos,
+    required this.trazado,
     required this.esDemostracion,
     required this.mostrarMapa,
     required this.onPlanificarViaje,
@@ -182,6 +189,7 @@ class _Contenido extends StatelessWidget {
 
   final Ruta ruta;
   final List<Paradero> paraderos;
+  final List<LatLng> trazado;
   final bool esDemostracion;
   final bool mostrarMapa;
   final VoidCallback onPlanificarViaje;
@@ -192,6 +200,7 @@ class _Contenido extends StatelessWidget {
         ? RutaMap(
             key: ValueKey(ruta.idRuta),
             paraderos: paraderos,
+            trazado: trazado,
             esDemostracion: esDemostracion,
           )
         : const ColoredBox(color: AppColors.field);

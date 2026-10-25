@@ -97,6 +97,9 @@ class RepositorioPrueba implements RutasRepository {
   }
 
   @override
+  Future<List<LatLng>> trazado(int idRuta) async => const <LatLng>[];
+
+  @override
   bool get esDemostracion => true;
 }
 

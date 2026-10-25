@@ -16,6 +16,7 @@ class RutaMap extends StatefulWidget {
   const RutaMap({
     super.key,
     required this.paraderos,
+    this.trazado = const [],
     this.esDemostracion = false,
     this.paraderosDestacados,
     this.marcadoresExtra = const [],
@@ -26,6 +27,10 @@ class RutaMap extends StatefulWidget {
 
   /// Paraderos de la ruta: con dos o más se dibuja el recorrido.
   final List<Paradero> paraderos;
+
+  /// Recorrido por las calles. Si está vacío, la línea une los paraderos en
+  /// línea recta.
+  final List<LatLng> trazado;
 
   /// Si es true, avisa que el recorrido es ilustrativo.
   final bool esDemostracion;
@@ -63,7 +68,11 @@ class _RutaMapState extends State<RutaMap> {
   final _controller = MapController();
   bool _listo = false;
 
-  List<LatLng> get _puntos => widget.paraderos.map(posicionDe).toList();
+  /// Puntos de la línea de la ruta: el trazado por las calles o, si no hay,
+  /// los paraderos.
+  List<LatLng> get _puntos => widget.trazado.length >= 2
+      ? widget.trazado
+      : widget.paraderos.map(posicionDe).toList();
 
   List<LatLng> get _puntosEncuadre => widget.encuadre ?? _puntos;
 
