@@ -54,6 +54,7 @@ class PlanificadorViaje extends ChangeNotifier {
 
   List<Ruta> _rutas = const [];
   Map<int, List<Paradero>> _paraderos = const {};
+  Map<int, List<LatLng>> _trazados = const {};
   List<Lugar> _catalogo = const [];
   IndiceLugares _indice = IndiceLugares(const []);
   List<Lugar> _frecuentes = const [];
@@ -87,6 +88,9 @@ class PlanificadorViaje extends ChangeNotifier {
   List<Paradero> paraderosDe(int idRuta) =>
       _paraderos[idRuta] ?? const <Paradero>[];
 
+  /// Recorrido por las calles de una ruta (vacío si no se conoce).
+  List<LatLng> trazadoDe(int idRuta) => _trazados[idRuta] ?? const <LatLng>[];
+
   List<Lugar> sugerencias(String consulta) => _indice.sugerir(consulta);
 
   /// Pide las rutas y los paraderos de todas ellas. Si ya se cargaron, no
@@ -97,12 +101,16 @@ class PlanificadorViaje extends ChangeNotifier {
     notifyListeners();
     try {
       final rutas = await _repository.listar();
-      final listas = await Future.wait(
-        rutas.map((r) => _repository.paraderos(r.idRuta)),
-      );
+      final (listas, trazados) = await (
+        Future.wait(rutas.map((r) => _repository.paraderos(r.idRuta))),
+        Future.wait(rutas.map((r) => _repository.trazado(r.idRuta))),
+      ).wait;
       _rutas = rutas;
       _paraderos = {
         for (final (i, ruta) in rutas.indexed) ruta.idRuta: listas[i],
+      };
+      _trazados = {
+        for (final (i, ruta) in rutas.indexed) ruta.idRuta: trazados[i],
       };
       // Primero los paraderos (por ahí pasan las líneas) y luego la base de
       // Piura, sin repetir un nombre que ya es paradero. El índice de la

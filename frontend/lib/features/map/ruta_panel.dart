@@ -119,6 +119,25 @@ class RutaPanel extends StatelessWidget {
           else
             for (final (i, paradero) in paraderos.indexed)
               _FilaParadero(indice: i, paradero: paradero),
+          if (ruta.recorrido != null) ...[
+            const SizedBox(height: 24),
+            const Text(
+              'Recorrido oficial (Municipalidad de Piura)',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.text,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              ruta.recorrido!.replaceFirst(
+                RegExp(r'^Recorrido oficial \([^)]*\): '),
+                '',
+              ),
+              style: AppText.body,
+            ),
+          ],
           if (ruta.lugaresDestacados.isNotEmpty) ...[
             const SizedBox(height: 24),
             const Text(
