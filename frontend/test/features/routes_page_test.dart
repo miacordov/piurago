@@ -37,26 +37,47 @@ void main() {
   const escritorio = Size(1366, 768);
   const celular = Size(390, 844);
 
-  testWidgets('muestra las líneas de prueba y su total', (tester) async {
+  testWidgets('muestra las líneas de Piura y su total', (tester) async {
     fijarPantalla(tester, escritorio);
     await abrir(tester, const FakeRutasRepository());
 
     expect(find.text('Encuentra tu ruta'), findsOneWidget);
-    expect(find.text('Línea 10 · El Moradito'), findsOneWidget);
-    expect(find.text('9 líneas'), findsOneWidget);
+    expect(find.text('I-18'), findsOneWidget);
+    expect(
+      find.text('Terminal Satélite (Piura) - Terminal La Unión'),
+      findsOneWidget,
+    );
+    expect(find.text('EMTRUBAPI · Interurbana · S/ 3.00'), findsOneWidget);
+    expect(find.text('cada ~10 min'), findsWidgets);
+    expect(find.text('20 líneas'), findsOneWidget);
     expect(find.text('Modo demostración'), findsOneWidget);
   });
 
-  testWidgets('el buscador filtra por zona o paradero', (tester) async {
+  testWidgets('el buscador filtra por código, zona o empresa', (tester) async {
     fijarPantalla(tester, escritorio);
     await abrir(tester, const FakeRutasRepository());
 
-    await tester.enterText(find.byType(TextField), 'Tacalá');
+    await tester.enterText(find.byType(TextField), 'chiclayito');
     await tester.pumpAndSettle();
 
-    expect(find.text('Ruta D · La Guadalupe'), findsOneWidget);
-    expect(find.text('Línea 10 · El Moradito'), findsNothing);
+    expect(find.text('A.H. Chiclayito - CP Monte Castillo'), findsOneWidget);
+    expect(find.text('I-18'), findsNothing);
     expect(find.text('1 línea'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '6M Buss');
+    await tester.pumpAndSettle();
+
+    expect(find.text('3 líneas'), findsOneWidget);
+  });
+
+  testWidgets('avisa las líneas fuera de servicio', (tester) async {
+    fijarPantalla(tester, escritorio);
+    await abrir(tester, const FakeRutasRepository());
+
+    await tester.enterText(find.byType(TextField), 'Granja de Colores');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fuera de servicio'), findsOneWidget);
   });
 
   testWidgets('avisa cuando no hay resultados', (tester) async {

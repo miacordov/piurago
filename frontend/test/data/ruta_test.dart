@@ -16,7 +16,11 @@ void main() {
     'recorrido': 'Vía del Mercado → Av. Los Almendros',
     'activa': true,
     'tiempoEstimado': null,
-    'frecuenciaMinutos': null,
+    'frecuenciaMinutos': 25,
+    'tipoServicio': 'Regulada',
+    'horario': '06:00–21:00',
+    'pasaje': 2.0,
+    'pasajeEstudiante': 1.0,
   };
 
   test('fromJson lee la respuesta del backend', () {
@@ -27,7 +31,12 @@ void main() {
     expect(ruta.puntoInicio, 'A.H. Los Almendros');
     expect(ruta.activa, isTrue);
     expect(ruta.tiempoEstimado, isNull);
-    expect(ruta.paraderosDestacados, isEmpty);
+    expect(ruta.frecuenciaMinutos, 25);
+    expect(ruta.tipoServicio, 'Regulada');
+    expect(ruta.horario, '06:00–21:00');
+    expect(ruta.pasaje, 2.0);
+    expect(ruta.pasajeEstudiante, 1.0);
+    expect(ruta.lugaresDestacados, isEmpty);
   });
 
   test('el buscador ignora mayúsculas y revisa varios campos', () {
@@ -40,7 +49,16 @@ void main() {
     expect(ruta.coincideCon('tacalá'), isFalse);
   });
 
-  test('el color de la ficha rota entre azul, verde y naranja', () {
+  test('el color de la ficha depende del tipo de servicio', () {
+    Ruta con(String tipo) =>
+        Ruta(idRuta: 1, nombre: 'Ruta', tipoServicio: tipo);
+
+    expect(con('Regulada').tono, RutaTono.azul);
+    expect(con('Urbana').tono, RutaTono.verde);
+    expect(con('Interurbana').tono, RutaTono.naranja);
+  });
+
+  test('sin tipo de servicio el color rota entre azul, verde y naranja', () {
     Ruta con(int id) => Ruta(idRuta: id, nombre: 'Ruta $id');
 
     expect(con(1).tono, RutaTono.azul);

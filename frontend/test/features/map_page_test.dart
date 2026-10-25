@@ -2,7 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
+import 'package:piurago/data/models/paradero.dart';
+import 'package:piurago/data/models/ruta.dart';
 import 'package:piurago/data/rutas_repository.dart';
+
+class _RepositorioSinParaderos implements RutasRepository {
+  const _RepositorioSinParaderos();
+
+  @override
+  Future<List<Ruta>> listar() async => const [Ruta(idRuta: 1, nombre: 'Ruta')];
+
+  @override
+  Future<List<Paradero>> paraderos(int idRuta) async => const <Paradero>[];
+
+  @override
+  bool get esDemostracion => true;
+}
 
 void fijarPantalla(WidgetTester tester, Size tamano) {
   tester.view.physicalSize = tamano;
@@ -36,22 +51,41 @@ void main() {
     tester,
   ) async {
     fijarPantalla(tester, escritorio);
-    await irAlMapa(tester, idRuta: 1);
+    await irAlMapa(tester, idRuta: 2);
 
     expect(find.text('RUTA SELECCIONADA'), findsOneWidget);
-    expect(find.text('Línea 10 · El Moradito'), findsOneWidget);
+    expect(find.text('Piura - Catacaos'), findsOneWidget);
+    expect(
+      find.text('I-19 · 6M Buss SAA · Interurbana\nPiura → Catacaos'),
+      findsOneWidget,
+    );
+    expect(find.text('Pasa cada ~15 min'), findsOneWidget);
+    expect(
+      find.text('05:30–22:00 · S/ 3.00 · Estudiante S/ 1.50'),
+      findsOneWidget,
+    );
     expect(find.text('Paraderos de la ruta'), findsOneWidget);
-    expect(find.text('5 paraderos'), findsOneWidget);
-    expect(find.text('Universidad Nacional'), findsOneWidget);
+    expect(find.text('10 paraderos'), findsOneWidget);
+    expect(find.text('Gobierno Regional'), findsWidgets);
+    expect(find.text('Lugares por los que pasa'), findsOneWidget);
     expect(find.text('Compartir ruta'), findsOneWidget);
     expect(find.text('Marcar como superada'), findsOneWidget);
   });
 
   testWidgets('una ruta sin paraderos avisa que faltan datos', (tester) async {
     fijarPantalla(tester, escritorio);
-    await irAlMapa(tester, idRuta: 2);
+    await tester.pumpWidget(
+      const PiuraGoApp(
+        rutasRepository: _RepositorioSinParaderos(),
+        mostrarMapaBase: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+    tester
+        .state<NavigatorState>(find.byType(Navigator).first)
+        .pushReplacementNamed(AppRoutes.mapa);
+    await tester.pumpAndSettle();
 
-    expect(find.text('Ruta B · Combi Interurbana'), findsOneWidget);
     expect(
       find.text('Esta ruta todavía no tiene paraderos cargados.'),
       findsOneWidget,
@@ -62,7 +96,10 @@ void main() {
     fijarPantalla(tester, escritorio);
     await irAlMapa(tester);
 
-    expect(find.text('Línea 10 · El Moradito'), findsOneWidget);
+    expect(
+      find.text('Terminal Satélite (Piura) - Terminal La Unión'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Ver en mapa abre la ruta elegida', (tester) async {
@@ -75,7 +112,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('RUTA SELECCIONADA'), findsOneWidget);
-    expect(find.text('Ruta B · Combi Interurbana'), findsOneWidget);
+    expect(find.text('Piura - Catacaos'), findsOneWidget);
   });
 
   testWidgets('la barra lateral lleva del mapa a las rutas', (tester) async {
@@ -93,6 +130,9 @@ void main() {
     await irAlMapa(tester, idRuta: 1);
 
     expect(find.text('RUTA SELECCIONADA'), findsOneWidget);
-    expect(find.text('Línea 10 · El Moradito'), findsOneWidget);
+    expect(
+      find.text('Terminal Satélite (Piura) - Terminal La Unión'),
+      findsOneWidget,
+    );
   });
 }
