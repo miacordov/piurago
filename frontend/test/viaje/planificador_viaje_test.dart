@@ -229,6 +229,49 @@ void main() {
     expect(planificador.muyCerca, isFalse);
   });
 
+  const conocidos = [
+    Lugar(
+      'Calle Lima',
+      LatLng(-5.2000, -80.63),
+      tipo: TipoLugar.calle,
+      detalle: 'Centro, Piura',
+    ),
+    // Ya es un paradero: no se repite.
+    Lugar('Hospital Sur', LatLng(-5.3000, -80.70), detalle: 'Otra zona'),
+  ];
+
+  test('suma la base de lugares conocidos sin repetir paraderos', () async {
+    final planificador = PlanificadorViaje(
+      RepositorioPrueba(),
+      lugaresConocidos: conocidos,
+    );
+    await planificador.cargar();
+
+    expect(planificador.catalogo, hasLength(10));
+    expect(planificador.sugerencias('jr lima').map((l) => l.nombre), [
+      'Calle Lima',
+    ]);
+    expect(lugar(planificador, 'Hospital Sur').tipo, TipoLugar.paradero);
+  });
+
+  test('al tocar el mapa usa el nombre de la calle más cercana', () async {
+    final planificador = PlanificadorViaje(
+      RepositorioPrueba(),
+      lugaresConocidos: conocidos,
+    );
+    await planificador.cargar();
+
+    // Unos 33 m de Calle Lima.
+    planificador.fijarPunto(const LatLng(-5.2003, -80.63));
+    expect(planificador.destino!.nombre, 'Cerca de Calle Lima');
+    expect(planificador.destino!.detalle, 'Centro, Piura');
+    expect(planificador.destino!.posicion, const LatLng(-5.2003, -80.63));
+
+    // Lejos de toda calle conocida.
+    planificador.fijarPunto(const LatLng(-5.2500, -80.70));
+    expect(planificador.origen!.nombre, nombrePuntoEnMapa);
+  });
+
   test('sugerencias filtra el catálogo', () async {
     final planificador = await cargado();
     expect(planificador.sugerencias('merc').map((l) => l.nombre), [

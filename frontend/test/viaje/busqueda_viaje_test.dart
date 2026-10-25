@@ -358,6 +358,25 @@ void main() {
       expect(nombres('lima jr'), ['Jirón Lima']);
     });
 
+    test('sugerencias: "jr", "jirón" y "calle" son lo mismo', () {
+      // En OpenStreetMap el Jr. Lima del centro de Piura es "Calle Lima".
+      final catalogo = [
+        const Lugar('Calle Lima', LatLng(0, 0), tipo: TipoLugar.calle),
+        const Lugar('Jirón Tacna', LatLng(0, 0), tipo: TipoLugar.calle),
+        const Lugar('Avenida Lima', LatLng(0, 0), tipo: TipoLugar.calle),
+      ];
+      List<String> nombres(String q) =>
+          sugerirLugares(catalogo, q).map((l) => l.nombre).toList();
+
+      expect(nombres('jr lima'), ['Calle Lima']);
+      expect(nombres('jirón lima'), ['Calle Lima']);
+      expect(nombres('calle tacna'), ['Jirón Tacna']);
+      expect(nombres('ca tacna'), ['Jirón Tacna']);
+      expect(nombres('av lima'), ['Avenida Lima']);
+      // Sin tipo de vía salen todas las que tienen ese nombre.
+      expect(nombres('lima'), ['Calle Lima', 'Avenida Lima']);
+    });
+
     test('sugerencias: primero las que empiezan con lo escrito', () {
       final catalogo = [
         const Lugar('Colegio San Miguel', LatLng(0, 0)),
@@ -376,12 +395,12 @@ void main() {
       expect(catalogo.every((l) => l.tipo == TipoLugar.paradero), isTrue);
     });
 
-    test('sugerencias: como máximo 6', () {
+    test('sugerencias: como máximo 5, como piuratransporta', () {
       final catalogo = [
         for (var i = 0; i < 9; i++) Lugar('Paradero $i', const LatLng(0, 0)),
       ];
-      expect(maximoSugerencias, 6);
-      expect(sugerirLugares(catalogo, 'parad'), hasLength(6));
+      expect(maximoSugerencias, 5);
+      expect(sugerirLugares(catalogo, 'parad'), hasLength(5));
     });
   });
 

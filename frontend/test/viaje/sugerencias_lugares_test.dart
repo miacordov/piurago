@@ -179,6 +179,39 @@ void main() {
     });
   });
 
+  test('si la base ya da 5 sugerencias no pide nada en línea', () {
+    fakeAsync((async) {
+      final buscador = BuscadorFalso();
+      final s = SugerenciasLugares(
+        locales: (texto) => [
+          for (var i = 0; i < 5; i++) Lugar('Calle $i', const LatLng(0, 0)),
+        ],
+        buscador: buscador,
+      )..consultar('calle');
+      async.elapse(const Duration(seconds: 1));
+
+      expect(s.buscaEnLinea, isFalse);
+      expect(buscador.pedidos, isEmpty);
+      expect(s.todas, hasLength(5));
+    });
+  });
+
+  test('los lugares en línea solo completan hasta 5', () {
+    fakeAsync((async) {
+      final buscador = BuscadorFalso();
+      buscador.respuestas['hospital'] = Future.value([
+        for (var i = 0; i < 6; i++)
+          Lugar('Hospital $i', const LatLng(-5.18, -80.63)),
+      ]);
+      final s = crear(buscador)..consultar('hospital');
+      async.elapse(const Duration(milliseconds: 300));
+      async.flushMicrotasks();
+
+      expect(s.locales, hasLength(1));
+      expect(s.otros, hasLength(4));
+    });
+  });
+
   test('sin buscador en línea solo hay locales', () {
     fakeAsync((async) {
       final s = crear(null)..consultar('mercado');
