@@ -22,4 +22,5 @@ class AppColors {
   static const dangerStrong = Color(0xFFDD0012);
   static const etaBox = Color(0xFFDDF1FF);
   static const track = Color(0xFFCEDBEC);
+  static const secondaryBorder = Color(0xFFCFDBEC);
 }

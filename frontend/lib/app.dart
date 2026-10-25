@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/routes.dart';
 import 'core/theme/app_theme.dart';
+import 'data/lugares/buscador_lugares.dart';
 import 'data/rutas_repository.dart';
 import 'features/auth/login_page.dart';
 import 'features/location/location_page.dart';
@@ -12,11 +13,16 @@ class PiuraGoApp extends StatelessWidget {
   const PiuraGoApp({
     super.key,
     this.rutasRepository,
+    this.buscadorLugares,
     this.mostrarMapaBase = true,
   });
 
   /// Fuente de datos de las rutas. Si no se indica, se usan datos de prueba.
   final RutasRepository? rutasRepository;
+
+  /// Buscador de lugares en línea de "¿A dónde vas?". Si no se indica, solo
+  /// se sugieren los paraderos (por ejemplo, en las pruebas, sin internet).
+  final BuscadorLugares? buscadorLugares;
 
   /// Permite desactivar el mapa real (por ejemplo, en las pruebas, que no
   /// tienen acceso a internet).
@@ -38,6 +44,7 @@ class PiuraGoApp extends StatelessWidget {
           final idRuta = ModalRoute.of(context)?.settings.arguments as int?;
           return MapPage(
             repository: repository,
+            buscadorLugares: buscadorLugares,
             idRuta: idRuta,
             mostrarMapa: mostrarMapaBase,
           );
