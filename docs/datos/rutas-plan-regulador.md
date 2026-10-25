@@ -52,20 +52,58 @@ piuratransporta ya tiene casi todas: algunas con el código del plan (RD-01, RD-
 - **Frecuencia:** el mayor de los dos intervalos del anexo, el más conservador. No hay horario ni pasaje publicados.
 - **Líneas sin recorrido:** las que no tienen recorrido publicado (RD-07, RD-13) dicen "Recorrido pendiente" y no tienen paraderos. Salen en la lista de Rutas, pero no en "¿A dónde vas?".
 
-### Cómo se calcularon los paraderos de RD-12 y RD-17
+Los paraderos y el trazado de RD-12 y RD-17 se calculan como los del resto de rutas con recorrido oficial: ver la sección siguiente.
 
-No se supuso ningún recorrido. Se tomaron las calles oficiales en el orden de la nota de la Municipalidad y cada paradero se puso en el **cruce real** entre una calle y la siguiente, con la geometría de OpenStreetMap. Lo hace `frontend/tool/paraderos_desde_recorrido.py`, y el resultado está en `paraderos-plan-regulador.json`.
+## Trazados y paraderos confirmados con el recorrido oficial
 
-- **Calles que no están en OpenStreetMap:** se saltan; el paradero se busca en el cruce con la siguiente calle. Faltan: UPIS Villa Rica, UPIS 11 de Enero, calle 8 de Octubre, Av. Raúl Mata La Cruz y Av. Ramón Mujica.
-- **Cruces que no se registran:** si dos calles consecutivas no se cruzan en OpenStreetMap, no se pone paradero. Por ejemplo, Av. Grau con Av. Marcavelica.
-- **Son propuestos, no oficiales.** Hay que validarlos en campo, igual que `paraderos-propuestos.md`.
+Las 10 rutas con recorrido calle por calle en la nota de la Municipalidad (RD-05, RD-10, RD-11, RD-12, RD-14, RD-16, RD-17, RD-19, RD-20 y RD-21) tienen ahora un **trazado por las calles** y **paraderos confirmados**. Lo calcula `frontend/tool/trazados_oficiales.py`, con la red vial de OpenStreetMap (© colaboradores de OpenStreetMap, ODbL). El resultado está en `trazados-oficiales.json` y la app lo usa desde `frontend/lib/data/trazados_oficiales.dart`.
+
+### Cómo se calcula
+
+1. **Recorrido oficial en orden.** Se siguen las calles oficiales en el orden de la nota. Donde una calle cruza a la siguiente (nodo compartido en OpenStreetMap) va un paradero. Si no se cruzan, se entra a la calle por su punto más cercano.
+2. **Homónimos.** Si una calle o un lugar tiene varios homónimos (varios "Nuevo Horizonte", varias "Av. Ignacio Merino"), se usa el más cercano al punto anterior. Si el más cercano queda a más de 2.5 km, se omite porque es otra calle con el mismo nombre (salvo el destino final).
+3. **Trazado.** Los puntos se unen por la **red vial real** (camino más corto), prefiriendo las calles oficiales de la ruta. El trazado sigue calles de punta a punta. Solo es línea recta donde la red descargada no llega: los tramos rurales de la RD-05 hacia Tambogrande y Las Lomas.
+4. **Confirmación.** Los paraderos propuestos que ya tenía la ruta se **confirman** si quedan a 200 m o menos del trazado oficial; los demás se **descartan**. Los paraderos finales son los lugares confirmados más los cruces oficiales, en el orden del trazado.
+
+### Resultado
+
+| Ruta | Trazado (km) | Longitud oficial (km) | En línea recta (km) | Paraderos | Paraderos propuestos descartados (distancia al recorrido) |
+|---|---|---|---|---|---|
+| RD-05 | 100.0 | 96.2 | 21.2 | 10 (2 lugares confirmados) | Parque Néstor Martos Garridos (2345 m), Real Plaza (2300 m), I.E. Nuestra Señora de Fatima (1580 m), Mercado Modelo (1303 m), Plazuela Merino (254 m), Catedral de Piura (483 m) |
+| RD-10 | 19.6 | 20.8 | 0.0 | 10 (6 lugares confirmados) | Univ. Nacional de Piura (622 m), Plaza de Armas (399 m) |
+| RD-11 | 9.8 | 14.8 | 0.0 | 13 (7 lugares confirmados) | Plaza Tres Culturas (240 m), Plaza del Sol (Centro) (222 m) |
+| RD-12 | 7.8 | 11.3 | 0.0 | 8 | — |
+| RD-14 | 15.5 | 14.9 | 0.0 | 11 (5 lugares confirmados) | I.E. Nuestra Señora del Transito (340 m), Aeropuerto de Piura (727 m), Plaza de Armas (362 m), Establecimiento de Salud I-4 Pachitea (455 m), Univ. de Piura (UDEP) (1206 m) |
+| RD-16 | 15.6 | 11.8 | 0.0 | 10 (6 lugares confirmados) | Terminal Terrestre (421 m), Establecimiento de Salud I-4 Pachitea (214 m), Unidad Médico Legal Piura (328 m), Miraflores Country Club (1279 m) |
+| RD-17 | 16.2 | 14.6 | 0.0 | 12 | — |
+| RD-19 | 17.3 | 13.3 | 0.0 | 13 (6 lugares confirmados) | Aeropuerto de Piura (758 m), Real Plaza (299 m), Clínica Bello Horizonte (376 m) |
+| RD-20 | 29.1 | 15.8 | 0.0 | 16 (5 lugares confirmados) | Plaza Tres Culturas (240 m), Estadio Miguel Grau (384 m), Mercado Modelo (683 m), I.E. Nuestra Señora de Fatima (502 m), Hospital Jorge Reátegui Delgado (358 m) |
+| RD-21 | 17.1 | 18.9 | 0.0 | 5 (1 lugar confirmado) | Parque Néstor Martos Garridos (1551 m), Plaza del Sol (Av. Grau-Gulman) (1486 m), Hospital Jorge Reátegui Delgado (1653 m), I.E. Nuestra Señora de Fatima (1913 m), Mercado Modelo (2208 m), Parque Miguel Cortés/Infantil (1882 m), Plazuela Merino (2633 m), Real Plaza (2170 m) |
+
+**Cómo leer la tabla:**
+- **Longitud:** la del trazado coincide con la oficial en RD-05, RD-10, RD-14, RD-17, RD-19 y RD-21.
+- **RD-11 y RD-12 quedan más cortas:** sus extremos ("Vía del Mercado Zonal San Francisco", "UPIS Villa Rica", "UPIS 11 de Enero") no están en OpenStreetMap.
+- **RD-16 y RD-20 quedan más largas.** La RD-20 sola, desde Las Américas hasta Monte Castillo por carretera, ya mide unos 15 km, así que la longitud oficial podría no cubrir todo el recorrido. **Por verificar con la ficha técnica.**
+- **Descartados:** los lugares que piuratransporta dice que la ruta "pasa por", pero que quedan lejos del recorrido oficial de la Municipalidad.
+
+### Calles del recorrido oficial que no están en OpenStreetMap
+
+- Parcela J, Hada (RD-05)
+- Av. Guillermo Gulman y Av. Raúl Mata La Cruz (RD-10, RD-20, RD-21)
+- Puente Grau (RD-21)
+- Jr. Enrique del Villar (RD-16)
+- Av. Ramón Mujica (RD-14, RD-17)
+- Vía del Mercado Zonal San Francisco (RD-11)
+- UPIS Villa Rica y UPIS 11 de Enero (RD-12)
+- Calle 8 de Octubre (RD-17)
 
 ## Diferencias entre fuentes (por verificar)
 
 | Tema | piuratransporta | Otra fuente |
 |---|---|---|
-| Empresa de RD-11 | Lugueda | Santo Toribio de Mogrovejo SAC (nota de la Municipalidad y Wikipedia) |
-| Recorrido de RD-21 | Piura – Catacaos | Cura Mori – Terminal Satélite Sechura (nota de la Municipalidad) |
+| Empresa de RD-11 | Lugueda | Santo Toribio de Mogrovejo SAC (nota de la Municipalidad y Wikipedia). **La app usa el dato de la Municipalidad.** |
+| Empresa de RD-14 | Nueva Alternativa | Nueva Alternativa del Norte SAC (Municipalidad). **La app usa el dato de la Municipalidad.** |
+| Recorrido de RD-21 | Piura – Catacaos | Cura Mori – Terminal Satélite (Piura), pasando por Catacaos (Municipalidad). **La app usa el dato de la Municipalidad.** |
 | Estado de U-03 | Activa (El Sol de Piura) | Inactiva (Wikipedia) |
 | RD-13 | — | Adjudicada a 3W Tours (El Tiempo, 2025); antes se reportó desierta |
 

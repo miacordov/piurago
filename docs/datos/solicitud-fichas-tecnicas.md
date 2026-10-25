@@ -34,5 +34,5 @@ Se pide con la **Ley de Transparencia y Acceso a la Información Pública**: TUO
 ## Al recibir la respuesta
 
 1. Guardar los archivos en el equipo, fuera del repositorio si contienen datos personales.
-2. Cargar los recorridos y paraderos oficiales. Reemplazan a los propuestos de `paraderos-propuestos.json` y `paraderos-plan-regulador.json`.
+2. Cargar los recorridos y paraderos oficiales. Reemplazan a los propuestos (`paraderos-propuestos.json`) y a los calculados desde la nota de la Municipalidad (`trazados-oficiales.json`).
 3. Resolver las diferencias listadas en `rutas-plan-regulador.md`.
