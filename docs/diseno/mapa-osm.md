@@ -33,7 +33,10 @@ OpenStreetMap). Solo habría que cambiar `RutaMap.urlTeselas`.
 
 - Ubicación del usuario en el mapa (necesita el paquete `geolocator` y permisos del
   dispositivo): llega con la pantalla de viaje en vivo.
-- Paraderos reales con coordenadas: se cargan al final del proyecto. Hasta entonces el
-  recorrido de la Línea 10 es una demostración con coordenadas aproximadas.
+- Paraderos reales con coordenadas: se cargan al final del proyecto. Las 20 líneas ya
+  están cargadas (datos de https://piuratransporta.com/rutas, copia en
+  `docs/datos/rutas-piuratransporta.json`), con paraderos PROPUESTOS y coordenadas de
+  OpenStreetMap (ver `docs/datos/paraderos-propuestos.md`). El recorrido une los
+  paraderos en línea recta: no sigue las calles.
 - Android: la aplicación necesita el permiso de internet en
   `android/app/src/main/AndroidManifest.xml`.
