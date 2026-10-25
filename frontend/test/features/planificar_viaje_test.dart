@@ -46,6 +46,12 @@ Finder sugerencia(String nombre) => find.byKey(ValueKey('sugerencia-$nombre'));
 Finder frecuente(String nombre) => find.byKey(ValueKey('frecuente-$nombre'));
 Finder tarjeta(String linea) => find.byKey(ValueKey('opcion-$linea'));
 
+/// Texto dentro de la barra "Desde → Hasta" que resume el viaje.
+Finder enResumen(String texto) => find.descendant(
+  of: find.byKey(const ValueKey('resumen-viaje')),
+  matching: find.textContaining(texto, findRichText: true),
+);
+
 String textoDe(WidgetTester tester, Finder campo) =>
     tester.widget<TextField>(campo).controller!.text;
 
@@ -313,7 +319,7 @@ void main() {
     expect(textoDe(tester, campoHasta), 'Hospital Sur');
 
     await clic(tester, frecuente('Mercado Central'));
-    expect(textoDe(tester, campoDesde), 'Mercado Central');
+    expect(enResumen('Desde  Mercado Central'), findsOneWidget);
     expect(tarjeta('Línea A'), findsOneWidget);
   });
 
@@ -346,7 +352,24 @@ void main() {
       find.text('Baja en Hospital Sur · 0 m a pie (0 min)'),
       findsOneWidget,
     );
-    expect(find.text('S/ 1.50 · cada ~10 min'), findsOneWidget);
+    // Como en Moovit: duración aproximada, pasaje y la tira del recorrido.
+    // 2001 m en bus (9 min) + 5 min de espera + 0 a pie.
+    Finder enTarjetaA(String texto) =>
+        find.descendant(of: tarjeta('Línea A'), matching: find.text(texto));
+    expect(
+      find.descendant(
+        of: tarjeta('Línea A'),
+        matching: find.text('≈ 14 min  aprox.', findRichText: true),
+      ),
+      findsOneWidget,
+    );
+    expect(enTarjetaA('S/ 1.50'), findsOneWidget);
+    expect(enTarjetaA('A-01'), findsOneWidget);
+    expect(enTarjetaA('Pasa cada ~10 min'), findsOneWidget);
+    // Los campos se resumen en una barra.
+    expect(campoHasta, findsNothing);
+    expect(enResumen('Desde  Mercado Central'), findsOneWidget);
+    expect(enResumen('Hasta  Hospital Sur'), findsOneWidget);
     expect(
       find.text('Sube en Mercado Chico · 222 m a pie (3 min)'),
       findsOneWidget,
@@ -414,7 +437,7 @@ void main() {
     expect(find.text('Llegaste'), findsOneWidget);
 
     await clic(tester, find.text('Listo'));
-    expect(campoHasta, findsOneWidget);
+    expect(find.byKey(const ValueKey('resumen-viaje')), findsOneWidget);
     expect(tarjeta('Línea A'), findsOneWidget);
   });
 
@@ -454,12 +477,17 @@ void main() {
 
     await clic(tester, find.byTooltip('Intercambiar origen y destino'));
 
-    expect(textoDe(tester, campoHasta), 'Mercado Central');
-    expect(textoDe(tester, campoDesde), 'Hospital Sur');
+    expect(enResumen('Desde  Hospital Sur'), findsOneWidget);
+    expect(enResumen('Hasta  Mercado Central'), findsOneWidget);
     expect(
       find.text('Sube en Hospital Sur · 0 m a pie (0 min)'),
       findsOneWidget,
     );
+
+    // "Cambiar" vuelve a mostrar los campos, con los lugares elegidos.
+    await clic(tester, find.text('Cambiar'));
+    expect(textoDe(tester, campoHasta), 'Mercado Central');
+    expect(textoDe(tester, campoDesde), 'Hospital Sur');
   });
 
   testWidgets('limpiar vacía los campos', (tester) async {
@@ -475,10 +503,13 @@ void main() {
     expect(find.text('Destinos rápidos'), findsOneWidget);
   });
 
-  testWidgets('en el celular el panel va debajo del mapa', (tester) async {
+  testWidgets('en el celular el panel es una hoja deslizable sobre el mapa', (
+    tester,
+  ) async {
     fijarPantalla(tester, celular);
     await irAlMapa(tester);
 
+    expect(find.byType(DraggableScrollableSheet), findsOneWidget);
     expect(find.text('¿A dónde vas?'), findsOneWidget);
     await viajar(tester, 'Hospital Sur', 'Mercado Central');
     expect(find.text('Línea A'), findsOneWidget);

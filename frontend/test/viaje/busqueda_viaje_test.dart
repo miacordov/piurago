@@ -269,6 +269,47 @@ void main() {
     });
   });
 
+  group('duración aproximada del viaje', () {
+    test('suma caminata, espera y bus', () {
+      expect(velocidadBusMetrosPorMinuto, 300);
+      expect(factorRecorridoBus, 1.3);
+      final resultado = buscar(
+        [ruta(1, 'Cada 10', frecuencia: 10)],
+        {
+          1: [
+            paraderoPrueba(1, 'Norte', -5.2010),
+            paraderoPrueba(2, 'Sur', -5.2190),
+          ],
+        },
+        desde: const LatLng(-5.2010, -80.63),
+        hasta: const LatLng(-5.2190, -80.63),
+      );
+      final opcion = resultado.opciones.single;
+
+      // 2001 m en línea recta x 1.3 = 2602 m a 300 m/min: 9 min.
+      expect(opcion.minutosEnBus, 9);
+      // Se espera, en promedio, la mitad de la frecuencia.
+      expect(opcion.minutosEspera, 5);
+      expect(opcion.minutosTotales, 14);
+    });
+
+    test('sin frecuencia no suma espera', () {
+      final resultado = buscar(
+        [ruta(1, 'Sin dato')],
+        {
+          1: [
+            paraderoPrueba(1, 'Norte', -5.2010),
+            paraderoPrueba(2, 'Sur', -5.2190),
+          ],
+        },
+      );
+      final opcion = resultado.opciones.single;
+      expect(opcion.minutosEspera, 0);
+      // 2 min a pie al subir, 9 en bus y 2 a pie al bajar.
+      expect(opcion.minutosTotales, 13);
+    });
+  });
+
   group('catálogo de lugares', () {
     test('une nombres sin distinguir mayúsculas ni tildes', () {
       final catalogo = construirCatalogo(
