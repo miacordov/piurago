@@ -83,7 +83,12 @@ Con las credenciales de Neon configuradas (archivo local o variables de entorno)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local,carga   # o solo carga, con variables de entorno
 ```
 
-El perfil `carga` ejecuta la migración y el seed antes de que Hibernate valide el esquema, no levanta el servidor web y termina solo. Se puede repetir sin riesgo: actualiza las rutas por código, inserta las que falten y solo agrega paraderos a las rutas que no tienen. No borra nada.
+El perfil `carga` ejecuta la migración y los seeds antes de que Hibernate valide el esquema, no levanta el servidor web y termina solo. Se puede repetir sin riesgo.
+
+| Seed | Qué hace |
+|---|---|
+| `db/seeds/001_rutas_paraderos_piuratransporta.sql` | Las 20 líneas de piuratransporta.com con paraderos propuestos. Actualiza las rutas por código, inserta las que falten y solo agrega paraderos a las rutas que no tienen. No borra nada. |
+| `db/seeds/002_rutas_plan_regulador.sql` | Datos de la Municipalidad (Plan Regulador, O.M. 092-02-CMPP): agrega RD-07, RD-12, RD-13 y RD-17. En las 10 rutas con recorrido oficial guarda ese recorrido y **reemplaza sus paraderos** por los del recorrido oficial (solo si todavía no los tiene). Antes borra el histórico de congestión de los paraderos que se quitan; ese histórico se rehace con `POST /api/historico-congestion/recalcular`. Ver `docs/datos/rutas-plan-regulador.md`. |
 - `postman/`: coleccion de pruebas de punta a punta (pendiente de agregar).
 
 ## Estructura
