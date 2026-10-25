@@ -46,7 +46,11 @@ CREATE TABLE ruta (
     recorrido           TEXT,
     activa              BOOLEAN NOT NULL DEFAULT TRUE,
     tiempo_estimado     INTEGER,
-    frecuencia_minutos  INTEGER
+    frecuencia_minutos  INTEGER,
+    tipo_servicio       VARCHAR(15),
+    horario             VARCHAR(20),
+    pasaje              DECIMAL(5,2),
+    pasaje_estudiante   DECIMAL(5,2)
 );
 
 CREATE UNIQUE INDEX ux_ruta_codigo ON ruta (codigo);
