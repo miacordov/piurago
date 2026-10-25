@@ -17,7 +17,10 @@ abstract class RutasRepository {
 
 /// Rutas reales de Piura y Castilla tomadas de https://piuratransporta.com/rutas
 /// (consultado el 24/10/2026), en el mismo orden: primero las interurbanas
-/// (I-), luego las reguladas (RD-) y al final las urbanas (U-).
+/// (I-), luego las reguladas (RD-) y al final las urbanas (U-). Se suman
+/// RD-07, RD-12, RD-13 y RD-17 del Plan Regulador de Rutas (O.M.
+/// 092-02-CMPP), que piuratransporta no publica: ver
+/// docs/datos/rutas-plan-regulador.md.
 ///
 /// Los paraderos son PROPUESTOS (lugares conocidos con coordenadas de
 /// OpenStreetMap, ver paraderos_propuestos.dart) y no hay ETA en vivo: los
@@ -164,6 +167,17 @@ class FakeRutasRepository implements RutasRepository {
       ],
     ),
     Ruta(
+      idRuta: 21,
+      codigo: 'RD-07',
+      nombre: 'Castilla - Veintiséis de Octubre',
+      empresa: '6M Buss SAA',
+      tipoServicio: 'Regulada',
+      puntoInicio: 'Castilla',
+      puntoFinal: 'Veintiséis de Octubre',
+      descripcion: 'Recorrido pendiente: solo se conocen los extremos. Fuente: Plan Regulador de Rutas (O.M. 092-02-CMPP), anexo 01. Antes U-10.',
+      frecuenciaMinutos: 4,
+    ),
+    Ruta(
       idRuta: 7,
       codigo: 'RD-08',
       nombre: 'Piura - Catacaos',
@@ -254,6 +268,37 @@ class FakeRutasRepository implements RutasRepository {
       ],
     ),
     Ruta(
+      idRuta: 22,
+      codigo: 'RD-12',
+      nombre: 'UPIS Villa Rica - UPIS 11 de Enero',
+      empresa: 'Autogas',
+      tipoServicio: 'Regulada',
+      puntoInicio: 'UPIS Villa Rica',
+      puntoFinal: 'UPIS 11 de Enero',
+      recorrido: 'UPIS Villa Rica, UPIS Bella Rica, Vía de Evitamiento Este, Proyecto Vivero Sam, Arco de la Asociación Sol y Campo, Asociación de Vivienda El Álamo en Av. Los Jardines, calle Bolognesi, Calle Lalaquiz, Av. Los Almendros, Av. Guardia Civil, Av. Andrés Avelino Cáceres, Av. Independencia, Puente Eguiguren, Av. Luis A. Eguiguren, Av. Loreto, Prolongación Av. Loreto y Av. Alameda Perú en UPIS 11 de Enero (ida y vuelta).',
+      frecuenciaMinutos: 5,
+      lugaresDestacados: [
+        'Vía de Evitamiento Este',
+        'Av. Los Almendros',
+        'Av. Guardia Civil',
+        'Av. Andrés A. Cáceres',
+        'Av. Independencia',
+        'Av. Luis A. Eguiguren',
+        'Av. Loreto',
+      ],
+    ),
+    Ruta(
+      idRuta: 23,
+      codigo: 'RD-13',
+      nombre: 'A.H. Los Almendros - Parque Kurt Beer',
+      empresa: '3W Tours',
+      tipoServicio: 'Regulada',
+      puntoInicio: 'A.H. Los Almendros',
+      puntoFinal: 'Parque Kurt Beer',
+      descripcion: 'Recorrido pendiente: solo se conocen los extremos. Fuente: Plan Regulador de Rutas (O.M. 092-02-CMPP), anexo 01.',
+      frecuenciaMinutos: 5,
+    ),
+    Ruta(
       idRuta: 11,
       codigo: 'RD-14',
       nombre: 'A.H. El Indio - Curumuy / Ejidos de Huan',
@@ -318,6 +363,26 @@ class FakeRutasRepository implements RutasRepository {
         'Real Plaza',
         'Unidad Médico Legal Piura',
         'Terminal Terrestre',
+      ],
+    ),
+    Ruta(
+      idRuta: 24,
+      codigo: 'RD-17',
+      nombre: 'A.H. Kurt Beer - Las Lomas del Chipe',
+      empresa: 'Rápido Universal',
+      tipoServicio: 'Regulada',
+      puntoInicio: 'A.H. Kurt Beer',
+      puntoFinal: 'Las Lomas del Chipe',
+      recorrido: 'A.H. Kurt Beer, Villa Perú Canadá, calle 8 de Octubre, Av. Juan Velasco Alvarado, Av. Raúl Mata La Cruz, Av. Santa Rosa, Av. Bellavista, Av. Grau, Av. Marcavelica, Av. Sánchez Cerro, Av. Vice, Víctor Andrés Belaunde, Jirón B, Av. Sullana, Av. Luis A. Eguiguren, Av. Country, Av. Ramón Mujica, Av. Fortunato Chirichigno, Av. Las Palmeras, Manzanos, Gardenias, Avenida Colectora y la Av. A en Asociación Pro Vivienda Las Lomas del Chipe (ida y vuelta).',
+      frecuenciaMinutos: 6,
+      lugaresDestacados: [
+        'Villa Perú Canadá',
+        'Av. Sánchez Cerro',
+        'Av. Sullana',
+        'Av. Luis A. Eguiguren',
+        'Av. Country',
+        'Av. Fortunato Chirichigno',
+        'Las Lomas del Chipe',
       ],
     ),
     Ruta(
