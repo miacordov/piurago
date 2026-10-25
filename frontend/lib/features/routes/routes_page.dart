@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
@@ -7,9 +8,13 @@ import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
 import '../shell/app_shell.dart';
 import '../shell/shell_scaffold.dart';
+import 'filtro_rutas.dart';
 import 'ruta_card.dart';
 
-/// Lista de líneas con buscador.
+/// Lista de líneas, como la de Moovit y la de piuratransporta.com: buscador
+/// (sin tildes, por código, zona, empresa o lugar), filtros por tipo de
+/// servicio y una fila compacta por línea. Arriba, un acceso a Planificar
+/// viaje para quien no sabe qué línea tomar.
 class RoutesPage extends StatefulWidget {
   const RoutesPage({super.key, required this.repository});
 
@@ -23,6 +28,7 @@ class _RoutesPageState extends State<RoutesPage> {
   late Future<List<Ruta>> _rutas;
   final _busqueda = TextEditingController();
   String _consulta = '';
+  TipoServicio? _tipo;
 
   @override
   void initState() {
@@ -42,13 +48,21 @@ class _RoutesPageState extends State<RoutesPage> {
     });
   }
 
+  void _limpiar() {
+    _busqueda.clear();
+    setState(() {
+      _consulta = '';
+      _tipo = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ShellScaffold(
       seccion: SeccionApp.rutas,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return _cuerpo(horizontal: constraints.maxWidth >= 600 ? 40 : 20);
+          return _cuerpo(horizontal: constraints.maxWidth >= 600 ? 40 : 16);
         },
       ),
     );
@@ -59,9 +73,16 @@ class _RoutesPageState extends State<RoutesPage> {
       future: _rutas,
       builder: (context, snapshot) {
         final terminado = snapshot.connectionState == ConnectionState.done;
-        final filtradas = (snapshot.data ?? const <Ruta>[])
-            .where((r) => r.coincideCon(_consulta))
-            .toList();
+        final todas = snapshot.data ?? const <Ruta>[];
+        // Los números de los filtros cuentan lo que coincide con la búsqueda.
+        final porTexto = filtrarRutas(todas, consulta: _consulta);
+        final cuenta = contarPorTipo([for (final r in porTexto) r.ruta]);
+        final filtradas = _tipo == null
+            ? porTexto
+            : [
+                for (final r in porTexto)
+                  if (TipoServicio.de(r.ruta) == _tipo) r,
+              ];
         final total = terminado && !snapshot.hasError
             ? '${filtradas.length} ${filtradas.length == 1 ? 'línea' : 'líneas'}'
             : null;
@@ -69,12 +90,19 @@ class _RoutesPageState extends State<RoutesPage> {
         return CustomScrollView(
           slivers: [
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(horizontal, 36, horizontal, 0),
+              padding: EdgeInsets.fromLTRB(horizontal, 28, horizontal, 0),
               sliver: SliverToBoxAdapter(
-                child: _Encabezado(
-                  controller: _busqueda,
-                  total: total,
-                  onChanged: (valor) => setState(() => _consulta = valor),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 880),
+                  child: _Encabezado(
+                    controller: _busqueda,
+                    total: total,
+                    cuenta: terminado && !snapshot.hasError ? cuenta : null,
+                    tipo: _tipo,
+                    onChanged: (valor) => setState(() => _consulta = valor),
+                    onBorrar: _limpiar,
+                    onTipo: (tipo) => setState(() => _tipo = tipo),
+                  ),
                 ),
               ),
             ),
@@ -98,25 +126,32 @@ class _RoutesPageState extends State<RoutesPage> {
                 ),
               )
             else if (filtradas.isEmpty)
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: _Mensaje(
                   titulo: 'No encontramos rutas',
-                  detalle: 'Prueba con otra línea, zona o paradero.',
+                  detalle: 'Prueba con otra línea, calle o lugar.',
+                  accion: OutlinedButton(
+                    onPressed: _limpiar,
+                    child: const Text('Limpiar búsqueda'),
+                  ),
                 ),
               )
             else
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 40),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 380,
-                    mainAxisExtent: 282,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, indice) => RutaCard(ruta: filtradas[indice]),
-                    childCount: filtradas.length,
+                sliver: SliverConstrainedCrossAxis(
+                  maxExtent: 880,
+                  sliver: SliverList.separated(
+                    itemCount: filtradas.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, indice) {
+                      final r = filtradas[indice];
+                      return RutaCard(
+                        key: ValueKey('ruta-${r.ruta.idRuta}'),
+                        ruta: r.ruta,
+                        lugarCoincidente: r.lugarCoincidente,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -131,60 +166,167 @@ class _Encabezado extends StatelessWidget {
   const _Encabezado({
     required this.controller,
     required this.onChanged,
+    required this.onBorrar,
+    required this.onTipo,
     required this.total,
+    required this.cuenta,
+    required this.tipo,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final VoidCallback onBorrar;
+  final ValueChanged<TipoServicio?> onTipo;
   final String? total;
+  final Map<TipoServicio?, int>? cuenta;
+  final TipoServicio? tipo;
 
   @override
   Widget build(BuildContext context) {
+    final cuenta = this.cuenta;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('TRANSPORTE URBANO', style: AppText.eyebrow),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         const Text('Encuentra tu ruta', style: AppText.heading),
-        const SizedBox(height: 8),
-        const Text(
-          'Revisa recorridos, paraderos principales y tiempos estimados antes de salir.',
-          style: AppText.body,
-        ),
-        const SizedBox(height: 24),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: TextField(
+        const SizedBox(height: 16),
+        const _AccesoPlanificar(),
+        const SizedBox(height: 16),
+        ValueListenableBuilder(
+          valueListenable: controller,
+          builder: (context, valor, _) => TextField(
             controller: controller,
             onChanged: onChanged,
-            decoration: appInputDecoration(
-              hint: 'Buscar línea, zona o paradero',
-              icon: Icons.search,
-              fill: AppColors.surface,
-            ),
+            textInputAction: TextInputAction.search,
+            decoration:
+                appInputDecoration(
+                  hint: 'Busca una línea, calle o lugar',
+                  icon: Icons.search,
+                  fill: AppColors.surface,
+                ).copyWith(
+                  suffixIcon: valor.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Borrar búsqueda',
+                          onPressed: onBorrar,
+                          icon: const Icon(
+                            Icons.close,
+                            size: 18,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                ),
           ),
         ),
-        const SizedBox(height: 32),
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                'Todas las rutas',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.text,
-                ),
+        if (cuenta != null) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _FiltroTipo(
+                texto: 'Todas (${cuenta[null]})',
+                elegido: tipo == null,
+                onTap: () => onTipo(null),
               ),
-            ),
-            const SizedBox(width: 8),
-            if (total != null) Text(total!, style: AppText.small),
-          ],
-        ),
+              for (final t in TipoServicio.values)
+                _FiltroTipo(
+                  texto: '${t.plural} (${cuenta[t]})',
+                  elegido: tipo == t,
+                  onTap: () => onTipo(t),
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: 16),
+        if (total != null) Text(total!, style: AppText.small),
+        const SizedBox(height: 8),
       ],
+    );
+  }
+}
+
+/// Acceso a Planificar viaje, para quien no sabe qué línea tomar.
+class _AccesoPlanificar extends StatelessWidget {
+  const _AccesoPlanificar();
+
+  @override
+  Widget build(BuildContext context) {
+    final boton = FilledButton.icon(
+      onPressed: () =>
+          Navigator.of(context).pushReplacementNamed(AppRoutes.mapa),
+      style: appCompactButtonStyle(),
+      icon: const Icon(Icons.alt_route, size: 16),
+      label: const Text('Planificar viaje'),
+    );
+    const textos = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('¿No sabes qué línea tomar?', style: AppText.label),
+        SizedBox(height: 2),
+        Text(
+          'Dinos a dónde vas y te decimos qué línea te sirve.',
+          style: AppText.small,
+        ),
+      ],
+    );
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 480) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [textos, const SizedBox(height: 10), boton],
+            );
+          }
+          return Row(
+            children: [
+              const Icon(Icons.alt_route, color: AppColors.primary),
+              const SizedBox(width: 12),
+              const Expanded(child: textos),
+              const SizedBox(width: 12),
+              boton,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _FiltroTipo extends StatelessWidget {
+  const _FiltroTipo({
+    required this.texto,
+    required this.elegido,
+    required this.onTap,
+  });
+
+  final String texto;
+  final bool elegido;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(texto),
+      selected: elegido,
+      onSelected: (_) => onTap(),
+      showCheckmark: false,
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: elegido ? FontWeight.w600 : FontWeight.w400,
+        color: elegido ? AppColors.primary : AppColors.text,
+      ),
+      backgroundColor: AppColors.surface,
+      selectedColor: AppColors.primarySoft,
+      side: BorderSide(color: elegido ? AppColors.primary : AppColors.border),
+      shape: const StadiumBorder(),
     );
   }
 }

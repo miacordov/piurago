@@ -69,6 +69,26 @@ Mismo panel izquierdo. A la derecha: círculo con ícono de ubicación, "UN ÚLT
 Barra superior con "Piura, Perú", la píldora "Modo demostración" (con punto verde) y el avatar. Contenido: "TRANSPORTE URBANO", "Encuentra tu ruta", buscador "Buscar línea, zona o paradero", "Rutas cercanas" con contador de líneas. Tarjeta de línea: ficha de color (azul, verde o naranja), nombre, zona, tres paraderos, "Próxima unidad N min" y botón "Ver en mapa". Si no hay resultados: "No encontramos rutas" / "Prueba con otra línea, zona o paradero."
 Backend: `GET /api/rutas`. El buscador filtra en la app. Las líneas reales (RD-05, RD-10...) reemplazan a las inventadas.
 
+**Diseño actual** (rediseñado tomando como referencia la lista de líneas de Moovit y https://piuratransporta.com/rutas). El prototipo usaba tarjetas altas en cuadrícula; con 20 líneas había que bajar mucho para encontrar una.
+
+- **Encabezado:** "TRANSPORTE URBANO" y "Encuentra tu ruta".
+- **Acceso a Planificar viaje:** "¿No sabes qué línea tomar?", "Dinos a dónde vas y te decimos qué línea te sirve." y el botón **"Planificar viaje"**, que abre el buscador "¿A dónde vas?" del mapa.
+- **Buscador:** "Busca una línea, calle o lugar", con un botón para borrar. Busca por código, nombre, zona, empresa, tipo y lugares por los que pasa.
+  - No distingue tildes ni mayúsculas.
+  - El código vale con o sin guion ("rd05" = "RD-05").
+  - Con varias palabras, deben estar todas.
+- **Filtros por tipo:** "Todas", "Urbanas", "Reguladas" e "Interurbanas", cada uno con el número de líneas que coinciden con la búsqueda. Debajo, el total: "N líneas".
+- **Una fila compacta por línea**, como en Moovit:
+  - el código con el color de su tipo (Regulada azul, Urbana verde, Interurbana naranja);
+  - el nombre, y la empresa con el tipo;
+  - por dónde pasa: los 3 primeros lugares, o "Pasa por {lugar}" (en color) si la búsqueda coincidió con un lugar;
+  - a la derecha, "cada ~N min" (o "Fuera de servicio" en rojo) y el pasaje;
+  - tocar la fila abre la línea en el mapa.
+- **Orden:** primero las líneas en servicio, en el orden de piuratransporta; al final, las que están fuera de servicio.
+- **Sin resultados:** "No encontramos rutas", "Prueba con otra línea, calle o lugar." y el botón "Limpiar búsqueda".
+
+La lógica de filtrado está en `frontend/lib/features/routes/filtro_rutas.dart`.
+
 ### 4. Mapa con ruta seleccionada (`04-mapa-ruta-seleccionada.png`)
 Buscador "¿A dónde quieres ir?" con botón de ubicación, chip del clima (fuera del alcance: se omite), línea de ruta discontinua con halo blanco, paraderos como círculos blancos con borde primario, tarjeta flotante "Línea 10 · El Moradito, 5 paraderos · ETA 4 min", controles de zoom y ubicación, nota "Recorrido ilustrativo · ETA de demostración". Panel derecho: "RUTA SELECCIONADA", nombre y zona, caja "Próxima unidad estimada", lista "Paraderos de la ruta" con el ETA de cada paradero, botón primario "Compartir ruta" (activa el GPS colaborativo) y botón secundario "Marcar como superada" (solo estado local).
 Backend: `GET /api/rutas/{id}/paraderos`, `GET /api/reportes-gps/eta/{idRuta}`. Mapa real con `flutter_map` + OpenStreetMap.
