@@ -24,6 +24,14 @@ const caminataMaximaMetros = 600.0;
 /// Velocidad de una persona caminando: unos 4.8 km/h.
 const velocidadCaminataMetrosPorMinuto = 80.0;
 
+/// Velocidad media de una combi en Piura con paradas y tráfico (unos
+/// 18 km/h), para estimar cuánto dura el tramo en bus.
+const velocidadBusMetrosPorMinuto = 300.0;
+
+/// El bus no va en línea recta: el recorrido por las calles es, en
+/// promedio, un 30 % más largo que la distancia entre paraderos.
+const factorRecorridoBus = 1.3;
+
 /// Si el origen y el destino están más cerca que esto, no se buscan líneas:
 /// conviene ir caminando.
 const distanciaParaCaminarMetros = 300.0;
@@ -150,6 +158,22 @@ class OpcionViaje {
   double get metrosTotales => metrosSubida + metrosBajada;
   int get minutosSubida => minutosAPie(metrosSubida);
   int get minutosBajada => minutosAPie(metrosBajada);
+
+  /// Espera promedio en el paradero: la mitad de la frecuencia (0 si no se
+  /// conoce).
+  int get minutosEspera => ((ruta.frecuenciaMinutos ?? 0) / 2).ceil();
+
+  /// Tramo en bus, estimado con [factorRecorridoBus] y
+  /// [velocidadBusMetrosPorMinuto]: es aproximado.
+  int get minutosEnBus =>
+      (distanciaMetros(posicionDe(sube), posicionDe(baja)) *
+              factorRecorridoBus /
+              velocidadBusMetrosPorMinuto)
+          .ceil();
+
+  /// Duración aproximada de todo el viaje, de puerta a puerta.
+  int get minutosTotales =>
+      minutosSubida + minutosEspera + minutosEnBus + minutosBajada;
 
   double? get pasaje => ruta.pasaje;
   int? get frecuenciaMinutos => ruta.frecuenciaMinutos;

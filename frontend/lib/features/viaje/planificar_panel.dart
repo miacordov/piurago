@@ -22,9 +22,13 @@ class PlanificarPanel extends StatefulWidget {
     required this.planificador,
     this.buscadorLugares,
     this.esDemostracion = false,
+    this.controladorScroll,
   });
 
   final PlanificadorViaje planificador;
+
+  /// Scroll del panel: en el celular es el de la hoja deslizable.
+  final ScrollController? controladorScroll;
 
   /// Buscador de lugares en línea; sin él solo se sugieren los paraderos.
   final BuscadorLugares? buscadorLugares;
@@ -49,6 +53,10 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
     locales: _p.sugerencias,
     buscador: widget.buscadorLugares,
   );
+
+  /// Con origen y destino elegidos, los campos se resumen en una barra (como
+  /// en Moovit); "Cambiar" los vuelve a mostrar.
+  bool _editando = false;
 
   PlanificadorViaje get _p => widget.planificador;
 
@@ -144,6 +152,7 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
       _focoDesde.requestFocus();
     } else {
       FocusScope.of(context).unfocus();
+      setState(() => _editando = false);
     }
   }
 
@@ -172,6 +181,7 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
     _hasta.clear();
     _sugerencias.limpiar();
     FocusScope.of(context).unfocus();
+    _editando = false;
     _p.limpiar();
   }
 
@@ -181,6 +191,7 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
       listenable: Listenable.merge([_p, _sugerencias]),
       builder: (context, _) {
         return SingleChildScrollView(
+          controller: widget.controladorScroll,
           padding: const EdgeInsets.all(24),
           child: switch (_p.estado) {
             _ when _p.paso != null => _GuiaViaje(
@@ -197,6 +208,25 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
   }
 
   Widget _formulario() {
+    final origen = _p.origen;
+    final destino = _p.destino;
+    if (origen != null && destino != null && !_editando) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('PLANIFICAR VIAJE', style: AppText.eyebrow),
+          const SizedBox(height: 10),
+          _ResumenViaje(
+            origen: origen,
+            destino: destino,
+            onCambiar: () => setState(() => _editando = true),
+            onIntercambiar: _intercambiar,
+            onLimpiar: _limpiar,
+          ),
+          ..._resultados(),
+        ],
+      );
+    }
     final activo = _p.campoActivo;
     final indicacion = activo == CampoViaje.hasta
         ? 'Toca el mapa para fijar tu destino.'
@@ -378,6 +408,136 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
       ],
       _ => const [],
     };
+  }
+}
+
+/// Barra "Desde → Hasta" con el viaje elegido, como en Moovit: deja espacio
+/// a los resultados. "Cambiar" vuelve a mostrar los campos.
+class _ResumenViaje extends StatelessWidget {
+  const _ResumenViaje({
+    required this.origen,
+    required this.destino,
+    required this.onCambiar,
+    required this.onIntercambiar,
+    required this.onLimpiar,
+  });
+
+  final Lugar origen;
+  final Lugar destino;
+  final VoidCallback onCambiar;
+  final VoidCallback onIntercambiar;
+  final VoidCallback onLimpiar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('resumen-viaje'),
+      padding: const EdgeInsets.fromLTRB(12, 10, 4, 4),
+      decoration: BoxDecoration(
+        color: AppColors.field,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _LineaResumen(
+                      etiqueta: 'Desde',
+                      lugar: origen,
+                      icono: Icons.trip_origin,
+                      color: AppColors.success,
+                    ),
+                    const SizedBox(height: 8),
+                    _LineaResumen(
+                      etiqueta: 'Hasta',
+                      lugar: destino,
+                      icono: Icons.place,
+                      color: AppColors.danger,
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Intercambiar origen y destino',
+                    onPressed: onIntercambiar,
+                    icon: const Icon(Icons.swap_vert, color: AppColors.text),
+                  ),
+                  IconButton(
+                    tooltip: 'Limpiar',
+                    onPressed: onLimpiar,
+                    icon: const Icon(Icons.close, color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onCambiar,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+              ),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: const Text('Cambiar'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LineaResumen extends StatelessWidget {
+  const _LineaResumen({
+    required this.etiqueta,
+    required this.lugar,
+    required this.icono,
+    required this.color,
+  });
+
+  final String etiqueta;
+  final Lugar lugar;
+  final IconData icono;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icono, size: 16, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: '$etiqueta  ', style: AppText.small),
+                TextSpan(
+                  text: lugar.nombre,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.text,
+                  ),
+                ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -760,6 +920,33 @@ class _GuiaViaje extends StatelessWidget {
         Text(
           llegaste ? 'Fin del viaje' : 'Paso ${paso.index + 1} de $totalPasos',
           style: AppText.small,
+        ),
+        const SizedBox(height: 8),
+        // Barra de progreso: un tramo por paso, los hechos en color.
+        Semantics(
+          label: llegaste
+              ? 'Viaje completo'
+              : 'Paso ${paso.index + 1} de $totalPasos',
+          child: ExcludeSemantics(
+            child: Row(
+              children: [
+                for (var i = 0; i < totalPasos; i++) ...[
+                  if (i > 0) const SizedBox(width: 4),
+                  Expanded(
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: i <= paso.index
+                            ? (llegaste ? AppColors.success : AppColors.primary)
+                            : AppColors.track,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         Container(
