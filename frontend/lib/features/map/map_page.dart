@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
+import '../../data/api/http_rutas_repository.dart';
 import '../../data/lugares/buscador_lugares.dart';
 import '../../data/models/lugar.dart';
 import '../../data/models/paradero.dart';
@@ -173,6 +174,7 @@ class _MapPageState extends State<MapPage> {
             esDemostracion: widget.repository.esDemostracion,
             mostrarMapa: widget.mostrarMapa,
             onPlanificarViaje: _planificarViaje,
+            repository: widget.repository,
           );
         },
       ),
@@ -188,6 +190,7 @@ class _Contenido extends StatefulWidget {
     required this.esDemostracion,
     required this.mostrarMapa,
     required this.onPlanificarViaje,
+    required this.repository,
   });
 
   final Ruta ruta;
@@ -196,6 +199,7 @@ class _Contenido extends StatefulWidget {
   final bool esDemostracion;
   final bool mostrarMapa;
   final VoidCallback onPlanificarViaje;
+  final RutasRepository repository;
 
   @override
   State<_Contenido> createState() => _ContenidoState();
@@ -222,6 +226,17 @@ class _ContenidoState extends State<_Contenido> {
     }
   }
 
+  void _reportarGps(Paradero paradero) {
+    final repo = widget.repository;
+    if (repo is HttpRutasRepository) {
+      repo.reportarGps(
+        idRuta: widget.ruta.idRuta,
+        latitud: paradero.latitud,
+        longitud: paradero.longitud,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget mapa = widget.mostrarMapa
@@ -238,6 +253,7 @@ class _ContenidoState extends State<_Contenido> {
             ruta: widget.ruta,
             paraderos: widget.paraderos,
             onFinalizarViaje: _finalizarViaje,
+            onParaderoAlcanzado: _reportarGps,
           )
         : RutaPanel(
             ruta: widget.ruta,

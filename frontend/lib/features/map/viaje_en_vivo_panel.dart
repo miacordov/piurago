@@ -15,11 +15,13 @@ class ViajeEnVivoPanel extends StatefulWidget {
     required this.ruta,
     required this.paraderos,
     required this.onFinalizarViaje,
+    this.onParaderoAlcanzado,
   });
 
   final Ruta ruta;
   final List<Paradero> paraderos;
   final VoidCallback onFinalizarViaje;
+  final void Function(Paradero paraderoActual)? onParaderoAlcanzado;
 
   @override
   State<ViajeEnVivoPanel> createState() => _ViajeEnVivoPanelState();
@@ -34,6 +36,9 @@ class _ViajeEnVivoPanelState extends State<ViajeEnVivoPanel> {
   void initState() {
     super.initState();
     _iniciarCuentaRegresiva();
+    if (widget.paraderos.isNotEmpty) {
+      widget.onParaderoAlcanzado?.call(widget.paraderos.first);
+    }
   }
 
   @override
@@ -53,6 +58,8 @@ class _ViajeEnVivoPanelState extends State<ViajeEnVivoPanel> {
           if (_indiceParaderoActual < widget.paraderos.length - 1) {
             _indiceParaderoActual++;
             _segundosRestantes = 120;
+            widget.onParaderoAlcanzado
+                ?.call(widget.paraderos[_indiceParaderoActual]);
           }
         }
       });
@@ -65,6 +72,7 @@ class _ViajeEnVivoPanelState extends State<ViajeEnVivoPanel> {
         _indiceParaderoActual++;
         _segundosRestantes = 110;
       });
+      widget.onParaderoAlcanzado?.call(widget.paraderos[_indiceParaderoActual]);
     }
   }
 
