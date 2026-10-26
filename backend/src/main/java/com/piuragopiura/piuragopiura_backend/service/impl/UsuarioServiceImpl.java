@@ -7,6 +7,9 @@ import com.piuragopiura.piuragopiura_backend.repository.UsuarioRegistradoReposit
 import com.piuragopiura.piuragopiura_backend.service.UsuarioService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -49,5 +52,29 @@ public class UsuarioServiceImpl implements UsuarioService {
         nuevo.setEmail(email);
         nuevo.setPasswordHash(passwordEncoder.encode(passwordPlano));
         return usuarioRegistradoRepository.save(nuevo);
+    }
+    
+    @Test
+    void buscaUnUsuarioRegistradoPorEmail() {
+        UsuarioRegistrado usuario = new UsuarioRegistrado();
+        usuario.setEmail("ana@example.com");
+        when(usuarioRegistradoRepository.findByEmail("ana@example.com")).thenReturn(Optional.of(usuario));
+
+        assertThat(service.buscarPorEmail("ana@example.com")).isSameAs(usuario);
+    }
+
+    @Test
+    void rechazaUnEmailQueNoExiste() {
+        when(usuarioRegistradoRepository.findByEmail("nadie@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.buscarPorEmail("nadie@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no encontrado");
+    }
+    
+    @Override
+    public UsuarioRegistrado buscarPorEmail(String email) {
+        return usuarioRegistradoRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 }
