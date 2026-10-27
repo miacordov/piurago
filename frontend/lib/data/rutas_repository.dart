@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:latlong2/latlong.dart';
 
 import 'models/eta.dart';
@@ -37,6 +39,9 @@ abstract class FuenteCongestion {
   /// Resumen de la franja (MANANA_PICO, MEDIO_DIA, TARDE_PICO o NOCHE) del
   /// día de hoy; sin franja, la de ahora. Null si el backend no responde.
   Future<ResumenCongestion?> resumenCongestion({String? franjaHoraria});
+
+  /// Histórico de congestión en Excel (.xlsx), o null si el backend falla.
+  Future<Uint8List?> exportarCongestionExcel();
 }
 
 /// Rutas reales de Piura y Castilla tomadas de https://piuratransporta.com/rutas
