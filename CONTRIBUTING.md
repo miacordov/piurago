@@ -60,3 +60,9 @@ Las tareas pendientes se llevan como **Issues** de GitHub. En la descripción de
 ## Seguridad
 
 Nunca se suben credenciales (contraseñas de la base de datos, claves JWT, tokens). Ver `backend/README.md`.
+
+### Dependencias
+
+- Las versiones exactas quedan fijas en `backend/pom.xml` y en `frontend/pubspec.lock` (el `pubspec.yaml` da rangos), y Maven se usa con el Wrapper (`./mvnw`).
+- **Dependabot** (`.github/dependabot.yml`) revisa cada lunes las dependencias de Maven y de Flutter, y cada mes las acciones del CI. Abre un PR cuando hay una versión nueva o una falla de seguridad conocida. Las versiones menores y de parche llegan juntas en un solo PR.
+- Esos PR se revisan como cualquier otro: el CI tiene que pasar antes de unirlos. Una versión mayor puede romper el código, así que hay que probarla.

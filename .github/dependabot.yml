@@ -1,0 +1,41 @@
+# Dependabot revisa cada semana si hay versiones nuevas o con fallas de
+# seguridad en las dependencias y abre un PR por cada grupo de cambios.
+# Los PR siguen pasando por el CI y la revisión de siempre.
+version: 2
+updates:
+  # Backend: dependencias de Maven (pom.xml)
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "America/Lima"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(backend)"
+    groups:
+      # Las versiones menores y de parche van juntas en un solo PR.
+      menores:
+        update-types: ["minor", "patch"]
+
+  # Frontend: paquetes de Flutter (pubspec.yaml)
+  - package-ecosystem: "pub"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "America/Lima"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(frontend)"
+    groups:
+      menores:
+        update-types: ["minor", "patch"]
+
+  # Acciones del CI (.github/workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
