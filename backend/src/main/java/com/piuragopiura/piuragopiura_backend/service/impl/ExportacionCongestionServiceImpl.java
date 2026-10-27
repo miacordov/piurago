@@ -113,7 +113,7 @@ public class ExportacionCongestionServiceImpl implements ExportacionCongestionSe
 
     /**
      * Ancho de cada columna según su texto más largo. No se usa autoSizeColumn porque necesita
-     * las fuentes del sistema, que la imagen de Docker (Alpine) no trae.
+     * las fuentes del sistema, que las imágenes de Docker livianas pueden no traer.
      */
     private void ajustarAnchos(Sheet hoja, int columnas) {
         for (int c = 0; c < columnas; c++) {

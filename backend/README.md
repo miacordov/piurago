@@ -125,7 +125,7 @@ La congestión sale de los mismos reportes GPS de los pasajeros, igual para toda
 | POST | `/api/historico-congestion/recalcular-todas` | solo registrados | Fuerza el recálculo de todas las rutas sin esperar la hora. |
 | POST | `/api/historico-congestion/recalcular?idRuta=&franjaHoraria=&diaSemana=` | solo registrados | Recalcula una ruta en una franja y un día. |
 
-El Excel se arma con **Apache POI** (`ExportacionCongestionServiceImpl`). El ancho de las columnas se calcula con el largo del texto y no con `autoSizeColumn`, porque este necesita fuentes del sistema que la imagen de Docker (Alpine) no trae.
+El Excel se arma con **Apache POI** (`ExportacionCongestionServiceImpl`). El ancho de las columnas se calcula con el largo del texto y no con `autoSizeColumn`, porque este necesita fuentes del sistema y las imágenes de Docker livianas, como la de Render, pueden no traerlas.
 
 Se configura con `piurago.congestion.recalculo-ms` (cada cuánto, por defecto 1 hora), `piurago.congestion.recalculo-inicial-ms` y `piurago.congestion.recalculo-automatico=false` para apagarlo.
 
