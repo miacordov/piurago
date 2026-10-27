@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/routes.dart';
 import 'core/theme/app_theme.dart';
+import 'data/api/auth_service.dart';
 import 'data/lugares/buscador_lugares.dart';
 import 'data/models/lugar.dart';
 import 'data/rutas_repository.dart';
@@ -15,6 +16,7 @@ class PiuraGoApp extends StatelessWidget {
   const PiuraGoApp({
     super.key,
     this.rutasRepository,
+    this.authService,
     this.buscadorLugares,
     this.lugaresConocidos = const [],
     this.mostrarMapaBase = true,
@@ -22,6 +24,11 @@ class PiuraGoApp extends StatelessWidget {
 
   /// Fuente de datos de las rutas. Si no se indica, se usan datos de prueba.
   final RutasRepository? rutasRepository;
+
+  /// Sesión con el backend. Si hay una sesión registrada guardada, la app
+  /// abre directamente en Rutas. Sin él (pruebas, modo demo), el acceso no
+  /// llama al backend.
+  final AuthService? authService;
 
   /// Buscador de lugares en línea de "¿A dónde vas?". Si no se indica, solo
   /// se sugieren los paraderos (por ejemplo, en las pruebas, sin internet).
@@ -42,9 +49,11 @@ class PiuraGoApp extends StatelessWidget {
       title: 'PiuraGo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      initialRoute: AppRoutes.login,
+      initialRoute: (authService?.esRegistrado ?? false)
+          ? AppRoutes.rutas
+          : AppRoutes.login,
       routes: {
-        AppRoutes.login: (_) => const LoginPage(),
+        AppRoutes.login: (_) => LoginPage(authService: authService),
         AppRoutes.ubicacion: (_) => const LocationPage(),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),
         AppRoutes.mapa: (context) {

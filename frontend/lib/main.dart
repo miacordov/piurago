@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import 'data/api/almacen_sesion.dart';
 import 'data/api/auth_service.dart';
 import 'data/api/http_rutas_repository.dart';
 import 'data/lugares/buscador_lugares.dart';
@@ -26,12 +27,18 @@ const _urlBuscador = String.fromEnvironment(
   defaultValue: PhotonBuscadorLugares.urlPublica,
 );
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   final BuscadorLugares buscador = _datosPrueba
       ? const BuscadorLugaresPrueba()
       : PhotonBuscadorLugares(url: Uri.parse(_urlBuscador));
 
-  final authService = AuthService(baseUrl: Uri.parse(_urlApi));
+  // La sesión se guarda cifrada en el dispositivo y se recupera al abrir.
+  final authService = AuthService(
+    baseUrl: Uri.parse(_urlApi),
+    almacen: AlmacenSesionSegura(),
+  );
+  await authService.restaurarSesion();
   final RutasRepository rutasRepo = _datosPrueba
       ? const FakeRutasRepository()
       : HttpRutasRepository(
@@ -40,9 +47,12 @@ void main() {
           fallback: const FakeRutasRepository(),
         );
 
-  runApp(PiuraGoApp(
-    rutasRepository: rutasRepo,
-    buscadorLugares: buscador,
-    lugaresConocidos: lugaresPiura,
-  ));
+  runApp(
+    PiuraGoApp(
+      rutasRepository: rutasRepo,
+      authService: _datosPrueba ? null : authService,
+      buscadorLugares: buscador,
+      lugaresConocidos: lugaresPiura,
+    ),
+  );
 }

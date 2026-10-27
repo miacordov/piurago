@@ -9,6 +9,7 @@ import '../../core/theme/app_text.dart';
 import '../../data/api/http_rutas_repository.dart';
 import '../../data/lugares/buscador_lugares.dart';
 import '../../data/models/lugar.dart';
+import '../../data/models/eta.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
@@ -56,11 +57,19 @@ class MapPage extends StatefulWidget {
 }
 
 class _DatosMapa {
-  const _DatosMapa(this.ruta, this.paraderos, [this.trazado = const []]);
+  const _DatosMapa(
+    this.ruta,
+    this.paraderos, [
+    this.trazado = const [],
+    this.eta,
+  ]);
 
   final Ruta? ruta;
   final List<Paradero> paraderos;
   final List<LatLng> trazado;
+
+  /// Próxima unidad según el backend, si el repositorio la da.
+  final Eta? eta;
 }
 
 class _MapPageState extends State<MapPage> {
@@ -101,11 +110,15 @@ class _MapPageState extends State<MapPage> {
       (r) => r.idRuta == widget.idRuta,
       orElse: () => rutas.first,
     );
-    final (paraderos, trazado) = await (
-      widget.repository.paraderos(ruta.idRuta),
-      widget.repository.trazado(ruta.idRuta),
+    final repo = widget.repository;
+    final (paraderos, trazado, eta) = await (
+      repo.paraderos(ruta.idRuta),
+      repo.trazado(ruta.idRuta),
+      repo is FuenteEta
+          ? (repo as FuenteEta).eta(ruta.idRuta)
+          : Future<Eta?>.value(),
     ).wait;
-    return _DatosMapa(ruta, paraderos, trazado);
+    return _DatosMapa(ruta, paraderos, trazado, eta);
   }
 
   void _recargar() {
@@ -171,6 +184,7 @@ class _MapPageState extends State<MapPage> {
             ruta: ruta,
             paraderos: snapshot.data!.paraderos,
             trazado: snapshot.data!.trazado,
+            eta: snapshot.data!.eta,
             esDemostracion: widget.repository.esDemostracion,
             mostrarMapa: widget.mostrarMapa,
             onPlanificarViaje: _planificarViaje,
@@ -187,6 +201,7 @@ class _Contenido extends StatefulWidget {
     required this.ruta,
     required this.paraderos,
     required this.trazado,
+    this.eta,
     required this.esDemostracion,
     required this.mostrarMapa,
     required this.onPlanificarViaje,
@@ -196,6 +211,7 @@ class _Contenido extends StatefulWidget {
   final Ruta ruta;
   final List<Paradero> paraderos;
   final List<LatLng> trazado;
+  final Eta? eta;
   final bool esDemostracion;
   final bool mostrarMapa;
   final VoidCallback onPlanificarViaje;
@@ -209,7 +225,10 @@ class _ContenidoState extends State<_Contenido> {
   bool _enViaje = false;
 
   Future<void> _iniciarViaje() async {
-    final confirmado = await ConfirmarAbordajeDialog.mostrar(context, widget.ruta);
+    final confirmado = await ConfirmarAbordajeDialog.mostrar(
+      context,
+      widget.ruta,
+    );
     if (confirmado == true && mounted) {
       setState(() => _enViaje = true);
     }
@@ -257,6 +276,7 @@ class _ContenidoState extends State<_Contenido> {
           )
         : RutaPanel(
             ruta: widget.ruta,
+            eta: widget.eta,
             paraderos: widget.paraderos,
             onPlanificarViaje: widget.onPlanificarViaje,
             onCompartirRuta: _iniciarViaje,

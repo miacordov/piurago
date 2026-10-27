@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/ui.dart';
+import '../../data/models/eta.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 
@@ -13,12 +14,16 @@ class RutaPanel extends StatelessWidget {
     super.key,
     required this.ruta,
     required this.paraderos,
+    this.eta,
     this.onPlanificarViaje,
     this.onCompartirRuta,
   });
 
   final Ruta ruta;
   final List<Paradero> paraderos;
+
+  /// Próxima unidad según el backend (si está simulada, se indica).
+  final Eta? eta;
 
   /// Si se indica, el panel muestra el botón "Planificar viaje".
   final VoidCallback? onPlanificarViaje;
@@ -86,7 +91,7 @@ class RutaPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _CajaEta(ruta: ruta, paraderos: paraderos.length),
+          _CajaEta(ruta: ruta, paraderos: paraderos.length, eta: eta),
           if (onPlanificarViaje != null) ...[
             const SizedBox(height: 12),
             OutlinedButton.icon(
@@ -157,7 +162,8 @@ class RutaPanel extends StatelessWidget {
           ],
           const SizedBox(height: 24),
           FilledButton.icon(
-            onPressed: onCompartirRuta ??
+            onPressed:
+                onCompartirRuta ??
                 () => mostrarProximamente(context, 'Compartir la ruta'),
             style: appFilledButtonStyle(),
             icon: const Icon(Icons.share_outlined, size: 18),
@@ -178,13 +184,18 @@ class RutaPanel extends StatelessWidget {
 }
 
 class _CajaEta extends StatelessWidget {
-  const _CajaEta({required this.ruta, required this.paraderos});
+  const _CajaEta({required this.ruta, required this.paraderos, this.eta});
 
   final Ruta ruta;
   final int paraderos;
+  final Eta? eta;
 
   @override
   Widget build(BuildContext context) {
+    final delBackend = this.eta;
+    if (delBackend != null && ruta.activa) {
+      return _cajaConEta(delBackend);
+    }
     final eta = ruta.etaMinutos;
     // Sin ETA en vivo se muestran la frecuencia, el horario y el pasaje.
     final sinEta = eta == null && ruta.frecuenciaMinutos != null;
@@ -232,6 +243,83 @@ class _CajaEta extends StatelessWidget {
                     color: AppColors.text,
                   ),
                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+extension on _CajaEta {
+  /// ETA del backend. Si es SIMULADO (nadie comparte el GPS en esa línea),
+  /// lo indica con "Tiempo estimado": sale de la frecuencia, no del bus real.
+  Widget _cajaConEta(Eta eta) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.etaBox,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.schedule, size: 22, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Próxima unidad estimada',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.small,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      '~${eta.minutos} min',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    if (eta.simulado) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: const Text(
+                            'Tiempo estimado',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.small,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (eta.simulado) ...[
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Nadie comparte el GPS en esta línea ahora: se calcula con '
+                    'su frecuencia.',
+                    style: AppText.small,
+                  ),
+                ],
               ],
             ),
           ),

@@ -3,24 +3,28 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+import '../models/eta.dart';
 import '../models/paradero.dart';
 import '../models/ruta.dart';
 import '../rutas_repository.dart';
-import '../trazados_oficiales.dart';
 import 'auth_service.dart';
 
 /// Repositorio de rutas que consume la API REST de Spring Boot.
 /// Si el backend no está disponible o falla la red, conmuta automáticamente
 /// al [fallback] (por defecto [FakeRutasRepository]) para que la aplicación
 /// siga funcionando en modo demostración.
-class HttpRutasRepository implements RutasRepository {
+///
+/// Los ids de las rutas en el backend no son los mismos que en los datos
+/// locales: para usar el trazado oficial o los paraderos locales de una ruta
+/// se busca la misma línea por su código (RD-12, I-18...).
+class HttpRutasRepository implements RutasRepository, FuenteEta {
   HttpRutasRepository({
     http.Client? cliente,
     Uri? baseUrl,
     required this.authService,
     this.fallback = const FakeRutasRepository(),
-  })  : _cliente = cliente ?? http.Client(),
-        _baseUrl = baseUrl ?? Uri.parse('http://localhost:8080');
+  }) : _cliente = cliente ?? http.Client(),
+       _baseUrl = baseUrl ?? Uri.parse('http://localhost:8080');
 
   final http.Client _cliente;
   final Uri _baseUrl;
@@ -28,6 +32,9 @@ class HttpRutasRepository implements RutasRepository {
   final RutasRepository fallback;
 
   bool _usandoFallback = false;
+
+  /// Código de cada ruta según el último listado (id -> código).
+  final _codigos = <int, String>{};
 
   @override
   bool get esDemostracion => _usandoFallback;
@@ -54,6 +61,7 @@ class HttpRutasRepository implements RutasRepository {
 
         if (rutas.isNotEmpty) {
           _usandoFallback = false;
+          _recordarCodigos(rutas);
           return rutas;
         }
       }
@@ -62,7 +70,30 @@ class HttpRutasRepository implements RutasRepository {
     }
 
     _usandoFallback = true;
-    return fallback.listar();
+    final locales = await fallback.listar();
+    _recordarCodigos(locales);
+    return locales;
+  }
+
+  void _recordarCodigos(List<Ruta> rutas) {
+    _codigos
+      ..clear()
+      ..addEntries([
+        for (final r in rutas)
+          if (r.codigo != null) MapEntry(r.idRuta, r.codigo!),
+      ]);
+  }
+
+  /// Id en los datos locales ([fallback]) de la misma línea, o null si no se
+  /// sabe su código.
+  Future<int?> _idLocal(int idRuta) async {
+    if (_usandoFallback) return idRuta;
+    final codigo = _codigos[idRuta];
+    if (codigo == null) return null;
+    for (final r in await fallback.listar()) {
+      if (r.codigo == codigo) return r.idRuta;
+    }
+    return null;
   }
 
   @override
@@ -93,14 +124,16 @@ class HttpRutasRepository implements RutasRepository {
       // Error de red
     }
 
-    return fallback.paraderos(idRuta);
+    final local = await _idLocal(idRuta);
+    return local == null ? const <Paradero>[] : fallback.paraderos(local);
   }
 
+  /// El backend no guarda el trazado: se usa el trazado oficial local de la
+  /// misma línea (buscada por código), o ninguno.
   @override
   Future<List<LatLng>> trazado(int idRuta) async {
-    // La geometría del recorrido se dibuja con los trazados oficiales
-    // confirmados de Piura o en línea recta sobre los paraderos.
-    return trazadosOficiales[idRuta] ?? await fallback.trazado(idRuta);
+    final local = await _idLocal(idRuta);
+    return local == null ? const <LatLng>[] : fallback.trazado(local);
   }
 
   /// Envía un reporte GPS al backend durante el viaje en vivo.
@@ -132,8 +165,10 @@ class HttpRutasRepository implements RutasRepository {
     }
   }
 
-  /// Consulta el ETA en vivo calculado por el backend hacia el próximo paradero.
-  Future<int?> obtenerEta(int idRuta) async {
+  /// ETA de la próxima unidad según el backend: minutos y si es una
+  /// estimación (origen SIMULADO, sin pasajeros compartiendo el GPS).
+  @override
+  Future<Eta?> eta(int idRuta) async {
     try {
       final token = await authService.obtenerToken();
       final url = _baseUrl.replace(path: '/api/reportes-gps/eta/$idRuta');
@@ -147,11 +182,10 @@ class HttpRutasRepository implements RutasRepository {
       );
 
       if (respuesta.statusCode == 200) {
-        final datos = jsonDecode(respuesta.body) as Map<String, dynamic>;
-        return (datos['etaMinutos'] as num?)?.toInt();
+        return Eta.fromJson(jsonDecode(respuesta.body) as Map<String, dynamic>);
       }
     } catch (_) {
-      // Error de red
+      // Error de red o respuesta inesperada.
     }
     return null;
   }

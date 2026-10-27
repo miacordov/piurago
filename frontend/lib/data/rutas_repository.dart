@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
+import 'models/eta.dart';
 import 'models/paradero.dart';
 import 'models/ruta.dart';
 import 'paraderos_propuestos.dart';
@@ -20,6 +21,13 @@ abstract class RutasRepository {
   /// Indica que los datos no vienen del backend (sin paraderos reales ni ETA
   /// en vivo): la interfaz lo avisa al usuario.
   bool get esDemostracion;
+}
+
+/// Fuente del tiempo de llegada de la próxima unidad. La implementa el
+/// repositorio que llama al backend; los datos de prueba no tienen ETA.
+abstract class FuenteEta {
+  /// ETA de la ruta, o null si el backend no responde.
+  Future<Eta?> eta(int idRuta);
 }
 
 /// Rutas reales de Piura y Castilla tomadas de https://piuratransporta.com/rutas

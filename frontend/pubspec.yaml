@@ -38,6 +38,7 @@ dependencies:
   # Cliente HTTP del buscador de lugares (Photon). Ya venía con flutter_map.
   http: ^1.6.0
   latlong2: ^0.10.1
+  flutter_secure_storage: ^11.2.0
 
 dev_dependencies:
   flutter_test:
