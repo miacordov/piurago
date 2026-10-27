@@ -45,6 +45,11 @@ Aplicación Flutter (móvil y web) de PiuraGo. Mapas con flutter_map + OpenStree
   pestañas piden `MANANA_PICO`, `MEDIO_DIA`, `TARDE_PICO` o `NOCHE`. Sin viajes
   compartidos en la franja, la pantalla lo explica en vez de mostrar cifras; con los
   datos de prueba avisa que hace falta el servidor.
+- **Exportar a Excel:** el botón de Congestión descarga el Excel que arma el backend
+  con Apache POI (`GET /api/historico-congestion/exportar`). En el navegador se
+  descarga directo; en el celular se abre el menú de compartir (`share_plus`) para
+  guardarlo o enviarlo. Ver `lib/core/guardar_archivo.dart`. La prueba de la descarga
+  en el navegador corre aparte: `flutter test --platform chrome test/core`.
 - **Ids del backend:** las rutas del backend tienen otros ids que los datos locales.
   El trazado oficial y los paraderos de respaldo se buscan por el código de la
   línea (`lib/data/api/http_rutas_repository.dart`).
