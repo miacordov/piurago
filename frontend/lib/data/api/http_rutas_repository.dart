@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../models/eta.dart';
 import '../models/paradero.dart';
+import '../models/resumen_congestion.dart';
 import '../models/ruta.dart';
 import '../rutas_repository.dart';
 import 'auth_service.dart';
@@ -17,7 +18,8 @@ import 'auth_service.dart';
 /// Los ids de las rutas en el backend no son los mismos que en los datos
 /// locales: para usar el trazado oficial o los paraderos locales de una ruta
 /// se busca la misma línea por su código (RD-12, I-18...).
-class HttpRutasRepository implements RutasRepository, FuenteEta {
+class HttpRutasRepository
+    implements RutasRepository, FuenteEta, FuenteCongestion {
   HttpRutasRepository({
     http.Client? cliente,
     Uri? baseUrl,
@@ -183,6 +185,35 @@ class HttpRutasRepository implements RutasRepository, FuenteEta {
 
       if (respuesta.statusCode == 200) {
         return Eta.fromJson(jsonDecode(respuesta.body) as Map<String, dynamic>);
+      }
+    } catch (_) {
+      // Error de red o respuesta inesperada.
+    }
+    return null;
+  }
+
+  /// Congestión de la ciudad según el histórico del backend.
+  @override
+  Future<ResumenCongestion?> resumenCongestion({String? franjaHoraria}) async {
+    try {
+      final token = await authService.obtenerToken();
+      final url = _baseUrl.replace(
+        path: '/api/historico-congestion/resumen',
+        queryParameters: {'franjaHoraria': ?franjaHoraria},
+      );
+
+      final respuesta = await _cliente.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (respuesta.statusCode == 200) {
+        return ResumenCongestion.fromJson(
+          jsonDecode(utf8.decode(respuesta.bodyBytes)) as Map<String, dynamic>,
+        );
       }
     } catch (_) {
       // Error de red o respuesta inesperada.

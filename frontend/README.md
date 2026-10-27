@@ -38,6 +38,13 @@ Aplicación Flutter (móvil y web) de PiuraGo. Mapas con flutter_map + OpenStree
 - **Próxima unidad:** el panel de la ruta muestra el ETA de
   `GET /api/reportes-gps/eta/{idRuta}`. Cuando el backend responde `origen: SIMULADO`
   (nadie comparte el GPS en esa línea), se indica "Tiempo estimado".
+- **Congestión:** la pantalla de Congestión muestra
+  `GET /api/historico-congestion/resumen`: el nivel de la ciudad, la velocidad y la
+  demora promedio, una barra por franja del día y los tramos más lentos entre
+  paraderos. "Ahora" deja que el backend elija la franja con su hora; las otras
+  pestañas piden `MANANA_PICO`, `MEDIO_DIA`, `TARDE_PICO` o `NOCHE`. Sin viajes
+  compartidos en la franja, la pantalla lo explica en vez de mostrar cifras; con los
+  datos de prueba avisa que hace falta el servidor.
 - **Ids del backend:** las rutas del backend tienen otros ids que los datos locales.
   El trazado oficial y los paraderos de respaldo se buscan por el código de la
   línea (`lib/data/api/http_rutas_repository.dart`).
