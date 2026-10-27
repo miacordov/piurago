@@ -121,8 +121,11 @@ La congestión sale de los mismos reportes GPS de los pasajeros, igual para toda
 |---|---|---|---|
 | GET | `/api/historico-congestion/resumen?franjaHoraria=&diaSemana=` | cualquier usuario con token | Congestión de la ciudad: nivel general, velocidad y demora promedio, nivel de cada franja del día y los 5 tramos más lentos (ruta, paraderos, minutos de más). Sin parámetros usa la franja y el día de ahora. Sin datos, el nivel viene vacío. |
 | GET | `/api/historico-congestion/ruta/{idRuta}` | cualquier usuario con token | Todos los registros de una ruta. |
+| GET | `/api/historico-congestion/exportar` | cualquier usuario con token | Descarga el histórico en Excel (`congestion-piura-AAAA-MM-DD.xlsx`), con una hoja por ruta y otra por tramo, ordenadas por línea, día y franja. |
 | POST | `/api/historico-congestion/recalcular-todas` | solo registrados | Fuerza el recálculo de todas las rutas sin esperar la hora. |
 | POST | `/api/historico-congestion/recalcular?idRuta=&franjaHoraria=&diaSemana=` | solo registrados | Recalcula una ruta en una franja y un día. |
+
+El Excel se arma con **Apache POI** (`ExportacionCongestionServiceImpl`). El ancho de las columnas se calcula con el largo del texto y no con `autoSizeColumn`, porque este necesita fuentes del sistema que la imagen de Docker (Alpine) no trae.
 
 Se configura con `piurago.congestion.recalculo-ms` (cada cuánto, por defecto 1 hora), `piurago.congestion.recalculo-inicial-ms` y `piurago.congestion.recalculo-automatico=false` para apagarlo.
 
