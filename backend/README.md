@@ -91,6 +91,22 @@ El perfil `carga` ejecuta la migración y los seeds antes de que Hibernate valid
 | `db/seeds/002_rutas_plan_regulador.sql` | Datos de la Municipalidad (Plan Regulador, O.M. 092-02-CMPP): agrega RD-07, RD-12, RD-13 y RD-17. En las 10 rutas con recorrido oficial guarda ese recorrido y **reemplaza sus paraderos** por los del recorrido oficial (solo si todavía no los tiene). Antes borra el histórico de congestión de los paraderos que se quitan; ese histórico se rehace con `POST /api/historico-congestion/recalcular`. Ver `docs/datos/rutas-plan-regulador.md`. |
 - `postman/`: coleccion de pruebas de punta a punta (pendiente de agregar).
 
+## Cómo se calcula el ETA
+
+`GET /api/reportes-gps/eta/{idRuta}` responde cuánto falta para la próxima unidad y su `origen`. Lo calcula `EtaServiceImpl`, igual para todas las rutas:
+
+- **`REAL`:** hay un pasajero de esa línea compartiendo su viaje, con **dos reportes suyos en los últimos 5 minutos**.
+  - **Pasajero:** la velocidad se calcula solo con los reportes de ese pasajero; no se mezclan buses distintos de la misma línea.
+  - **Destino:** el ETA es al **siguiente paradero**, el más cercano de los paraderos a los que el bus se está acercando. Vale en la ida y en la vuelta.
+  - **Velocidad:** la del momento. Si el bus está detenido (menos de 3 km/h) o la medida es ruido del GPS (más de 100 km/h), se usa la velocidad típica de la línea en la franja y el día actuales (`historico_congestion`). Si la línea no tiene histórico, se usan 15 km/h.
+- **`SIMULADO`:** nadie comparte su viaje en esa línea ahora. Sale de la frecuencia de la línea y la hora; la app lo indica como "Tiempo estimado".
+
+El resultado se guarda 10 segundos (`CacheConfig`): en cuanto alguien empieza a compartir su viaje, el ETA de esa línea pasa a `REAL`.
+
+**Límites:**
+- La distancia al paradero es en línea recta, no por las calles.
+- Las horas usan el reloj del servidor. En un servidor con hora UTC, como Render, la franja horaria queda corrida respecto a Piura.
+
 ## Estructura
 
 ```
