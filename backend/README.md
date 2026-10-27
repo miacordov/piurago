@@ -105,7 +105,7 @@ El resultado se guarda 10 segundos (`CacheConfig`): en cuanto alguien empieza a 
 
 **Límites:**
 - La distancia al paradero es en línea recta, no por las calles.
-- Las horas usan el reloj del servidor. En un servidor con hora UTC, como Render, la franja horaria queda corrida respecto a Piura.
+- Las horas usan la zona de Piura (`America/Lima`) aunque el servidor esté en otra, como UTC en Render: `PiuragopiuraBackendApplication` la fija al arrancar. No hay que configurar nada en Render.
 
 ## Estructura
 
