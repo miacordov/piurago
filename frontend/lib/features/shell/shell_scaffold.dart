@@ -6,10 +6,19 @@ import 'app_shell.dart';
 /// Marco de las pantallas internas. En pantallas anchas muestra barra lateral
 /// y barra superior; en angostas, un menú desplegable.
 class ShellScaffold extends StatelessWidget {
-  const ShellScaffold({super.key, required this.seccion, required this.child});
+  const ShellScaffold({
+    super.key,
+    required this.seccion,
+    required this.child,
+    this.esDemostracion = false,
+  });
 
   final SeccionApp seccion;
   final Widget child;
+
+  /// Los datos de la pantalla son de prueba (sin backend): la barra superior
+  /// lo avisa con "Modo demostración".
+  final bool esDemostracion;
 
   static const double anchoMinimoEscritorio = 760;
 
@@ -26,7 +35,7 @@ class ShellScaffold extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      const TopBar(),
+                      TopBar(esDemostracion: esDemostracion),
                       Expanded(child: child),
                     ],
                   ),

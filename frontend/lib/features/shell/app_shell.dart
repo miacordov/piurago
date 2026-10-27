@@ -162,9 +162,12 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-/// Barra superior de pantallas anchas: ubicación, modo demostración y perfil.
+/// Barra superior de pantallas anchas: ubicación, modo demostración (solo
+/// con datos de prueba) y perfil.
 class TopBar extends StatelessWidget {
-  const TopBar({super.key});
+  const TopBar({super.key, this.esDemostracion = false});
+
+  final bool esDemostracion;
 
   @override
   Widget build(BuildContext context) {
@@ -175,11 +178,15 @@ class TopBar extends StatelessWidget {
         color: AppColors.surface,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.location_on_outlined, size: 18, color: AppColors.primary),
-          SizedBox(width: 8),
-          Text(
+          const Icon(
+            Icons.location_on_outlined,
+            size: 18,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
+          const Text(
             'Piura, Perú',
             style: TextStyle(
               fontSize: 13,
@@ -187,11 +194,17 @@ class TopBar extends StatelessWidget {
               color: AppColors.text,
             ),
           ),
-          Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
-          Spacer(),
-          DemoPill(),
-          SizedBox(width: 12),
-          UserAvatar(),
+          const Icon(
+            Icons.chevron_right,
+            size: 18,
+            color: AppColors.textMuted,
+          ),
+          const Spacer(),
+          if (esDemostracion) ...[
+            const DemoPill(),
+            const SizedBox(width: 12),
+          ],
+          const UserAvatar(),
         ],
       ),
     );

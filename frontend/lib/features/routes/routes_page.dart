@@ -80,6 +80,7 @@ class _RoutesPageState extends State<RoutesPage> {
   Widget build(BuildContext context) {
     return ShellScaffold(
       seccion: SeccionApp.rutas,
+      esDemostracion: widget.repository.esDemostracion,
       child: LayoutBuilder(
         builder: (context, constraints) {
           return _cuerpo(horizontal: constraints.maxWidth >= 600 ? 40 : 16);
