@@ -69,6 +69,10 @@ class RepoConCongestion extends FakeRutasRepository
   ResumenCongestion? Function(String? franja) respuesta;
   final pedidas = <String?>[];
 
+  /// Como el repositorio del backend cuando responde.
+  @override
+  bool get esDemostracion => false;
+
   @override
   Future<ResumenCongestion?> resumenCongestion({String? franjaHoraria}) async {
     pedidas.add(franjaHoraria);
@@ -365,5 +369,21 @@ void main() {
       expect(find.text('Exportar a Excel'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+  });
+
+  testWidgets('con el backend no muestra "Modo demostración"', (tester) async {
+    fijarPantalla(tester, escritorio);
+    await abrir(tester, RepoConCongestion((_) => resumenMedioDia));
+
+    expect(find.text('Modo demostración'), findsNothing);
+  });
+
+  testWidgets('con los datos de prueba muestra "Modo demostración"', (
+    tester,
+  ) async {
+    fijarPantalla(tester, escritorio);
+    await abrir(tester, const FakeRutasRepository());
+
+    expect(find.text('Modo demostración'), findsOneWidget);
   });
 }

@@ -71,7 +71,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/historico-congestion/recalcular").hasRole("REGISTRADO")
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/historico-congestion/recalcular",
+                                "/api/historico-congestion/recalcular-todas").hasRole("REGISTRADO")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
