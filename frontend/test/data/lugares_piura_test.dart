@@ -47,10 +47,15 @@ void main() {
   });
 
   test('buscar en la base es rápido (menos de 10 ms por tecla)', () {
-    final reloj = Stopwatch()..start();
-    for (final texto in ['j', 'jr', 'jr ', 'jr l', 'jr li', 'jr lim']) {
-      indice.sugerir(texto);
+    const teclas = ['j', 'jr', 'jr ', 'jr l', 'jr li', 'jr lim'];
+    // Calentamiento: la primera vuelta incluye la compilación del código.
+    for (var i = 0; i < 3; i++) {
+      teclas.forEach(indice.sugerir);
     }
-    expect(reloj.elapsedMilliseconds / 6, lessThan(10));
+    final reloj = Stopwatch()..start();
+    for (var i = 0; i < 5; i++) {
+      teclas.forEach(indice.sugerir);
+    }
+    expect(reloj.elapsedMilliseconds / (5 * teclas.length), lessThan(10));
   });
 }
