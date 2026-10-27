@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
+import '../../data/models/eta.dart';
 import '../../data/models/ruta.dart';
 
 /// Fila de una línea en la lista de rutas, como en la lista de líneas de
@@ -10,9 +11,18 @@ import '../../data/models/ruta.dart';
 /// dónde pasa, y a la derecha la frecuencia y el pasaje. Tocarla abre la
 /// línea en el mapa.
 class RutaCard extends StatelessWidget {
-  const RutaCard({super.key, required this.ruta, this.lugarCoincidente});
+  const RutaCard({
+    super.key,
+    required this.ruta,
+    this.lugarCoincidente,
+    this.eta,
+  });
 
   final Ruta ruta;
+
+  /// Próxima unidad según el backend: reemplaza a la frecuencia y, si es
+  /// simulada, se indica "Tiempo estimado".
+  final Eta? eta;
 
   /// Lugar que coincidió con la búsqueda ("Pasa por Mercado Modelo"). Si no
   /// hay, se muestran los primeros lugares por los que pasa.
@@ -31,8 +41,11 @@ class RutaCard extends StatelessWidget {
     final pasaPor = lugarCoincidente != null
         ? 'Pasa por $lugarCoincidente'
         : lugares;
+    final eta = this.eta;
     final (servicio, colorServicio) = !ruta.activa
         ? ('Fuera de servicio', AppColors.danger)
+        : eta != null
+        ? ('~${eta.minutos} min', AppColors.primary)
         : ruta.etaMinutos != null
         ? ('${ruta.etaMinutos} min', AppColors.primary)
         : ruta.frecuenciaMinutos != null
@@ -126,6 +139,16 @@ class RutaCard extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: colorServicio,
+                          ),
+                        ),
+                      if (eta != null && eta.simulado && ruta.activa)
+                        const Text(
+                          'Tiempo estimado',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
                           ),
                         ),
                       if (pasaje != null)

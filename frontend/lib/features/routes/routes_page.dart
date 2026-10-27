@@ -4,6 +4,7 @@ import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
+import '../../data/models/eta.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
 import '../shell/app_shell.dart';
@@ -26,6 +27,10 @@ class RoutesPage extends StatefulWidget {
 
 class _RoutesPageState extends State<RoutesPage> {
   late Future<List<Ruta>> _rutas;
+
+  /// Próxima unidad de cada línea en servicio (si el repositorio la da).
+  /// Se piden en paralelo una sola vez, sin frenar la carga de la lista.
+  Map<int, Eta> _etas = const {};
   final _busqueda = TextEditingController();
   String _consulta = '';
   TipoServicio? _tipo;
@@ -33,7 +38,24 @@ class _RoutesPageState extends State<RoutesPage> {
   @override
   void initState() {
     super.initState();
+    _cargar();
+  }
+
+  void _cargar() {
     _rutas = widget.repository.listar();
+    _rutas.then(_cargarEtas, onError: (_) {});
+  }
+
+  Future<void> _cargarEtas(List<Ruta> rutas) async {
+    final repo = widget.repository;
+    if (repo is! FuenteEta) return;
+    final fuente = repo as FuenteEta;
+    final activas = rutas.where((r) => r.activa).toList();
+    final etas = await Future.wait(activas.map((r) => fuente.eta(r.idRuta)));
+    if (!mounted) return;
+    setState(() {
+      _etas = {for (final (i, ruta) in activas.indexed) ruta.idRuta: ?etas[i]};
+    });
   }
 
   @override
@@ -43,9 +65,7 @@ class _RoutesPageState extends State<RoutesPage> {
   }
 
   void _recargar() {
-    setState(() {
-      _rutas = widget.repository.listar();
-    });
+    setState(_cargar);
   }
 
   void _limpiar() {
@@ -150,6 +170,7 @@ class _RoutesPageState extends State<RoutesPage> {
                         key: ValueKey('ruta-${r.ruta.idRuta}'),
                         ruta: r.ruta,
                         lugarCoincidente: r.lugarCoincidente,
+                        eta: _etas[r.ruta.idRuta],
                       );
                     },
                   ),
