@@ -50,4 +50,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         nuevo.setPasswordHash(passwordEncoder.encode(passwordPlano));
         return usuarioRegistradoRepository.save(nuevo);
     }
+
+    @Override
+    public UsuarioRegistrado buscarPorEmail(String email) {
+        return usuarioRegistradoRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+    }
 }
