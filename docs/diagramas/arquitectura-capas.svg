@@ -128,9 +128,7 @@
 <rect x="396" y="977" width="398" height="50" fill="#FFFFFF"/>
 <ellipse cx="595" cy="976" rx="200" ry="12" fill="#EEF2F7" stroke="#121B2D"/>
 <text x="595" y="1012" font-size="14" font-weight="700" fill="#121B2D" text-anchor="middle">PostgreSQL (Neon)</text>
-<path d="M74.0,338 L74.0,344 L48,344 L48,606 L439.85714285714283,606 L439.85714285714283,680" fill="none" stroke="#C62828" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flechaRoja)"/>
-<text x="58" y="600" font-size="11.5" font-weight="600" fill="#C62828" text-anchor="start">excepción: AuthController usa un repositorio (pendiente, #12)</text>
-<text x="1134" y="652" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="end">Solo usan clases de model.</text>
+<text x="1134" y="652" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="end">Ningún controller los usa. Solo usan clases de model.</text>
 <rect x="1180" y="240" width="280" height="250" rx="10" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
 <text x="1194" y="262" font-size="13" font-weight="700" fill="#342EC1" text-anchor="start">DTO  (V de MVC en la API)</text>
 <text x="1194" y="284" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Entrada: LoginRequestDTO,</text>
@@ -158,13 +156,11 @@
 <text x="1194" y="742" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">   ExportacionCongestionServiceImpl</text>
 <text x="1194" y="760" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Logback: logback-spring.xml</text>
 <text x="1194" y="778" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">jjwt (JWT) · springdoc (Swagger)</text>
-<rect x="1180" y="816" width="280" height="132" rx="10" fill="#FFFFFF" stroke="#5D6A78" stroke-width="1.2"/>
+<rect x="1180" y="816" width="280" height="116" rx="10" fill="#FFFFFF" stroke="#5D6A78" stroke-width="1.2"/>
 <text x="1194" y="838" font-size="13" font-weight="700" fill="#5D6A78" text-anchor="start">LEYENDA</text>
 <line x1="1196" y1="868" x2="1240" y2="868" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
 <text x="1250" y="872" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">usa / depende de</text>
 <line x1="1196" y1="892" x2="1240" y2="892" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
 <text x="1250" y="896" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">implementa / hereda</text>
-<line x1="1196" y1="916" x2="1240" y2="916" stroke="#C62828" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flechaRoja)"/>
-<text x="1250" y="920" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">excepción a corregir</text>
-<text x="1194" y="940" font-size="11" font-weight="400" fill="#5D6A78" text-anchor="start">Pruebas: Mockito sobre las interfaces</text>
+<text x="1194" y="920" font-size="11" font-weight="400" fill="#5D6A78" text-anchor="start">Pruebas: Mockito sobre las interfaces</text>
 </svg>
