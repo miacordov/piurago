@@ -22,7 +22,7 @@ MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → r
 ## Decisiones tomadas
 - Un solo repositorio (monorepo) con backend/, frontend/ y docs/.
 - Los datos reales de rutas y paraderos se cargan al final: las rutas de Piura cambian seguido por cierres de avenidas.
-- El tema del ETA simulado (cuando no hay colaboradores) se resuelve al final.
+- El ETA simulado ya está implementado en el backend: sin colaboradores la respuesta trae `origen` = `SIMULADO`; con reportes reales, `REAL`.
 
 ## Configuración local del backend
 - Las credenciales viven en backend/config/application-local.properties (ignorado por Git; hay una plantilla .example).
@@ -31,7 +31,7 @@ MVC + DAO + SOLID + TDD. Capas: controller → service (interfaces + impl) → r
 
 ## Pendiente
 - Antes del despliegue: rotar la contraseña de Neon (la cuenta la administra otra persona del equipo) y generar un JWT_SECRET nuevo.
-- Al final: datos reales de rutas y paraderos, y la decisión sobre el ETA simulado.
+- Al final: datos reales de rutas y paraderos.
 
 ## Flujo de trabajo (detalle en CONTRIBUTING.md)
 - Nadie hace push directo a main: cada cambio va en una rama (feature/, fix/, docs/, test/, chore/) y entra por Pull Request con al menos una aprobación.
