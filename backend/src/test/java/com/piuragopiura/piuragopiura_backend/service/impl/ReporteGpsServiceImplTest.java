@@ -117,4 +117,19 @@ class ReporteGpsServiceImplTest {
         assertThat(captor.getValue().getPageSize()).isEqualTo(5);
         assertThat(captor.getValue().getPageNumber()).isZero();
     }
+
+    @Test
+    void obtenerRecientesPideLosReportesDesdeLaHoraIndicada() {
+        java.time.LocalDateTime desde = java.time.LocalDateTime.now().minusMinutes(5);
+        when(reporteGpsRepository.findByRuta_IdRutaAndFechaHoraAfterOrderByFechaHoraDesc(
+                eq(2L), eq(desde), any(Pageable.class))).thenReturn(List.of());
+
+        service.obtenerRecientes(2L, desde);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(reporteGpsRepository).findByRuta_IdRutaAndFechaHoraAfterOrderByFechaHoraDesc(
+                eq(2L), eq(desde), captor.capture());
+        assertThat(captor.getValue().getPageNumber()).isZero();
+        assertThat(captor.getValue().getPageSize()).isEqualTo(ReporteGpsServiceImpl.MAX_REPORTES_RECIENTES);
+    }
 }
