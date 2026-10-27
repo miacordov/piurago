@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -62,5 +63,14 @@ public class ReporteGpsServiceImpl implements ReporteGpsService {
     @Override
     public List<ReporteGps> obtenerUltimos(Long idRuta, int limite) {
         return reporteGpsRepository.findByRuta_IdRutaOrderByFechaHoraDesc(idRuta, PageRequest.of(0, limite));
+    }
+
+    /** Tope defensivo de reportes que se leen para calcular el ETA de una ruta. */
+    static final int MAX_REPORTES_RECIENTES = 200;
+
+    @Override
+    public List<ReporteGps> obtenerRecientes(Long idRuta, LocalDateTime desde) {
+        return reporteGpsRepository.findByRuta_IdRutaAndFechaHoraAfterOrderByFechaHoraDesc(
+                idRuta, desde, PageRequest.of(0, MAX_REPORTES_RECIENTES));
     }
 }

@@ -6,6 +6,7 @@ import 'data/api/auth_service.dart';
 import 'data/lugares/buscador_lugares.dart';
 import 'data/models/lugar.dart';
 import 'data/rutas_repository.dart';
+import 'data/ubicacion/servicio_ubicacion.dart';
 import 'features/auth/login_page.dart';
 import 'features/congestion/congestion_page.dart';
 import 'features/location/location_page.dart';
@@ -20,6 +21,7 @@ class PiuraGoApp extends StatelessWidget {
     this.buscadorLugares,
     this.lugaresConocidos = const [],
     this.mostrarMapaBase = true,
+    this.servicioUbicacion,
   });
 
   /// Fuente de datos de las rutas. Si no se indica, se usan datos de prueba.
@@ -42,9 +44,14 @@ class PiuraGoApp extends StatelessWidget {
   /// tienen acceso a internet).
   final bool mostrarMapaBase;
 
+  /// Servicio de geolocalización. Si no se indica, usa Geolocator real.
+  final ServicioUbicacion? servicioUbicacion;
+
   @override
   Widget build(BuildContext context) {
     final repository = rutasRepository ?? const FakeRutasRepository();
+    final ubicacion = servicioUbicacion ?? const GeolocatorServicioUbicacion();
+
     return MaterialApp(
       title: 'PiuraGo',
       debugShowCheckedModeBanner: false,
@@ -55,6 +62,8 @@ class PiuraGoApp extends StatelessWidget {
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),
         AppRoutes.ubicacion: (_) => const LocationPage(),
+        AppRoutes.login: (_) => const LoginPage(),
+        AppRoutes.ubicacion: (_) => LocationPage(servicioUbicacion: ubicacion),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),
         AppRoutes.mapa: (context) {
           final idRuta = ModalRoute.of(context)?.settings.arguments as int?;
@@ -64,6 +73,7 @@ class PiuraGoApp extends StatelessWidget {
             lugaresConocidos: lugaresConocidos,
             idRuta: idRuta,
             mostrarMapa: mostrarMapaBase,
+            servicioUbicacion: ubicacion,
           );
         },
         AppRoutes.congestion: (_) => const CongestionPage(),

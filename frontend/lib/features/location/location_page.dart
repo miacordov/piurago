@@ -4,15 +4,44 @@ import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
+import '../../data/ubicacion/servicio_ubicacion.dart';
 import '../auth/auth_shell.dart';
 
-/// Paso previo al mapa: pide activar la ubicación. Por ahora no solicita el
-/// permiso real del dispositivo; ambos botones llevan a la lista de rutas.
+/// Paso previo al mapa: pide activar la ubicación real del dispositivo (Android/web)
+/// utilizando [ServicioUbicacion]. Permite también continuar manualmente sin GPS.
 class LocationPage extends StatelessWidget {
-  const LocationPage({super.key});
+  const LocationPage({
+    super.key,
+    this.servicioUbicacion = const GeolocatorServicioUbicacion(),
+  });
+
+  final ServicioUbicacion servicioUbicacion;
 
   void _continuar(BuildContext context) {
     Navigator.of(context).pushReplacementNamed(AppRoutes.rutas);
+  }
+
+  Future<void> _activarUbicacion(BuildContext context) async {
+    final estado = await servicioUbicacion.solicitarPermiso();
+    if (!context.mounted) return;
+
+    if (estado == EstadoPermisoUbicacion.servicioDesactivado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('El GPS de tu dispositivo está desactivado.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } else if (estado == EstadoPermisoUbicacion.denegado ||
+        estado == EstadoPermisoUbicacion.denegadoParaSiempre) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permiso no concedido. Podrás buscar rutas manualmente.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+    _continuar(context);
   }
 
   @override
@@ -45,7 +74,7 @@ class LocationPage extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           FilledButton.icon(
-            onPressed: () => _continuar(context),
+            onPressed: () => _activarUbicacion(context),
             style: appFilledButtonStyle(),
             icon: const Icon(Icons.my_location, size: 18),
             label: const Text('Activar ubicación'),
