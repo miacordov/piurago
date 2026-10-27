@@ -2,6 +2,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'models/eta.dart';
 import 'models/paradero.dart';
+import 'models/resumen_congestion.dart';
 import 'models/ruta.dart';
 import 'paraderos_propuestos.dart';
 import 'trazados_oficiales.dart';
@@ -28,6 +29,14 @@ abstract class RutasRepository {
 abstract class FuenteEta {
   /// ETA de la ruta, o null si el backend no responde.
   Future<Eta?> eta(int idRuta);
+}
+
+/// Fuente de la congestión de la ciudad. La implementa el repositorio que
+/// llama al backend; los datos de prueba no tienen congestión.
+abstract class FuenteCongestion {
+  /// Resumen de la franja (MANANA_PICO, MEDIO_DIA, TARDE_PICO o NOCHE) del
+  /// día de hoy; sin franja, la de ahora. Null si el backend no responde.
+  Future<ResumenCongestion?> resumenCongestion({String? franjaHoraria});
 }
 
 /// Rutas reales de Piura y Castilla tomadas de https://piuratransporta.com/rutas

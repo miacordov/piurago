@@ -74,7 +74,7 @@ class PiuraGoApp extends StatelessWidget {
             servicioUbicacion: ubicacion,
           );
         },
-        AppRoutes.congestion: (_) => const CongestionPage(),
+        AppRoutes.congestion: (_) => CongestionPage(repository: repository),
       },
     );
   }
