@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
+import '../../data/ubicacion/servicio_ubicacion.dart';
 
 /// Panel lateral cuando el usuario está en viaje en vivo (referencia 06-viaje-en-vivo.png).
-/// Muestra el avance colaborativo por paraderos y el botón para finalizar viaje.
+/// Muestra el avance colaborativo por paraderos, escucha la posición GPS real
+/// del dispositivo en primer plano y ofrece el botón para finalizar viaje.
 class ViajeEnVivoPanel extends StatefulWidget {
   const ViajeEnVivoPanel({
     super.key,
@@ -16,12 +19,16 @@ class ViajeEnVivoPanel extends StatefulWidget {
     required this.paraderos,
     required this.onFinalizarViaje,
     this.onParaderoAlcanzado,
+    this.onPosicionGpsRecibida,
+    this.servicioUbicacion = const GeolocatorServicioUbicacion(),
   });
 
   final Ruta ruta;
   final List<Paradero> paraderos;
   final VoidCallback onFinalizarViaje;
   final void Function(Paradero paraderoActual)? onParaderoAlcanzado;
+  final void Function(double latitud, double longitud)? onPosicionGpsRecibida;
+  final ServicioUbicacion servicioUbicacion;
 
   @override
   State<ViajeEnVivoPanel> createState() => _ViajeEnVivoPanelState();
@@ -31,19 +38,32 @@ class _ViajeEnVivoPanelState extends State<ViajeEnVivoPanel> {
   int _indiceParaderoActual = 0;
   int _segundosRestantes = 95;
   Timer? _timer;
+  StreamSubscription<LatLng>? _gpsSubscription;
 
   @override
   void initState() {
     super.initState();
     _iniciarCuentaRegresiva();
+    _iniciarEscuchaGps();
     if (widget.paraderos.isNotEmpty) {
       widget.onParaderoAlcanzado?.call(widget.paraderos.first);
     }
   }
 
+  void _iniciarEscuchaGps() {
+    _gpsSubscription = widget.servicioUbicacion.escucharPosicion().listen(
+      (pos) {
+        if (!mounted) return;
+        widget.onPosicionGpsRecibida?.call(pos.latitude, pos.longitude);
+      },
+      onError: (_) {},
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _gpsSubscription?.cancel();
     super.dispose();
   }
 
