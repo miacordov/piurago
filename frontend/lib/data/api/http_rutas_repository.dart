@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -214,6 +215,27 @@ class HttpRutasRepository
         return ResumenCongestion.fromJson(
           jsonDecode(utf8.decode(respuesta.bodyBytes)) as Map<String, dynamic>,
         );
+      }
+    } catch (_) {
+      // Error de red o respuesta inesperada.
+    }
+    return null;
+  }
+
+  /// Excel del histórico de congestión (lo genera el backend con Apache POI).
+  @override
+  Future<Uint8List?> exportarCongestionExcel() async {
+    try {
+      final token = await authService.obtenerToken();
+      final url = _baseUrl.replace(path: '/api/historico-congestion/exportar');
+
+      final respuesta = await _cliente.get(
+        url,
+        headers: {if (token != null) 'Authorization': 'Bearer $token'},
+      );
+
+      if (respuesta.statusCode == 200) {
+        return respuesta.bodyBytes;
       }
     } catch (_) {
       // Error de red o respuesta inesperada.

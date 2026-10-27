@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/guardar_archivo.dart';
 import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text.dart';
@@ -69,12 +70,16 @@ Color _fondoNivel(NivelCongestion? nivel) => switch (nivel) {
 /// comparten los pasajeros y se recalcula cada hora. Con los datos de prueba
 /// (sin backend) la pantalla lo avisa en vez de mostrar cifras inventadas.
 class CongestionPage extends StatefulWidget {
-  const CongestionPage({super.key, this.repository});
+  const CongestionPage({super.key, this.repository, this.guardador});
 
   /// Si implementa [FuenteCongestion] (el repositorio del backend), de ahí
   /// sale el resumen; también se usa para abrir en el mapa la ruta de un
   /// tramo.
   final RutasRepository? repository;
+
+  /// Entrega el Excel exportado. Por defecto, [GuardadorPorPlataforma]
+  /// (descarga en web, compartir en el celular).
+  final GuardadorArchivos? guardador;
 
   @override
   State<CongestionPage> createState() => _CongestionPageState();
@@ -84,6 +89,10 @@ class _CongestionPageState extends State<CongestionPage> {
   /// Null: "Ahora" (el backend usa la franja y el día actuales).
   String? _franjaSeleccionada;
   Future<ResumenCongestion?>? _carga;
+  bool _exportando = false;
+
+  static const _tipoExcel =
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
   FuenteCongestion? get _fuente {
     final repo = widget.repository;
@@ -106,6 +115,38 @@ class _CongestionPageState extends State<CongestionPage> {
       _franjaSeleccionada = franja;
       _cargar();
     });
+  }
+
+  Future<void> _exportar() async {
+    final fuente = _fuente;
+    if (fuente == null || _exportando) return;
+    setState(() => _exportando = true);
+    final mensajes = ScaffoldMessenger.of(context);
+
+    final hoy = DateTime.now();
+    final fecha =
+        '${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+    final nombre = 'congestion-piura-$fecha.xlsx';
+
+    final String mensaje;
+    final bytes = await fuente.exportarCongestionExcel();
+    if (bytes == null) {
+      mensaje = 'No pudimos generar el Excel. Revisa tu conexión e inténtalo de nuevo.';
+    } else {
+      final guardado =
+          await (widget.guardador ?? const GuardadorPorPlataforma()).guardar(
+            nombre: nombre,
+            bytes: bytes,
+            tipo: _tipoExcel,
+          );
+      mensaje = guardado
+          ? 'Listo: $nombre'
+          : 'No pudimos guardar el archivo. Inténtalo de nuevo.';
+    }
+
+    if (!mounted) return;
+    setState(() => _exportando = false);
+    mensajes.showSnackBar(SnackBar(content: Text(mensaje)));
   }
 
   Future<void> _verMapa(TramoCritico tramo) async {
@@ -141,13 +182,14 @@ class _CongestionPageState extends State<CongestionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ESTADO DEL TRÁNSITO', style: AppText.eyebrow),
-                const SizedBox(height: 8),
-                const Text('Congestión en Piura', style: AppText.heading),
-                const SizedBox(height: 8),
-                const Text(
-                  'Cómo está el tránsito según los viajes que comparten los pasajeros. Se actualiza cada hora.',
-                  style: AppText.body,
+                _Encabezado(
+                  esCelular: esCelular,
+                  boton: _fuente == null
+                      ? null
+                      : _BotonExportar(
+                          exportando: _exportando,
+                          onPressed: _exportar,
+                        ),
                 ),
                 const SizedBox(height: 24),
                 _SelectorPestanas(
@@ -195,6 +237,74 @@ class _CongestionPageState extends State<CongestionPage> {
           );
         },
       ),
+    );
+  }
+}
+
+class _Encabezado extends StatelessWidget {
+  const _Encabezado({required this.esCelular, this.boton});
+
+  final bool esCelular;
+  final Widget? boton;
+
+  @override
+  Widget build(BuildContext context) {
+    const textos = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ESTADO DEL TRÁNSITO', style: AppText.eyebrow),
+        SizedBox(height: 8),
+        Text('Congestión en Piura', style: AppText.heading),
+        SizedBox(height: 8),
+        Text(
+          'Cómo está el tránsito según los viajes que comparten los pasajeros. Se actualiza cada hora.',
+          style: AppText.body,
+        ),
+      ],
+    );
+    final boton = this.boton;
+    if (boton == null) return textos;
+    if (esCelular) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [textos, const SizedBox(height: 16), boton],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        const Expanded(child: textos),
+        const SizedBox(width: 16),
+        boton,
+      ],
+    );
+  }
+}
+
+class _BotonExportar extends StatelessWidget {
+  const _BotonExportar({required this.exportando, required this.onPressed});
+
+  final bool exportando;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: exportando ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        side: const BorderSide(color: AppColors.primary),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      icon: exportando
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_rounded, size: 18),
+      label: const Text('Exportar a Excel'),
     );
   }
 }
