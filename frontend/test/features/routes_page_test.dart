@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
 import 'package:piurago/core/theme/app_theme.dart';
+import 'package:piurago/data/api/auth_service.dart';
+import 'package:piurago/data/api/http_rutas_repository.dart';
 import 'package:piurago/data/models/eta.dart';
 import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
@@ -297,5 +301,34 @@ void main() {
     await abrir(tester, _RepositorioConEta());
 
     expect(find.text('~7 min'), findsOneWidget);
+  });
+
+  group('aviso "Modo demostración"', () {
+    testWidgets('no aparece cuando las rutas vienen del backend', (
+      tester,
+    ) async {
+      fijarPantalla(tester, escritorio);
+      await abrir(tester, _RepositorioConEta());
+
+      expect(find.text('Línea con ETA en vivo'), findsOneWidget);
+      expect(find.text('Modo demostración'), findsNothing);
+    });
+
+    testWidgets(
+      'aparece si el backend no responde y se usan los datos de prueba',
+      (tester) async {
+        fijarPantalla(tester, escritorio);
+        final caido = MockClient((_) async => http.Response('error', 503));
+        final repo = HttpRutasRepository(
+          cliente: caido,
+          authService: AuthService(cliente: caido)
+            ..establecerTokenManualmente('token'),
+        );
+        await abrir(tester, repo);
+
+        expect(find.text('I-18'), findsOneWidget);
+        expect(find.text('Modo demostración'), findsOneWidget);
+      },
+    );
   });
 }
