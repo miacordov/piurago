@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:piurago/app.dart';
 import 'package:piurago/core/routes.dart';
 import 'package:piurago/core/theme/app_theme.dart';
+import 'package:piurago/data/models/eta.dart';
 import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
 import 'package:piurago/data/rutas_repository.dart';
@@ -42,6 +43,38 @@ Future<void> abrir(WidgetTester tester, RutasRepository repository) async {
     ),
   );
   await tester.pumpAndSettle();
+}
+
+/// Repositorio con ETA, como el que llama al backend: la línea 2 tiene un
+/// ETA simulado; la 3 está fuera de servicio.
+class _RepositorioConEta implements RutasRepository, FuenteEta {
+  final pedidos = <int>[];
+
+  @override
+  Future<List<Ruta>> listar() async => const [
+    Ruta(idRuta: 1, codigo: 'A-01', nombre: 'Línea con ETA en vivo'),
+    Ruta(idRuta: 2, codigo: 'B-02', nombre: 'Línea con ETA estimado'),
+    Ruta(idRuta: 3, codigo: 'C-03', nombre: 'Línea parada', activa: false),
+  ];
+
+  @override
+  Future<List<Paradero>> paraderos(int idRuta) async => const [];
+
+  @override
+  Future<List<LatLng>> trazado(int idRuta) async => const [];
+
+  @override
+  Future<Eta?> eta(int idRuta) async {
+    pedidos.add(idRuta);
+    return switch (idRuta) {
+      1 => const Eta(minutos: 3, simulado: false),
+      2 => const Eta(minutos: 7, simulado: true),
+      _ => null,
+    };
+  }
+
+  @override
+  bool get esDemostracion => false;
 }
 
 void main() {
@@ -222,5 +255,47 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Congestión en Piura'), findsOneWidget);
+  });
+
+  testWidgets('con backend, cada línea en servicio muestra su próxima unidad', (
+    tester,
+  ) async {
+    fijarPantalla(tester, escritorio);
+    final repo = _RepositorioConEta();
+    await abrir(tester, repo);
+
+    // Una consulta por línea en servicio, una sola vez.
+    expect(repo.pedidos..sort(), [1, 2]);
+    final enVivo = find.byKey(const ValueKey('ruta-1'));
+    final estimado = find.byKey(const ValueKey('ruta-2'));
+    expect(
+      find.descendant(of: enVivo, matching: find.text('~3 min')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: enVivo, matching: find.text('Tiempo estimado')),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: estimado, matching: find.text('~7 min')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: estimado, matching: find.text('Tiempo estimado')),
+      findsOneWidget,
+    );
+    expect(find.text('Fuera de servicio'), findsOneWidget);
+
+    // Buscar no vuelve a pedir los ETA.
+    await tester.enterText(find.byType(TextField), 'B-02');
+    await tester.pumpAndSettle();
+    expect(repo.pedidos, hasLength(2));
+  });
+
+  testWidgets('en el celular la fila con ETA no se desborda', (tester) async {
+    fijarPantalla(tester, celular);
+    await abrir(tester, _RepositorioConEta());
+
+    expect(find.text('~7 min'), findsOneWidget);
   });
 }
