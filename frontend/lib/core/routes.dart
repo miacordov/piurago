@@ -6,4 +6,5 @@ class AppRoutes {
   static const ubicacion = '/ubicacion';
   static const rutas = '/rutas';
   static const mapa = '/mapa';
+  static const congestion = '/congestion';
 }

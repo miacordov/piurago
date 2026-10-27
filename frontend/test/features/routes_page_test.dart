@@ -7,6 +7,7 @@ import 'package:piurago/core/theme/app_theme.dart';
 import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
 import 'package:piurago/data/rutas_repository.dart';
+import 'package:piurago/features/congestion/congestion_page.dart';
 import 'package:piurago/features/routes/routes_page.dart';
 
 class _RepositorioConFalla implements RutasRepository {
@@ -34,6 +35,10 @@ Future<void> abrir(WidgetTester tester, RutasRepository repository) async {
     MaterialApp(
       theme: AppTheme.light,
       home: RoutesPage(repository: repository),
+      routes: {
+        AppRoutes.congestion: (_) => const CongestionPage(),
+        AppRoutes.mapa: (_) => const Scaffold(body: Text('Mapa')),
+      },
     ),
   );
   await tester.pumpAndSettle();
@@ -214,11 +219,8 @@ void main() {
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Congestión'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(
-      find.text('Congestión estará disponible en una próxima versión.'),
-      findsOneWidget,
-    );
+    expect(find.text('Congestión en Piura'), findsOneWidget);
   });
 }

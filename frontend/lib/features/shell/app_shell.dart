@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/ui.dart';
 
 /// Secciones de la barra lateral.
 enum SeccionApp { rutas, mapa, congestion }
@@ -104,7 +103,7 @@ class SideNav extends StatelessWidget {
             icon: Icons.traffic,
             label: 'Congestión',
             selected: seccion == SeccionApp.congestion,
-            onTap: () => mostrarProximamente(context, 'Congestión'),
+            onTap: () => _ir(context, AppRoutes.congestion),
           ),
         ],
       ),

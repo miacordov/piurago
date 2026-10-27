@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
+import '../../data/api/http_rutas_repository.dart';
 import '../../data/lugares/buscador_lugares.dart';
 import '../../data/models/lugar.dart';
 import '../../data/models/paradero.dart';
@@ -16,8 +17,11 @@ import '../shell/shell_scaffold.dart';
 import '../viaje/mapa_viaje.dart';
 import '../viaje/planificador_viaje.dart';
 import '../viaje/planificar_panel.dart';
+import 'confirmar_abordaje_dialog.dart';
 import 'ruta_map.dart';
 import 'ruta_panel.dart';
+import 'viaje_en_vivo_panel.dart';
+import 'viaje_finalizado_dialog.dart';
 
 /// Pantalla del mapa, con dos modos de panel:
 /// - Planificar viaje ("¿A dónde vas?"), si no se indica una ruta (por
@@ -170,6 +174,7 @@ class _MapPageState extends State<MapPage> {
             esDemostracion: widget.repository.esDemostracion,
             mostrarMapa: widget.mostrarMapa,
             onPlanificarViaje: _planificarViaje,
+            repository: widget.repository,
           );
         },
       ),
@@ -177,7 +182,7 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-class _Contenido extends StatelessWidget {
+class _Contenido extends StatefulWidget {
   const _Contenido({
     required this.ruta,
     required this.paraderos,
@@ -185,6 +190,7 @@ class _Contenido extends StatelessWidget {
     required this.esDemostracion,
     required this.mostrarMapa,
     required this.onPlanificarViaje,
+    required this.repository,
   });
 
   final Ruta ruta;
@@ -193,22 +199,69 @@ class _Contenido extends StatelessWidget {
   final bool esDemostracion;
   final bool mostrarMapa;
   final VoidCallback onPlanificarViaje;
+  final RutasRepository repository;
+
+  @override
+  State<_Contenido> createState() => _ContenidoState();
+}
+
+class _ContenidoState extends State<_Contenido> {
+  bool _enViaje = false;
+
+  Future<void> _iniciarViaje() async {
+    final confirmado = await ConfirmarAbordajeDialog.mostrar(context, widget.ruta);
+    if (confirmado == true && mounted) {
+      setState(() => _enViaje = true);
+    }
+  }
+
+  Future<void> _finalizarViaje() async {
+    await ViajeFinalizadoDialog.mostrar(
+      context,
+      ruta: widget.ruta,
+      paraderosVisitados: widget.paraderos.length,
+    );
+    if (mounted) {
+      setState(() => _enViaje = false);
+    }
+  }
+
+  void _reportarGps(Paradero paradero) {
+    final repo = widget.repository;
+    if (repo is HttpRutasRepository) {
+      repo.reportarGps(
+        idRuta: widget.ruta.idRuta,
+        latitud: paradero.latitud,
+        longitud: paradero.longitud,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Widget mapa = mostrarMapa
+    final Widget mapa = widget.mostrarMapa
         ? RutaMap(
-            key: ValueKey(ruta.idRuta),
-            paraderos: paraderos,
-            trazado: trazado,
-            esDemostracion: esDemostracion,
+            key: ValueKey(widget.ruta.idRuta),
+            paraderos: widget.paraderos,
+            trazado: widget.trazado,
+            esDemostracion: widget.esDemostracion,
           )
         : const ColoredBox(color: AppColors.field);
-    final panel = RutaPanel(
-      ruta: ruta,
-      paraderos: paraderos,
-      onPlanificarViaje: onPlanificarViaje,
-    );
+
+    final Widget panel = _enViaje
+        ? ViajeEnVivoPanel(
+            ruta: widget.ruta,
+            paraderos: widget.paraderos,
+            onFinalizarViaje: _finalizarViaje,
+            onParaderoAlcanzado: _reportarGps,
+          )
+        : RutaPanel(
+            ruta: widget.ruta,
+            paraderos: widget.paraderos,
+            onPlanificarViaje: widget.onPlanificarViaje,
+            onCompartirRuta: _iniciarViaje,
+          );
+
     return _Disposicion(mapa: mapa, panel: panel);
   }
 }
