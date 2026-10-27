@@ -88,7 +88,7 @@ El perfil `carga` ejecuta la migración y los seeds antes de que Hibernate valid
 | Seed | Qué hace |
 |---|---|
 | `db/seeds/001_rutas_paraderos_piuratransporta.sql` | Las 20 líneas de piuratransporta.com con paraderos propuestos. Actualiza las rutas por código, inserta las que falten y solo agrega paraderos a las rutas que no tienen. No borra nada. |
-| `db/seeds/002_rutas_plan_regulador.sql` | Datos de la Municipalidad (Plan Regulador, O.M. 092-02-CMPP): agrega RD-07, RD-12, RD-13 y RD-17. En las 10 rutas con recorrido oficial guarda ese recorrido y **reemplaza sus paraderos** por los del recorrido oficial (solo si todavía no los tiene). Antes borra el histórico de congestión de los paraderos que se quitan; ese histórico se rehace con `POST /api/historico-congestion/recalcular`. Ver `docs/datos/rutas-plan-regulador.md`. |
+| `db/seeds/002_rutas_plan_regulador.sql` | Datos de la Municipalidad (Plan Regulador, O.M. 092-02-CMPP): agrega RD-07, RD-12, RD-13 y RD-17. En las 10 rutas con recorrido oficial guarda ese recorrido y **reemplaza sus paraderos** por los del recorrido oficial (solo si todavía no los tiene). Antes borra el histórico de congestión de los paraderos que se quitan; ese histórico se rehace solo en el siguiente recálculo automático (ver "Cómo se calcula la congestión"). Ver `docs/datos/rutas-plan-regulador.md`. |
 - `postman/`: coleccion de pruebas de punta a punta (pendiente de agregar).
 
 ## Cómo se calcula el ETA
@@ -106,6 +106,25 @@ El resultado se guarda 10 segundos (`CacheConfig`): en cuanto alguien empieza a 
 **Límites:**
 - La distancia al paradero es en línea recta, no por las calles.
 - Las horas usan la zona de Piura (`America/Lima`) aunque el servidor esté en otra, como UTC en Render: `PiuragopiuraBackendApplication` la fija al arrancar. No hay que configurar nada en Render.
+
+## Cómo se calcula la congestión
+
+La congestión sale de los mismos reportes GPS de los pasajeros, igual para todas las rutas. Se guarda en `historico_congestion` por franja (`MANANA_PICO` 6-9 h, `MEDIO_DIA` 10-16 h, `TARDE_PICO` 17-20 h, `NOCHE`) y día (`LUN`…`DOM`).
+
+- **Recálculo automático:** cada hora, `RecalculoCongestionProgramado` recalcula todas las rutas activas con los reportes de los últimos 28 días. La primera vez corre 2 minutos después de arrancar. Las rutas sin reportes se saltan.
+  - Cada desplazamiento entre dos reportes seguidos de un mismo pasajero da una velocidad. Se descartan los de más de 10 minutos y los de más de 100 km/h.
+  - Se guarda un registro por **ruta completa** (`id_paradero` vacío) y uno por cada **tramo entre dos paraderos seguidos** (`id_paradero` = el paradero donde empieza el tramo). Un desplazamiento cuenta para el tramo más cercano, si pasa a menos de 300 m.
+  - **Nivel:** `ALTA` por debajo de 10 km/h, `MEDIA` por debajo de 18 km/h y `BAJA` desde ahí. La demora es en minutos por km frente a ir a 25 km/h.
+- **Endpoints:**
+
+| Método | Ruta | Quién | Qué hace |
+|---|---|---|---|
+| GET | `/api/historico-congestion/resumen?franjaHoraria=&diaSemana=` | cualquier usuario con token | Congestión de la ciudad: nivel general, velocidad y demora promedio, nivel de cada franja del día y los 5 tramos más lentos (ruta, paraderos, minutos de más). Sin parámetros usa la franja y el día de ahora. Sin datos, el nivel viene vacío. |
+| GET | `/api/historico-congestion/ruta/{idRuta}` | cualquier usuario con token | Todos los registros de una ruta. |
+| POST | `/api/historico-congestion/recalcular-todas` | solo registrados | Fuerza el recálculo de todas las rutas sin esperar la hora. |
+| POST | `/api/historico-congestion/recalcular?idRuta=&franjaHoraria=&diaSemana=` | solo registrados | Recalcula una ruta en una franja y un día. |
+
+Se configura con `piurago.congestion.recalculo-ms` (cada cuánto, por defecto 1 hora), `piurago.congestion.recalculo-inicial-ms` y `piurago.congestion.recalculo-automatico=false` para apagarlo.
 
 ## Estructura
 
