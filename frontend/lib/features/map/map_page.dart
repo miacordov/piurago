@@ -12,6 +12,7 @@ import '../../data/models/lugar.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
+import '../../data/ubicacion/servicio_ubicacion.dart';
 import '../shell/app_shell.dart';
 import '../shell/shell_scaffold.dart';
 import '../viaje/mapa_viaje.dart';
@@ -36,9 +37,11 @@ class MapPage extends StatefulWidget {
     this.lugaresConocidos = const [],
     this.idRuta,
     this.mostrarMapa = true,
+    this.servicioUbicacion = const GeolocatorServicioUbicacion(),
   });
 
   final RutasRepository repository;
+  final ServicioUbicacion servicioUbicacion;
 
   /// Buscador de lugares en línea de Planificar viaje (opcional).
   final BuscadorLugares? buscadorLugares;
@@ -175,6 +178,7 @@ class _MapPageState extends State<MapPage> {
             mostrarMapa: widget.mostrarMapa,
             onPlanificarViaje: _planificarViaje,
             repository: widget.repository,
+            servicioUbicacion: widget.servicioUbicacion,
           );
         },
       ),
@@ -191,6 +195,7 @@ class _Contenido extends StatefulWidget {
     required this.mostrarMapa,
     required this.onPlanificarViaje,
     required this.repository,
+    required this.servicioUbicacion,
   });
 
   final Ruta ruta;
@@ -200,6 +205,7 @@ class _Contenido extends StatefulWidget {
   final bool mostrarMapa;
   final VoidCallback onPlanificarViaje;
   final RutasRepository repository;
+  final ServicioUbicacion servicioUbicacion;
 
   @override
   State<_Contenido> createState() => _ContenidoState();
@@ -237,6 +243,17 @@ class _ContenidoState extends State<_Contenido> {
     }
   }
 
+  void _reportarCoordenadasGps(double lat, double lng) {
+    final repo = widget.repository;
+    if (repo is HttpRutasRepository) {
+      repo.reportarGps(
+        idRuta: widget.ruta.idRuta,
+        latitud: lat,
+        longitud: lng,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget mapa = widget.mostrarMapa
@@ -254,6 +271,8 @@ class _ContenidoState extends State<_Contenido> {
             paraderos: widget.paraderos,
             onFinalizarViaje: _finalizarViaje,
             onParaderoAlcanzado: _reportarGps,
+            onPosicionGpsRecibida: _reportarCoordenadasGps,
+            servicioUbicacion: widget.servicioUbicacion,
           )
         : RutaPanel(
             ruta: widget.ruta,
