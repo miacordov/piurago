@@ -15,12 +15,32 @@ Aplicación Flutter (móvil y web) de PiuraGo. Mapas con flutter_map + OpenStree
 
 ### Opciones
 
-- `--dart-define=DATOS_PRUEBA=true`: el buscador de lugares no usa la red (busca
-  entre unos pocos lugares de Piura).
+- `--dart-define=API_URL=https://...`: dirección del backend (por defecto,
+  `http://localhost:8080`; en el emulador de Android, `http://10.0.2.2:8080`).
+  Nunca se escribe en el código.
+- `--dart-define=DATOS_PRUEBA=true`: la app no usa la red (rutas y lugares de
+  prueba, sin sesión con el backend).
 - `--dart-define=GEOCODER_URL=https://...`: otro servidor compatible con Photon
   (por defecto, `https://photon.komoot.io/api/`).
 
     flutter run -d chrome --dart-define=DATOS_PRUEBA=true
+
+## Sesión con el backend
+
+- **Acceso:** "Iniciar sesión" y "Crea tu cuenta" llaman a `POST /api/auth/login` y
+  `POST /api/auth/registro`. "Continuar como pasajero anónimo" pide un token con
+  `POST /api/usuarios/anonimo`; si el servidor no responde, la app entra igual con
+  datos de demostración.
+- **Sesión guardada:** el token, el correo y el identificador del dispositivo se
+  guardan cifrados con `flutter_secure_storage` (`lib/data/api/almacen_sesion.dart`).
+  Al volver a abrir la app, con una sesión registrada entra directo a Rutas, y el
+  pasajero anónimo reutiliza su usuario en lugar de crear uno nuevo.
+- **Próxima unidad:** el panel de la ruta muestra el ETA de
+  `GET /api/reportes-gps/eta/{idRuta}`. Cuando el backend responde `origen: SIMULADO`
+  (nadie comparte el GPS en esa línea), se indica "Tiempo estimado".
+- **Ids del backend:** las rutas del backend tienen otros ids que los datos locales.
+  El trazado oficial y los paraderos de respaldo se buscan por el código de la
+  línea (`lib/data/api/http_rutas_repository.dart`).
 
 ## Análisis y pruebas
 
