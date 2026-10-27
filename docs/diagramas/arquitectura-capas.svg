@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1120" viewBox="0 0 1500 1120" font-family="Inter, Roboto, Segoe UI, Arial, sans-serif">
+<defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5D6A78"/></marker><marker id="flechaRoja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C62828"/></marker><marker id="hereda" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L11,6 L0,12 z" fill="#fff" stroke="#5D6A78"/></marker></defs>
+<rect width="1500" height="1120" fill="#F5F8FC"/>
+<text x="40" y="38" font-size="22" font-weight="700" fill="#121B2D" text-anchor="start">PiuraGo — Arquitectura del backend por capas (MVC + DAO)</text>
+<text x="40" y="60" font-size="13" font-weight="400" fill="#5D6A78" text-anchor="start">Spring Boot 4 · Java 21 · generado desde los imports del código (backend/src/main/java)</text>
+<rect x="340" y="80" width="510" height="46" rx="23" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.6"/>
+<text x="595" y="108" font-size="14" font-weight="700" fill="#342EC1" text-anchor="middle">App PiuraGo (Flutter · web y Android)</text>
+<line x1="595" y1="126" x2="595" y2="156" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<text x="605" y="146" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">HTTP + JSON · Authorization: Bearer &lt;JWT&gt;</text>
+<rect x="40" y="160" width="1110" height="52" rx="10" fill="#EEF2F7" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="6 4"/>
+<text x="56" y="182" font-size="13" font-weight="700" fill="#5D6A78" text-anchor="start">SEGURIDAD (transversal, Spring Security)</text>
+<text x="56" y="201" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">JwtAuthFilter → JwtUtil · CustomUserDetailsService · SecurityConfig (roles, BCrypt, CORS) · GlobalExceptionHandler</text>
+<line x1="595" y1="212" x2="595" y2="236" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<rect x="40" y="240" width="1110" height="112" rx="12" fill="#E6E9FB" stroke="#342EC1" stroke-width="1.2"/>
+<text x="56" y="264" font-size="14" font-weight="700" fill="#342EC1" text-anchor="start">CONTROLLER  (C de MVC)</text>
+<text x="56" y="282" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">Recibe la petición, valida y responde con DTO. Depende solo de interfaces de service.</text>
+<rect x="56.0" y="294" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="159.0" y="321.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">AuthController</text>
+<rect x="274.0" y="294" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="377.0" y="321.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioController</text>
+<rect x="492.0" y="294" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="595.0" y="321.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">RutaController</text>
+<rect x="710.0" y="294" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="813.0" y="321.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">ReporteGpsController</text>
+<rect x="928.0" y="294" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="1031.0" y="321.0" font-size="11.264367816091955" font-weight="600" fill="#121B2D" text-anchor="middle">HistoricoCongestionController</text>
+<line x1="595" y1="352" x2="595" y2="388" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<text x="605" y="376" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">inyección por constructor de interfaces (D de SOLID)</text>
+<rect x="40" y="392" width="1110" height="196" rx="12" fill="#E3F3EA" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="56" y="416" font-size="14" font-weight="700" fill="#0B7A3E" text-anchor="start">SERVICE  (lógica de negocio)</text>
+<text x="56" y="434" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">Una interfaz por área (I de SOLID) y su implementación *ServiceImpl (S de SOLID).</text>
+<rect x="56.0" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="141.66666666666669" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="141.66666666666669" y="484.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioService</text>
+<rect x="237.33333333333334" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="323.0" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="323.0" y="484.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">RutaService</text>
+<rect x="418.6666666666667" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="504.33333333333337" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="504.33333333333337" y="484.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">ReporteGpsService</text>
+<rect x="600.0" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="685.6666666666666" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="685.6666666666666" y="484.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">EtaService</text>
+<rect x="781.3333333333334" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="867.0" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="867.0" y="477.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">HistoricoCongestion</text>
+<text x="867.0" y="491.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">Service</text>
+<rect x="962.6666666666667" y="444" width="171.33333333333334" height="54" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="1048.3333333333335" y="460" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«interface»</text>
+<text x="1048.3333333333335" y="477.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">ExportacionCongestion</text>
+<text x="1048.3333333333335" y="491.0" font-size="11.5" font-weight="600" fill="#121B2D" text-anchor="middle">Service</text>
+<rect x="56.0" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="141.66666666666669" y="548.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioServiceImpl</text>
+<rect x="237.33333333333334" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="323.0" y="548.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">RutaServiceImpl</text>
+<rect x="418.6666666666667" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="504.33333333333337" y="548.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ReporteGpsServiceImpl</text>
+<rect x="600.0" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="685.6666666666666" y="548.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">EtaServiceImpl</text>
+<rect x="781.3333333333334" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="867.0" y="541.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">HistoricoCongestion</text>
+<text x="867.0" y="555.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ServiceImpl</text>
+<rect x="962.6666666666667" y="522" width="171.33333333333334" height="42" rx="6" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="1048.3333333333335" y="541.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ExportacionCongestion</text>
+<text x="1048.3333333333335" y="555.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ServiceImpl</text>
+<line x1="141.66666666666669" y1="522" x2="141.66666666666669" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<line x1="323.0" y1="522" x2="323.0" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<line x1="504.33333333333337" y1="522" x2="504.33333333333337" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<line x1="685.6666666666666" y1="522" x2="685.6666666666666" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<line x1="867.0" y1="522" x2="867.0" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<line x1="1048.3333333333335" y1="522" x2="1048.3333333333335" y2="499" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<text x="1134" y="578" font-size="11.5" font-weight="400" fill="#5D6A78" text-anchor="end">Ayuda compartida: FranjaHoraria (franja y día de una hora)</text>
+<line x1="595" y1="588" x2="595" y2="624" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<text x="605" y="612" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">usa (acceso a datos solo por repositorios)</text>
+<rect x="40" y="628" width="1110" height="112" rx="12" fill="#FBF0DF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="56" y="652" font-size="14" font-weight="700" fill="#A8650F" text-anchor="start">REPOSITORY  (patrón DAO)</text>
+<text x="56" y="670" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">Spring Data JPA: encapsula el acceso a la base.</text>
+<rect x="56.0" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="129.57142857142856" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="129.57142857142856" y="717.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioRepository</text>
+<rect x="211.14285714285714" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="284.7142857142857" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="284.7142857142857" y="717.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioAnonimoRepo.</text>
+<rect x="366.2857142857143" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="439.85714285714283" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="439.85714285714283" y="717.0" font-size="10.38961038961039" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioRegistradoRepo.</text>
+<rect x="521.4285714285714" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="595.0" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="595.0" y="717.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">RutaRepository</text>
+<rect x="676.5714285714286" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="750.1428571428571" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="750.1428571428571" y="717.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ParaderoRepository</text>
+<rect x="831.7142857142857" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="905.2857142857142" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="905.2857142857142" y="717.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">ReporteGpsRepository</text>
+<rect x="986.8571428571429" y="682" width="147.14285714285714" height="44" rx="6" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="1060.4285714285716" y="698" font-size="10.5" font-weight="400" fill="#5D6A78" text-anchor="middle" font-style="italic">«JpaRepository»</text>
+<text x="1060.4285714285716" y="710.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">HistoricoCongestion</text>
+<text x="1060.4285714285716" y="724.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">Repository</text>
+<line x1="595" y1="740" x2="595" y2="776" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<text x="605" y="764" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">mapea (JPA / Hibernate)</text>
+<rect x="40" y="780" width="1110" height="150" rx="12" fill="#EEF2F7" stroke="#121B2D" stroke-width="1.2"/>
+<text x="56" y="804" font-size="14" font-weight="700" fill="#121B2D" text-anchor="start">MODEL  (M de MVC)</text>
+<text x="56" y="822" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="start">Entidades JPA. Los DTO van aparte: las entidades no salen de la API.</text>
+<rect x="56.0" y="834" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="159.0" y="861.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">Usuario  «abstracta»</text>
+<rect x="274.0" y="834" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="377.0" y="861.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">Ruta</text>
+<rect x="492.0" y="834" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="595.0" y="861.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">Paradero</text>
+<rect x="710.0" y="834" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="813.0" y="861.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">ReporteGps</text>
+<rect x="928.0" y="834" width="206.0" height="44" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="1031.0" y="861.0" font-size="12" font-weight="600" fill="#121B2D" text-anchor="middle">HistoricoCongestion</text>
+<rect x="56.0" y="890" width="206.0" height="30" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="159.0" y="910.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioAnonimo</text>
+<rect x="274.0" y="890" width="206.0" height="30" rx="6" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<text x="377.0" y="910.0" font-size="11" font-weight="600" fill="#121B2D" text-anchor="middle">UsuarioRegistrado</text>
+<line x1="159.0" y1="890" x2="159.0" y2="884" stroke="#5D6A78" stroke-width="1.2"/>
+<line x1="377.0" y1="890" x2="377.0" y2="884" stroke="#5D6A78" stroke-width="1.2"/>
+<line x1="159.0" y1="884" x2="377.0" y2="884" stroke="#5D6A78" stroke-width="1.2"/>
+<line x1="159.0" y1="884" x2="159.0" y2="879" stroke="#5D6A78" stroke-width="1.2" marker-end="url(#hereda)"/>
+<text x="492.0" y="910" font-size="11.5" font-weight="400" fill="#5D6A78" text-anchor="start">herencia JOINED: se usan donde se espera un Usuario (L de SOLID)</text>
+<line x1="595" y1="930" x2="595" y2="964" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<ellipse cx="595" cy="976" rx="200" ry="12" fill="#FFFFFF" stroke="#121B2D"/>
+<rect x="395" y="976" width="400" height="52" rx="0" fill="#FFFFFF" stroke="#121B2D" stroke-width="1.2"/>
+<path d="M395,1028 a200,12 0 0,0 400,0" fill="#FFFFFF" stroke="#121B2D"/>
+<rect x="396" y="977" width="398" height="50" fill="#FFFFFF"/>
+<ellipse cx="595" cy="976" rx="200" ry="12" fill="#EEF2F7" stroke="#121B2D"/>
+<text x="595" y="1012" font-size="14" font-weight="700" fill="#121B2D" text-anchor="middle">PostgreSQL (Neon)</text>
+<path d="M74.0,338 L74.0,344 L48,344 L48,606 L439.85714285714283,606 L439.85714285714283,680" fill="none" stroke="#C62828" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flechaRoja)"/>
+<text x="58" y="600" font-size="11.5" font-weight="600" fill="#C62828" text-anchor="start">excepción: AuthController usa un repositorio (pendiente, #12)</text>
+<text x="1134" y="652" font-size="12" font-weight="400" fill="#5D6A78" text-anchor="end">Solo usan clases de model.</text>
+<rect x="1180" y="240" width="280" height="250" rx="10" fill="#FFFFFF" stroke="#342EC1" stroke-width="1.2"/>
+<text x="1194" y="262" font-size="13" font-weight="700" fill="#342EC1" text-anchor="start">DTO  (V de MVC en la API)</text>
+<text x="1194" y="284" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Entrada: LoginRequestDTO,</text>
+<text x="1194" y="302" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">RegistroRequestDTO, AnonimoRequestDTO,</text>
+<text x="1194" y="320" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">ReporteGpsRequestDTO</text>
+<text x="1194" y="338" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Salida: AuthResponseDTO,</text>
+<text x="1194" y="356" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">AnonimoResponseDTO, RutaResponseDTO,</text>
+<text x="1194" y="374" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">ParaderoResponseDTO,</text>
+<text x="1194" y="392" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">ReporteGpsResponseDTO, EtaResponseDTO,</text>
+<text x="1194" y="410" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">HistoricoCongestionResponseDTO,</text>
+<text x="1194" y="428" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">ResumenCongestionDTO</text>
+<text x="1194" y="446" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">La vista gráfica es la app Flutter.</text>
+<rect x="1180" y="506" width="280" height="86" rx="10" fill="#FFFFFF" stroke="#0B7A3E" stroke-width="1.2"/>
+<text x="1194" y="528" font-size="13" font-weight="700" fill="#0B7A3E" text-anchor="start">TAREA PROGRAMADA</text>
+<text x="1194" y="550" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">RecalculoCongestionProgramado</text>
+<text x="1194" y="568" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">@Scheduled cada hora →</text>
+<text x="1194" y="586" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">HistoricoCongestionService</text>
+<rect x="1180" y="608" width="280" height="196" rx="10" fill="#FFFFFF" stroke="#A8650F" stroke-width="1.2"/>
+<text x="1194" y="630" font-size="13" font-weight="700" fill="#A8650F" text-anchor="start">LIBRERÍAS JAVA</text>
+<text x="1194" y="652" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Guava: caché del ETA (10 s)</text>
+<text x="1194" y="670" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">   en CacheConfig</text>
+<text x="1194" y="688" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Apache Commons Lang3: Range</text>
+<text x="1194" y="706" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">   en ReporteGpsServiceImpl</text>
+<text x="1194" y="724" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Apache POI: Excel (.xlsx) en</text>
+<text x="1194" y="742" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">   ExportacionCongestionServiceImpl</text>
+<text x="1194" y="760" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">Logback: logback-spring.xml</text>
+<text x="1194" y="778" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">jjwt (JWT) · springdoc (Swagger)</text>
+<rect x="1180" y="816" width="280" height="132" rx="10" fill="#FFFFFF" stroke="#5D6A78" stroke-width="1.2"/>
+<text x="1194" y="838" font-size="13" font-weight="700" fill="#5D6A78" text-anchor="start">LEYENDA</text>
+<line x1="1196" y1="868" x2="1240" y2="868" stroke="#5D6A78" stroke-width="1.6" marker-end="url(#flecha)"/>
+<text x="1250" y="872" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">usa / depende de</text>
+<line x1="1196" y1="892" x2="1240" y2="892" stroke="#5D6A78" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#hereda)"/>
+<text x="1250" y="896" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">implementa / hereda</text>
+<line x1="1196" y1="916" x2="1240" y2="916" stroke="#C62828" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flechaRoja)"/>
+<text x="1250" y="920" font-size="11.5" font-weight="400" fill="#121B2D" text-anchor="start">excepción a corregir</text>
+<text x="1194" y="940" font-size="11" font-weight="400" fill="#5D6A78" text-anchor="start">Pruebas: Mockito sobre las interfaces</text>
+</svg>
