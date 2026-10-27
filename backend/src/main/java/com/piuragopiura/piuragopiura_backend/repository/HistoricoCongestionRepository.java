@@ -15,5 +15,11 @@ public interface HistoricoCongestionRepository extends JpaRepository<HistoricoCo
     Optional<HistoricoCongestion> findByRuta_IdRutaAndFranjaHorariaAndDiaSemanaAndParaderoIsNull(
             Long idRuta, String franjaHoraria, String diaSemana
     );
+
+    Optional<HistoricoCongestion> findByRuta_IdRutaAndParadero_IdParaderoAndFranjaHorariaAndDiaSemana(
+            Long idRuta, Long idParadero, String franjaHoraria, String diaSemana
+    );
+
+    List<HistoricoCongestion> findByDiaSemana(String diaSemana);
 }
 
