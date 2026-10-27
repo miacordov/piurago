@@ -128,6 +128,8 @@ class _CongestionPageState extends State<CongestionPage> {
   Widget build(BuildContext context) {
     return ShellScaffold(
       seccion: SeccionApp.congestion,
+      // Sin repositorio la pantalla no tiene de dónde sacar datos reales.
+      esDemostracion: widget.repository?.esDemostracion ?? true,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final esCelular = constraints.maxWidth < 700;

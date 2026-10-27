@@ -136,6 +136,7 @@ class _MapPageState extends State<MapPage> {
     if (planificador != null) {
       return ShellScaffold(
         seccion: SeccionApp.mapa,
+        esDemostracion: widget.repository.esDemostracion,
         child: _Disposicion(
           mapa: widget.mostrarMapa
               ? MapaViaje(
@@ -159,6 +160,7 @@ class _MapPageState extends State<MapPage> {
     }
     return ShellScaffold(
       seccion: SeccionApp.mapa,
+      esDemostracion: widget.repository.esDemostracion,
       child: FutureBuilder<_DatosMapa>(
         future: _datos,
         builder: (context, snapshot) {
