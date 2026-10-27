@@ -26,8 +26,8 @@ public class HistoricoCongestionServiceImpl implements HistoricoCongestionServic
 
     private static final double RADIO_TIERRA_KM = 6371.0;
 
-    private static final List<String> FRANJAS = List.of("MANANA_PICO", "MEDIO_DIA", "TARDE_PICO", "NOCHE");
-    private static final List<String> DIAS = List.of("LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM");
+    private static final List<String> FRANJAS = FranjaHoraria.FRANJAS;
+    private static final List<String> DIAS = FranjaHoraria.DIAS;
 
     // SUPUESTOS: no provienen de datos reales, se pueden ajustar.
     private static final double VELOCIDAD_LIBRE_KMH = 25.0;           // velocidad sin tráfico
@@ -84,8 +84,8 @@ public class HistoricoCongestionServiceImpl implements HistoricoCongestionServic
                 ReporteGps actual = lista.get(i);
 
                 // El tramo pertenece a la franja y al día de su segundo reporte.
-                if (!franjaDe(actual.getFechaHora()).equals(franja)
-                        || !diaDe(actual.getFechaHora()).equals(dia)) {
+                if (!FranjaHoraria.franjaDe(actual.getFechaHora()).equals(franja)
+                        || !FranjaHoraria.diaDe(actual.getFechaHora()).equals(dia)) {
                     continue;
                 }
 
@@ -147,17 +147,7 @@ public class HistoricoCongestionServiceImpl implements HistoricoCongestionServic
         return v;
     }
 
-    private String franjaDe(LocalDateTime t) {
-        int hora = t.getHour();
-        if (hora >= 6 && hora <= 9) return "MANANA_PICO";
-        if (hora >= 10 && hora <= 16) return "MEDIO_DIA";
-        if (hora >= 17 && hora <= 20) return "TARDE_PICO";
-        return "NOCHE";
-    }
 
-    private String diaDe(LocalDateTime t) {
-        return DIAS.get(t.getDayOfWeek().getValue() - 1); // lunes = 1
-    }
 
     private String clasificarNivel(double velocidadKmh) {
         if (velocidadKmh < UMBRAL_TRAMO_CRITICO_KMH) return "ALTA";
