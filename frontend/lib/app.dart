@@ -61,8 +61,6 @@ class PiuraGoApp extends StatelessWidget {
           : AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),
-        AppRoutes.ubicacion: (_) => const LocationPage(),
-        AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.ubicacion: (_) => LocationPage(servicioUbicacion: ubicacion),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),
         AppRoutes.mapa: (context) {
