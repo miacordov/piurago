@@ -91,4 +91,26 @@ class UsuarioServiceImplTest {
         assertThat(resultado.getIdUsuario()).isEqualTo(5L);
         assertThat(resultado.getFechaUltimoAcceso()).isAfter(antes);
     }
+
+    @Test
+    void buscaUnUsuarioRegistradoPorSuEmail() {
+        UsuarioRegistrado ana = new UsuarioRegistrado();
+        ana.setIdUsuario(7L);
+        ana.setEmail("ana@example.com");
+        when(usuarioRegistradoRepository.findByEmail("ana@example.com")).thenReturn(Optional.of(ana));
+
+        UsuarioRegistrado encontrado = service.buscarPorEmail("ana@example.com");
+
+        assertThat(encontrado.getIdUsuario()).isEqualTo(7L);
+        assertThat(encontrado.getEmail()).isEqualTo("ana@example.com");
+    }
+
+    @Test
+    void siElEmailNoEstaRegistradoLoAvisa() {
+        when(usuarioRegistradoRepository.findByEmail("nadie@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.buscarPorEmail("nadie@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Usuario no encontrado");
+    }
 }

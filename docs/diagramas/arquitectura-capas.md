@@ -46,7 +46,6 @@ flowchart TD
     end
 
     AuthController --> UsuarioService
-    AuthController -. "pendiente #12" .-> UsuarioRegistradoRepository
     UsuarioController --> UsuarioService
     RutaController --> RutaService
     ReporteGpsController --> ReporteGpsService
@@ -73,8 +72,6 @@ flowchart TD
     ExportacionCongestionService -- ExportacionCongestionServiceImpl --> HistoricoCongestionRepository
 ```
 
-## Excepción pendiente
+## Regla "controller no usa repository"
 
-`AuthController` usa `UsuarioRegistradoRepository` directamente para buscar al usuario por correo, en lugar de pedírselo a `UsuarioService`. Rompe la regla "controller no usa repository" (issue #12).
-
-Cuando se corrija, hay que borrar la flecha roja en `generar_arquitectura.py` y la línea `pendiente #12` de este archivo, y volver a generar el diagrama.
+Ningún controller importa un repositorio: todos piden los datos a una interfaz de service. El último caso era `AuthController`, que buscaba al usuario por correo con `UsuarioRegistradoRepository`; ahora usa `UsuarioService.buscarPorEmail` (issue #12).

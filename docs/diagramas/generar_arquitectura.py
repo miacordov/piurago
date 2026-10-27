@@ -148,17 +148,7 @@ add(f'<rect x="{MX0 + 356}" y="{yM + 197}" width="398" height="50" fill="{C["fon
 add(f'<ellipse cx="{MX0 + 555}" cy="{yM + 196}" rx="200" ry="12" fill="{C["gris"]}" stroke="{C["texto"]}"/>')
 text(MX0 + 555, yM + 232, 'PostgreSQL (Neon)', 14, 700)
 
-# Excepción pendiente: AuthController -> UsuarioRegistradoRepository
-ax, aw = ctrl[0]
-rx, rw = repos[2]
-px = MX0 + 8
-yRojo = yS + 214
-add(f'<path d="M{ax + 18},{yC + 98} L{ax + 18},{yC + 104} L{px},{yC + 104} L{px},{yRojo} '
-    f'L{rx + rw / 2},{yRojo} L{rx + rw / 2},{yR + 52}" fill="none" stroke="{C["rojo"]}" stroke-width="1.6" '
-    f'stroke-dasharray="6 4" marker-end="url(#flechaRoja)"/>')
-text(px + 10, yRojo - 6, 'excepción: AuthController usa un repositorio (pendiente, #12)',
-     11.5, 600, C['rojo'], 'start')
-text(MX1 - 16, yR + 24, 'Solo usan clases de model.', 12, 400, C['suave'], 'end')
+text(MX1 - 16, yR + 24, 'Ningún controller los usa. Solo usan clases de model.', 12, 400, C['suave'], 'end')
 
 # Columna lateral
 def panel(y, h, titulo, lineas, stroke, fill=C['fondo'], size=11.5):
@@ -178,12 +168,10 @@ panel(608, 196, 'LIBRERÍAS JAVA', [
     'Guava: caché del ETA (10 s)', '   en CacheConfig', 'Apache Commons Lang3: Range', '   en ReporteGpsServiceImpl',
     'Apache POI: Excel (.xlsx) en', '   ExportacionCongestionServiceImpl', 'Logback: logback-spring.xml',
     'jjwt (JWT) · springdoc (Swagger)'], C['naranja'])
-panel(816, 132, 'LEYENDA', [], C['suave'])
+panel(816, 116, 'LEYENDA', [], C['suave'])
 flecha(SX0 + 16, 868, SX0 + 60, 868); text(SX0 + 70, 872, 'usa / depende de', 11.5, anchor='start')
 flecha(SX0 + 16, 892, SX0 + 60, 892, dash='5 3', marca='hereda', sw=1.2); text(SX0 + 70, 896, 'implementa / hereda', 11.5, anchor='start')
-flecha(SX0 + 16, 916, SX0 + 60, 916, color=C['rojo'], dash='6 4', marca='flechaRoja')
-text(SX0 + 70, 920, 'excepción a corregir', 11.5, anchor='start')
-text(SX0 + 14, 940, 'Pruebas: Mockito sobre las interfaces', 11, 400, C['suave'], 'start')
+text(SX0 + 14, 920, 'Pruebas: Mockito sobre las interfaces', 11, 400, C['suave'], 'start')
 
 add('</svg>')
 open(salida, 'w', encoding='utf-8').write('\n'.join(out))
