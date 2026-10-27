@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:piurago/app.dart';
+import 'package:piurago/core/guardar_archivo.dart';
 import 'package:piurago/core/routes.dart';
 import 'package:piurago/core/theme/app_theme.dart';
 import 'package:piurago/data/models/resumen_congestion.dart';
@@ -71,17 +74,44 @@ class RepoConCongestion extends FakeRutasRepository
     pedidas.add(franjaHoraria);
     return respuesta(franjaHoraria);
   }
+
+  /// Bytes del Excel que "devuelve el backend"; null simula un fallo.
+  Uint8List? excel = Uint8List.fromList([0x50, 0x4b, 3, 4]);
+
+  @override
+  Future<Uint8List?> exportarCongestionExcel() async => excel;
+}
+
+/// Guarda en memoria lo que la pantalla pide descargar.
+class GuardadorDePrueba implements GuardadorArchivos {
+  String? nombre;
+  Uint8List? bytes;
+  String? tipo;
+  bool resultado = true;
+
+  @override
+  Future<bool> guardar({
+    required String nombre,
+    required Uint8List bytes,
+    required String tipo,
+  }) async {
+    this.nombre = nombre;
+    this.bytes = bytes;
+    this.tipo = tipo;
+    return resultado;
+  }
 }
 
 Future<void> abrir(
   WidgetTester tester,
   RutasRepository repo, {
   List<Object?>? argumentosMapa,
+  GuardadorArchivos? guardador,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.light,
-      home: CongestionPage(repository: repo),
+      home: CongestionPage(repository: repo, guardador: guardador),
       onGenerateRoute: (settings) {
         if (settings.name == AppRoutes.mapa) {
           argumentosMapa?.add(settings.arguments);
@@ -255,5 +285,85 @@ void main() {
     expect(find.text('TRAMOS CRÍTICOS'), findsOneWidget);
     expect(find.text('+4 min'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group('exportar a Excel', () {
+    testWidgets('descarga el Excel del backend con la fecha en el nombre', (
+      tester,
+    ) async {
+      fijarPantalla(tester, escritorio);
+      final repo = RepoConCongestion((_) => resumenMedioDia);
+      final guardador = GuardadorDePrueba();
+      await abrir(tester, repo, guardador: guardador);
+
+      await tester.tap(find.text('Exportar a Excel'));
+      await tester.pumpAndSettle();
+
+      final hoy = DateTime.now();
+      final fecha =
+          '${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+      expect(guardador.nombre, 'congestion-piura-$fecha.xlsx');
+      expect(guardador.bytes, repo.excel);
+      expect(
+        guardador.tipo,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      expect(find.textContaining('Listo'), findsOneWidget);
+    });
+
+    testWidgets('si el backend no genera el Excel lo avisa', (tester) async {
+      fijarPantalla(tester, escritorio);
+      final repo = RepoConCongestion((_) => resumenMedioDia)..excel = null;
+      final guardador = GuardadorDePrueba();
+      await abrir(tester, repo, guardador: guardador);
+
+      await tester.tap(find.text('Exportar a Excel'));
+      await tester.pumpAndSettle();
+
+      expect(guardador.nombre, isNull);
+      expect(
+        find.textContaining('No pudimos generar el Excel'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('si no se puede guardar el archivo lo avisa', (tester) async {
+      fijarPantalla(tester, escritorio);
+      final guardador = GuardadorDePrueba()..resultado = false;
+      await abrir(
+        tester,
+        RepoConCongestion((_) => resumenMedioDia),
+        guardador: guardador,
+      );
+
+      await tester.tap(find.text('Exportar a Excel'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('No pudimos guardar el archivo'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('con los datos de prueba no se ofrece exportar', (
+      tester,
+    ) async {
+      fijarPantalla(tester, escritorio);
+      await abrir(tester, const FakeRutasRepository());
+
+      expect(find.text('Exportar a Excel'), findsNothing);
+    });
+
+    testWidgets('en el celular el botón también está', (tester) async {
+      fijarPantalla(tester, celular);
+      await abrir(
+        tester,
+        RepoConCongestion((_) => resumenMedioDia),
+        guardador: GuardadorDePrueba(),
+      );
+
+      expect(find.text('Exportar a Excel'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

@@ -139,4 +139,27 @@ void main() {
     expect(await caido.resumenCongestion(), isNull);
     expect(await sinRed.resumenCongestion(), isNull);
   });
+
+  group('exportarCongestionExcel()', () {
+    test('descarga el Excel del backend con el token', () async {
+      final bytesExcel = [0x50, 0x4b, 0x03, 0x04, 1, 2, 3];
+      final repo = repositorio((request) async {
+        expect(request.url.path, '/api/historico-congestion/exportar');
+        expect(request.headers['Authorization'], 'Bearer token');
+        return http.Response.bytes(bytesExcel, 200);
+      });
+
+      expect(await repo.exportarCongestionExcel(), bytesExcel);
+    });
+
+    test('si el backend falla devuelve null', () async {
+      final caido = repositorio((_) async => http.Response('error', 500));
+      final sinRed = repositorio(
+        (_) async => throw http.ClientException('red'),
+      );
+
+      expect(await caido.exportarCongestionExcel(), isNull);
+      expect(await sinRed.exportarCongestionExcel(), isNull);
+    });
+  });
 }
