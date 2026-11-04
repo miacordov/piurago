@@ -22,6 +22,7 @@ import '../viaje/planificar_panel.dart';
 import 'confirmar_abordaje_dialog.dart';
 import 'ruta_map.dart';
 import 'ruta_panel.dart';
+import 'ubicacion_usuario.dart';
 import 'viaje_en_vivo_panel.dart';
 import 'viaje_finalizado_dialog.dart';
 
@@ -51,8 +52,8 @@ class MapPage extends StatefulWidget {
   final List<Lugar> lugaresConocidos;
   final int? idRuta;
 
-  /// Permite reemplazar el mapa real por un recuadro vacío (para las pruebas,
-  /// que no tienen acceso a internet).
+  /// false en las pruebas, que no tienen acceso a internet: el mapa se
+  /// dibuja sin las teselas de OpenStreetMap.
   final bool mostrarMapa;
 
   @override
@@ -79,9 +80,13 @@ class _MapPageState extends State<MapPage> {
   late Future<_DatosMapa> _datos;
   PlanificadorViaje? _planificador;
 
+  /// Se comparte entre el mapa de la ruta y el de Planificar viaje.
+  late final UbicacionUsuario _ubicacion;
+
   @override
   void initState() {
     super.initState();
+    _ubicacion = UbicacionUsuario(widget.servicioUbicacion)..iniciar();
     if (widget.idRuta == null) {
       _iniciarPlanificador();
     } else {
@@ -92,6 +97,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     _planificador?.dispose();
+    _ubicacion.dispose();
     super.dispose();
   }
 
@@ -138,12 +144,12 @@ class _MapPageState extends State<MapPage> {
         seccion: SeccionApp.mapa,
         esDemostracion: widget.repository.esDemostracion,
         child: _Disposicion(
-          mapa: widget.mostrarMapa
-              ? MapaViaje(
-                  planificador: planificador,
-                  esDemostracion: widget.repository.esDemostracion,
-                )
-              : const ColoredBox(color: AppColors.field),
+          mapa: MapaViaje(
+            planificador: planificador,
+            esDemostracion: widget.repository.esDemostracion,
+            mostrarTeselas: widget.mostrarMapa,
+            ubicacion: _ubicacion,
+          ),
           panel: PlanificarPanel(
             planificador: planificador,
             buscadorLugares: widget.buscadorLugares,
@@ -195,6 +201,7 @@ class _MapPageState extends State<MapPage> {
             onPlanificarViaje: _planificarViaje,
             repository: widget.repository,
             servicioUbicacion: widget.servicioUbicacion,
+            ubicacion: _ubicacion,
           );
         },
       ),
@@ -213,6 +220,7 @@ class _Contenido extends StatefulWidget {
     required this.onPlanificarViaje,
     required this.repository,
     required this.servicioUbicacion,
+    required this.ubicacion,
   });
 
   final Ruta ruta;
@@ -224,6 +232,7 @@ class _Contenido extends StatefulWidget {
   final VoidCallback onPlanificarViaje;
   final RutasRepository repository;
   final ServicioUbicacion servicioUbicacion;
+  final UbicacionUsuario ubicacion;
 
   @override
   State<_Contenido> createState() => _ContenidoState();
@@ -277,14 +286,14 @@ class _ContenidoState extends State<_Contenido> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget mapa = widget.mostrarMapa
-        ? RutaMap(
-            key: ValueKey(widget.ruta.idRuta),
-            paraderos: widget.paraderos,
-            trazado: widget.trazado,
-            esDemostracion: widget.esDemostracion,
-          )
-        : const ColoredBox(color: AppColors.field);
+    final Widget mapa = RutaMap(
+      key: ValueKey(widget.ruta.idRuta),
+      paraderos: widget.paraderos,
+      trazado: widget.trazado,
+      esDemostracion: widget.esDemostracion,
+      mostrarTeselas: widget.mostrarMapa,
+      ubicacion: widget.ubicacion,
+    );
 
     final Widget panel = _enViaje
         ? ViajeEnVivoPanel(

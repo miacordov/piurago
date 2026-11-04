@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../map/ruta_map.dart';
+import '../map/ubicacion_usuario.dart';
 import 'busqueda_viaje.dart';
 import 'planificador_viaje.dart';
 
@@ -15,10 +16,18 @@ class MapaViaje extends StatelessWidget {
     super.key,
     required this.planificador,
     this.esDemostracion = false,
+    this.mostrarTeselas = true,
+    this.ubicacion,
   });
 
   final PlanificadorViaje planificador;
   final bool esDemostracion;
+
+  /// false en las pruebas (sin internet): el mapa se dibuja sin teselas.
+  final bool mostrarTeselas;
+
+  /// Ubicación del usuario (botón "Mi ubicación" y marcador azul).
+  final UbicacionUsuario? ubicacion;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +50,8 @@ class MapaViaje extends StatelessWidget {
               ? const []
               : [elegida.sube, elegida.baja],
           esDemostracion: esDemostracion,
+          mostrarTeselas: mostrarTeselas,
+          ubicacion: ubicacion,
           alTocar: planificador.fijarPunto,
           encuadre: [?origen, ?sube, ?baja, ?destino],
           lineasExtra: [

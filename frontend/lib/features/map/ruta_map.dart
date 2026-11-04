@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -6,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/paradero.dart';
 import '../viaje/busqueda_viaje.dart';
+import 'ubicacion_usuario.dart';
 
 /// Mapa de OpenStreetMap con el recorrido y los paraderos de una ruta.
 ///
@@ -23,7 +27,17 @@ class RutaMap extends StatefulWidget {
     this.lineasExtra = const [],
     this.encuadre,
     this.alTocar,
+    this.mostrarTeselas = true,
+    this.ubicacion,
   });
+
+  /// false en las pruebas, que no tienen internet: el mapa se dibuja sin las
+  /// teselas de OpenStreetMap.
+  final bool mostrarTeselas;
+
+  /// Si se indica, muestra el botón "Mi ubicación", el marcador azul con su
+  /// círculo de precisión y el aviso cuando falta el permiso.
+  final UbicacionUsuario? ubicacion;
 
   /// Paraderos de la ruta: con dos o más se dibuja el recorrido.
   final List<Paradero> paraderos;
@@ -54,6 +68,9 @@ class RutaMap extends StatefulWidget {
   /// Zoom al centrar un solo punto (o varios casi iguales).
   static const zoomPuntoUnico = 15.0;
 
+  /// Zoom mínimo al centrar en la ubicación del usuario.
+  static const zoomMiUbicacion = 16.0;
+
   static const urlTeselas = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   static const identificadorApp = 'com.piurago.piurago';
 
@@ -67,6 +84,7 @@ class RutaMap extends StatefulWidget {
 class _RutaMapState extends State<RutaMap> {
   final _controller = MapController();
   bool _listo = false;
+  StreamSubscription<LatLng>? _centrados;
 
   /// Puntos de la línea de la ruta: el trazado por las calles o, si no hay,
   /// los paraderos.
@@ -77,8 +95,25 @@ class _RutaMapState extends State<RutaMap> {
   List<LatLng> get _puntosEncuadre => widget.encuadre ?? _puntos;
 
   @override
+  void initState() {
+    super.initState();
+    _escucharCentrados();
+  }
+
+  /// "Mi ubicación" pide centrar el mapa en la posición del usuario.
+  void _escucharCentrados() {
+    _centrados?.cancel();
+    _centrados = widget.ubicacion?.centrados.listen((punto) {
+      if (!_listo) return;
+      final zoom = math.max(_controller.camera.zoom, RutaMap.zoomMiUbicacion);
+      _controller.move(punto, zoom);
+    });
+  }
+
+  @override
   void didUpdateWidget(RutaMap anterior) {
     super.didUpdateWidget(anterior);
+    if (anterior.ubicacion != widget.ubicacion) _escucharCentrados();
     if (!listEquals(anterior.encuadre, widget.encuadre)) {
       // El controlador se usa después del frame, cuando el mapa ya se dibujó.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -89,6 +124,7 @@ class _RutaMapState extends State<RutaMap> {
 
   @override
   void dispose() {
+    _centrados?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -149,10 +185,11 @@ class _RutaMapState extends State<RutaMap> {
             ),
           ),
           children: [
-            TileLayer(
-              urlTemplate: RutaMap.urlTeselas,
-              userAgentPackageName: RutaMap.identificadorApp,
-            ),
+            if (widget.mostrarTeselas)
+              TileLayer(
+                urlTemplate: RutaMap.urlTeselas,
+                userAgentPackageName: RutaMap.identificadorApp,
+              ),
             if (puntos.length >= 2)
               PolylineLayer(
                 polylines: [
@@ -187,6 +224,8 @@ class _RutaMapState extends State<RutaMap> {
                 ...widget.marcadoresExtra,
               ],
             ),
+            if (widget.ubicacion case final ubicacion?)
+              _CapaMiUbicacion(ubicacion: ubicacion),
             const RichAttributionWidget(
               alignment: AttributionAlignment.bottomLeft,
               attributions: [
@@ -197,6 +236,19 @@ class _RutaMapState extends State<RutaMap> {
         ),
         if (widget.esDemostracion)
           const Positioned(left: 12, top: 12, child: _NotaDemostracion()),
+        if (widget.ubicacion case final ubicacion?) ...[
+          Positioned(
+            right: 16,
+            top: 16,
+            child: _BotonMiUbicacion(ubicacion: ubicacion),
+          ),
+          Positioned(
+            left: 12,
+            right: 72,
+            top: widget.esDemostracion ? 56 : 12,
+            child: _AvisoUbicacion(ubicacion: ubicacion),
+          ),
+        ],
         Positioned(
           right: 16,
           bottom: 16,
@@ -224,6 +276,149 @@ class _RutaMapState extends State<RutaMap> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Marcador azul de la posición del usuario con el círculo de su precisión
+/// (en metros, así que crece o se achica con el zoom).
+class _CapaMiUbicacion extends StatelessWidget {
+  const _CapaMiUbicacion({required this.ubicacion});
+
+  final UbicacionUsuario ubicacion;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: ubicacion,
+      builder: (context, _) {
+        final posicion = ubicacion.posicion;
+        if (posicion == null) return const SizedBox.shrink();
+        return Stack(
+          children: [
+            CircleLayer(
+              circles: [
+                CircleMarker(
+                  point: posicion.punto,
+                  radius: posicion.precisionMetros,
+                  useRadiusInMeter: true,
+                  color: AppColors.ubicacion.withValues(alpha: 0.15),
+                  borderColor: AppColors.ubicacion.withValues(alpha: 0.4),
+                  borderStrokeWidth: 1,
+                ),
+              ],
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: posicion.punto,
+                  width: 22,
+                  height: 22,
+                  child: Tooltip(
+                    key: const ValueKey('marcador-mi-ubicacion'),
+                    message: 'Estás aquí',
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.ubicacion,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black26, blurRadius: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BotonMiUbicacion extends StatelessWidget {
+  const _BotonMiUbicacion({required this.ubicacion});
+
+  final UbicacionUsuario ubicacion;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: ubicacion,
+      builder: (context, _) {
+        final activa = ubicacion.posicion != null;
+        return FloatingActionButton.small(
+          heroTag: null,
+          tooltip: 'Mi ubicación',
+          backgroundColor: AppColors.surface,
+          foregroundColor: activa ? AppColors.ubicacion : AppColors.text,
+          onPressed: ubicacion.miUbicacion,
+          child: Icon(activa ? Icons.my_location : Icons.location_searching),
+        );
+      },
+    );
+  }
+}
+
+/// Aviso discreto cuando no hay permiso de ubicación (o el GPS está
+/// apagado). La app sigue funcionando sin la ubicación.
+class _AvisoUbicacion extends StatelessWidget {
+  const _AvisoUbicacion({required this.ubicacion});
+
+  final UbicacionUsuario ubicacion;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: ubicacion,
+      builder: (context, _) {
+        if (!ubicacion.mostrarAviso) return const SizedBox.shrink();
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            color: AppColors.surface,
+            elevation: 2,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.location_off_outlined,
+                    size: 18,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      ubicacion.mensajeAviso,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                  if (ubicacion.puedeActivar)
+                    TextButton(
+                      onPressed: ubicacion.activar,
+                      child: const Text('Activar ubicación'),
+                    ),
+                  IconButton(
+                    tooltip: 'Cerrar aviso',
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: ubicacion.cerrarAviso,
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
