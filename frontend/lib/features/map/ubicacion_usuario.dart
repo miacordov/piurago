@@ -5,28 +5,45 @@ import 'package:latlong2/latlong.dart';
 
 import '../../data/ubicacion/servicio_ubicacion.dart';
 
+/// Recuerda, mientras la app está abierta (en memoria), si ya se pidió el
+/// permiso de ubicación automáticamente. Así el cuadro de Chrome o el
+/// diálogo de Android sale solo una vez por sesión, aunque se abra el mapa
+/// varias veces.
+class SesionUbicacion {
+  bool permisoSolicitado = false;
+}
+
 /// Ubicación del usuario en los mapas (el de la ruta y el de Planificar
-/// viaje). El permiso lo pide el sistema (cuadro de Chrome o diálogo de
-/// Android) al tocar "Mi ubicación". Si se deniega, la app sigue
-/// funcionando y se muestra un aviso discreto con "Activar ubicación".
+/// viaje).
+///
+/// Al abrir el mapa:
+/// - concedido: sigue la posición y centra el mapa, sin pedir nada;
+/// - pendiente o denegado: pide el permiso nativo una sola vez por sesión;
+/// - denegado para siempre o GPS apagado: no pide; muestra el aviso.
+///
+/// El botón "Mi ubicación" vuelve a consultar el permiso cada vez (lo pide
+/// si está denegado) y centra el mapa. Sin permiso la app sigue funcionando
+/// con un aviso discreto con "Activar ubicación".
 class UbicacionUsuario extends ChangeNotifier {
   UbicacionUsuario(
     this._servicio, {
+    SesionUbicacion? sesion,
     this.distanceFilter = ServicioUbicacion.distanciaMinimaPorDefecto,
-  });
+  }) : _sesion = sesion ?? SesionUbicacion();
 
   final ServicioUbicacion _servicio;
+  final SesionUbicacion _sesion;
 
   /// Metros que debe moverse el usuario para actualizar el marcador.
   final int distanceFilter;
 
   EstadoPermisoUbicacion? _estado;
   PosicionUsuario? _posicion;
+  LatLng? _centroPendiente;
   bool _mostrarAviso = false;
   bool _centrarAlLlegar = false;
   bool _descartado = false;
   StreamSubscription<PosicionUsuario>? _suscripcion;
-  final _centrados = StreamController<LatLng>.broadcast();
 
   /// Último estado conocido del permiso (null si aún no se consultó o si el
   /// servicio no está disponible).
@@ -38,8 +55,14 @@ class UbicacionUsuario extends ChangeNotifier {
   /// true si hay que mostrar el aviso "Activar ubicación".
   bool get mostrarAviso => _mostrarAviso;
 
-  /// Puntos en los que el mapa debe centrarse.
-  Stream<LatLng> get centrados => _centrados.stream;
+  /// Devuelve el punto en el que el mapa debe centrarse y lo descarta. Se
+  /// guarda hasta que el mapa lo toma: así no se pierde si la posición llega
+  /// antes de que el mapa esté listo.
+  LatLng? tomarCentro() {
+    final centro = _centroPendiente;
+    _centroPendiente = null;
+    return centro;
+  }
 
   /// En web, el permiso bloqueado se vuelve a dar desde el navegador: no hay
   /// botón que lo resuelva.
@@ -58,30 +81,22 @@ class UbicacionUsuario extends ChangeNotifier {
     _ => 'Sin tu ubicación igual puedes ver las rutas.',
   };
 
-  /// Al abrir el mapa: consulta el permiso sin mostrar diálogos y, si ya
-  /// está concedido, empieza a seguir la posición.
+  /// Al abrir el mapa.
   Future<void> iniciar() async {
-    final estado = await _consultar(_servicio.verificar);
-    if (estado == EstadoPermisoUbicacion.concedido) _escuchar();
+    var estado = await _consultar(_servicio.verificar);
+    if (estado == EstadoPermisoUbicacion.denegado &&
+        !_sesion.permisoSolicitado) {
+      _sesion.permisoSolicitado = true;
+      estado = await _consultar(_servicio.solicitar);
+    }
+    _aplicar(estado);
   }
 
-  /// Botón "Mi ubicación": pide el permiso si falta y centra el mapa.
+  /// Botón "Mi ubicación": consulta el permiso de nuevo (por si se revocó o
+  /// se concedió desde los ajustes), lo pide si está denegado y centra.
   Future<void> miUbicacion() async {
-    final actual = _posicion;
-    if (_estado == EstadoPermisoUbicacion.concedido && actual != null) {
-      _centrar(actual.punto);
-      return;
-    }
-    final estado = await _consultar(_servicio.solicitar);
-    if (estado == null) return;
-    if (estado == EstadoPermisoUbicacion.concedido) {
-      _mostrarAviso = false;
-      _centrarAlLlegar = true;
-      _escuchar();
-    } else {
-      _mostrarAviso = true;
-    }
-    _notificar();
+    _sesion.permisoSolicitado = true;
+    _aplicar(await _consultar(_servicio.solicitar));
   }
 
   /// Botón "Activar ubicación" del aviso.
@@ -107,8 +122,34 @@ class UbicacionUsuario extends ChangeNotifier {
     _notificar();
   }
 
-  /// Consulta el servicio; si falla (sin plugin, sitio sin HTTPS), la app
-  /// sigue sin ubicación y sin avisos.
+  void _aplicar(EstadoPermisoUbicacion? estado) {
+    // null: el servicio falló; la app sigue sin ubicación y sin avisos.
+    if (estado == null || _descartado) return;
+    if (estado == EstadoPermisoUbicacion.concedido) {
+      _mostrarAviso = false;
+      final actual = _posicion;
+      if (actual != null && _suscripcion != null) {
+        _centroPendiente = actual.punto;
+      } else {
+        // Sin posición o con el stream terminado: se suscribe (otra vez) y
+        // centra cuando llegue la primera posición.
+        _centrarAlLlegar = true;
+        _escuchar();
+      }
+    } else {
+      // Sin permiso se deja de seguir la posición y se quita el marcador.
+      _mostrarAviso = true;
+      _suscripcion?.cancel();
+      _suscripcion = null;
+      _posicion = null;
+      _centroPendiente = null;
+      _centrarAlLlegar = false;
+    }
+    _notificar();
+  }
+
+  /// Consulta el servicio; si falla (sin plugin, sitio sin HTTPS), devuelve
+  /// null.
   Future<EstadoPermisoUbicacion?> _consultar(
     Future<EstadoPermisoUbicacion> Function() consulta,
   ) async {
@@ -116,7 +157,6 @@ class UbicacionUsuario extends ChangeNotifier {
       final estado = await consulta();
       if (_descartado) return null;
       _estado = estado;
-      _notificar();
       return estado;
     } catch (_) {
       return null;
@@ -125,22 +165,22 @@ class UbicacionUsuario extends ChangeNotifier {
 
   void _escuchar() {
     if (_suscripcion != null || _descartado) return;
-    _suscripcion = _servicio.posiciones(distanceFilter: distanceFilter).listen(
-      (posicion) {
-        _posicion = posicion;
-        if (_centrarAlLlegar) {
-          _centrarAlLlegar = false;
-          _centrar(posicion.punto);
-        }
-        _notificar();
-      },
-      // Sin señal: el marcador se queda en la última posición conocida.
-      onError: (Object _) {},
-    );
-  }
-
-  void _centrar(LatLng punto) {
-    if (!_descartado) _centrados.add(punto);
+    _suscripcion = _servicio
+        .posiciones(distanceFilter: distanceFilter)
+        .listen(
+          (posicion) {
+            _posicion = posicion;
+            if (_centrarAlLlegar) {
+              _centrarAlLlegar = false;
+              _centroPendiente = posicion.punto;
+            }
+            _notificar();
+          },
+          // Sin señal: el marcador se queda en la última posición conocida.
+          onError: (Object _) {},
+          // El stream terminó: el próximo "Mi ubicación" se vuelve a suscribir.
+          onDone: () => _suscripcion = null,
+        );
   }
 
   void _notificar() {
@@ -151,7 +191,6 @@ class UbicacionUsuario extends ChangeNotifier {
   void dispose() {
     _descartado = true;
     _suscripcion?.cancel();
-    _centrados.close();
     super.dispose();
   }
 }

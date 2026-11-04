@@ -115,22 +115,34 @@ class GeolocatorServicioUbicacion extends ServicioUbicacion {
 
 /// Implementación para pruebas y entornos sin GPS: el estado y la respuesta
 /// al diálogo se configuran, y las posiciones se emiten con [emitir].
+///
+/// Se comporta como el servicio real: solicitar() solo "muestra el diálogo"
+/// (y lo cuenta en [vecesSolicitado]) si el estado es denegado.
 class FakeServicioUbicacion extends ServicioUbicacion {
   FakeServicioUbicacion({
     EstadoPermisoUbicacion estadoInicial = EstadoPermisoUbicacion.denegado,
     this.respuestaSolicitud = EstadoPermisoUbicacion.concedido,
     this.esWeb = false,
-  }) : _estado = estadoInicial;
+    this.posicionAlEscuchar,
+  }) : estado = estadoInicial;
 
   /// Estado que deja solicitar() (lo que "responde" la persona al diálogo).
   EstadoPermisoUbicacion respuestaSolicitud;
 
+  /// Estado actual del permiso. Las pruebas pueden cambiarlo (por ejemplo,
+  /// para simular que la persona lo revocó en los ajustes).
+  EstadoPermisoUbicacion estado;
+
+  /// Primera posición que recibe quien empieza a escuchar, como el primer
+  /// dato que entrega el GPS real al suscribirse.
+  final PosicionUsuario? posicionAlEscuchar;
+
   @override
   final bool esWeb;
 
-  EstadoPermisoUbicacion _estado;
-  final _posiciones = StreamController<PosicionUsuario>.broadcast();
+  var _posiciones = StreamController<PosicionUsuario>.broadcast();
 
+  /// Veces que se mostró el diálogo de permiso.
   int vecesSolicitado = 0;
   int vecesAjustesApp = 0;
   int vecesAjustesUbicacion = 0;
@@ -139,16 +151,23 @@ class FakeServicioUbicacion extends ServicioUbicacion {
   /// Envía una posición a quienes escuchan el stream.
   void emitir(PosicionUsuario posicion) => _posiciones.add(posicion);
 
+  /// Termina el stream actual (como cuando el sistema corta el GPS). Las
+  /// siguientes suscripciones reciben un stream nuevo.
+  void cerrarPosiciones() {
+    _posiciones.close();
+    _posiciones = StreamController<PosicionUsuario>.broadcast();
+  }
+
   @override
-  Future<EstadoPermisoUbicacion> verificar() async => _estado;
+  Future<EstadoPermisoUbicacion> verificar() async => estado;
 
   @override
   Future<EstadoPermisoUbicacion> solicitar() async {
-    vecesSolicitado++;
-    if (_estado != EstadoPermisoUbicacion.concedido) {
-      _estado = respuestaSolicitud;
+    if (estado == EstadoPermisoUbicacion.denegado) {
+      vecesSolicitado++;
+      estado = respuestaSolicitud;
     }
-    return _estado;
+    return estado;
   }
 
   @override
@@ -156,7 +175,18 @@ class FakeServicioUbicacion extends ServicioUbicacion {
     int distanceFilter = ServicioUbicacion.distanciaMinimaPorDefecto,
   }) {
     ultimoDistanceFilter = distanceFilter;
-    return _posiciones.stream;
+    final fuente = _posiciones.stream;
+    final inicial = posicionAlEscuchar;
+    if (inicial == null) return fuente;
+    return Stream.multi((salida) {
+      salida.add(inicial);
+      final sub = fuente.listen(
+        salida.add,
+        onError: salida.addError,
+        onDone: salida.close,
+      );
+      salida.onCancel = sub.cancel;
+    });
   }
 
   @override

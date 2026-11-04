@@ -40,10 +40,15 @@ class MapPage extends StatefulWidget {
     this.idRuta,
     this.mostrarMapa = true,
     this.servicioUbicacion = const GeolocatorServicioUbicacion(),
+    this.sesionUbicacion,
   });
 
   final RutasRepository repository;
   final ServicioUbicacion servicioUbicacion;
+
+  /// Para pedir el permiso automáticamente solo una vez por sesión, aunque
+  /// el mapa se abra varias veces. Sin ella, cada apertura vuelve a pedir.
+  final SesionUbicacion? sesionUbicacion;
 
   /// Buscador de lugares en línea de Planificar viaje (opcional).
   final BuscadorLugares? buscadorLugares;
@@ -86,7 +91,10 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    _ubicacion = UbicacionUsuario(widget.servicioUbicacion)..iniciar();
+    _ubicacion = UbicacionUsuario(
+      widget.servicioUbicacion,
+      sesion: widget.sesionUbicacion,
+    )..iniciar();
     if (widget.idRuta == null) {
       _iniciarPlanificador();
     } else {
@@ -276,11 +284,7 @@ class _ContenidoState extends State<_Contenido> {
   void _reportarCoordenadasGps(double lat, double lng) {
     final repo = widget.repository;
     if (repo is HttpRutasRepository) {
-      repo.reportarGps(
-        idRuta: widget.ruta.idRuta,
-        latitud: lat,
-        longitud: lng,
-      );
+      repo.reportarGps(idRuta: widget.ruta.idRuta, latitud: lat, longitud: lng);
     }
   }
 
