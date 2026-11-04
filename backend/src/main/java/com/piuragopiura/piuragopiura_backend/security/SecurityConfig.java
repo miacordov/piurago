@@ -71,6 +71,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**")
                         .permitAll()
+                        // Salud del servicio para un monitor externo: solo responde UP o DOWN.
+                        // /actuator/info y cualquier otro endpoint siguen pidiendo token.
+                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/historico-congestion/recalcular",
                                 "/api/historico-congestion/recalcular-todas").hasRole("REGISTRADO")
