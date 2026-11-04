@@ -23,4 +23,7 @@ class AppColors {
   static const etaBox = Color(0xFFDDF1FF);
   static const track = Color(0xFFCEDBEC);
   static const secondaryBorder = Color(0xFFCFDBEC);
+
+  /// Azul del marcador "Estás aquí" (distinto del primario de las rutas).
+  static const ubicacion = Color(0xFF1A73E8);
 }

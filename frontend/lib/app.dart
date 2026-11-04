@@ -9,8 +9,8 @@ import 'data/rutas_repository.dart';
 import 'data/ubicacion/servicio_ubicacion.dart';
 import 'features/auth/login_page.dart';
 import 'features/congestion/congestion_page.dart';
-import 'features/location/location_page.dart';
 import 'features/map/map_page.dart';
+import 'features/map/ubicacion_usuario.dart';
 import 'features/routes/routes_page.dart';
 
 class PiuraGoApp extends StatelessWidget {
@@ -22,6 +22,7 @@ class PiuraGoApp extends StatelessWidget {
     this.lugaresConocidos = const [],
     this.mostrarMapaBase = true,
     this.servicioUbicacion,
+    this.sesionUbicacion,
   });
 
   /// Fuente de datos de las rutas. Si no se indica, se usan datos de prueba.
@@ -47,6 +48,12 @@ class PiuraGoApp extends StatelessWidget {
   /// Servicio de geolocalización. Si no se indica, usa Geolocator real.
   final ServicioUbicacion? servicioUbicacion;
 
+  /// Recuerda si ya se pidió el permiso de ubicación en esta sesión. Si no
+  /// se indica, se usa una sola en memoria para toda la ejecución de la app.
+  final SesionUbicacion? sesionUbicacion;
+
+  static final _sesionPorDefecto = SesionUbicacion();
+
   @override
   Widget build(BuildContext context) {
     final repository = rutasRepository ?? const FakeRutasRepository();
@@ -61,7 +68,6 @@ class PiuraGoApp extends StatelessWidget {
           : AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),
-        AppRoutes.ubicacion: (_) => LocationPage(servicioUbicacion: ubicacion),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),
         AppRoutes.mapa: (context) {
           final idRuta = ModalRoute.of(context)?.settings.arguments as int?;
@@ -72,6 +78,7 @@ class PiuraGoApp extends StatelessWidget {
             idRuta: idRuta,
             mostrarMapa: mostrarMapaBase,
             servicioUbicacion: ubicacion,
+            sesionUbicacion: sesionUbicacion ?? _sesionPorDefecto,
           );
         },
         AppRoutes.congestion: (_) => CongestionPage(repository: repository),

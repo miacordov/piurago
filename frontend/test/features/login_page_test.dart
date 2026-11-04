@@ -75,7 +75,7 @@ Future<void> tocar(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('iniciar sesión con el backend pasa a activar la ubicación', (
+  testWidgets('iniciar sesión con el backend va directo a la lista de rutas', (
     tester,
   ) async {
     fijarPantalla(tester);
@@ -89,7 +89,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/auth/login'));
     expect(auth.esRegistrado, isTrue);
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
+    expect(find.text('Encuentra tu ruta'), findsOneWidget);
   });
 
   testWidgets('con credenciales incorrectas avisa y no avanza', (tester) async {
@@ -102,7 +102,7 @@ void main() {
     await tocar(tester, find.text('Iniciar sesión').last);
 
     expect(find.text('Correo o contraseña incorrectos.'), findsOneWidget);
-    expect(find.text('Activa tu ubicación'), findsNothing);
+    expect(find.text('Encuentra tu ruta'), findsNothing);
   });
 
   testWidgets('sin conexión con el servidor lo dice', (tester) async {
@@ -141,7 +141,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/auth/registro'));
     expect(auth.esRegistrado, isTrue);
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
+    expect(find.text('Encuentra tu ruta'), findsOneWidget);
   });
 
   testWidgets('si el registro falla lo explica', (tester) async {
@@ -176,7 +176,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/usuarios/anonimo'));
     expect(auth.estaAutenticado, isTrue);
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
+    expect(find.text('Encuentra tu ruta'), findsOneWidget);
   });
 
   testWidgets('sin servidor, el pasajero anónimo entra igual (modo demo)', (
@@ -188,7 +188,7 @@ void main() {
 
     await tocar(tester, find.text('Continuar como pasajero anónimo'));
 
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
+    expect(find.text('Encuentra tu ruta'), findsOneWidget);
   });
 
   testWidgets('con una sesión registrada guardada abre directo en Rutas', (
