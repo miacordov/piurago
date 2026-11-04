@@ -266,12 +266,8 @@ void main() {
     await tester.pumpWidget(const PiuraGoApp());
     await tester.pumpAndSettle();
 
-    // Desde login entrar como anónimo
+    // Desde login entrar como anónimo: llega directo a la lista de rutas.
     await tester.tap(find.text('Continuar como pasajero anónimo'));
-    await tester.pumpAndSettle();
-
-    // Saltar pantalla de ubicación
-    await tester.tap(find.text('Continuar sin activar ubicación'));
     await tester.pumpAndSettle();
 
     // En la barra lateral tocar "Congestión"
