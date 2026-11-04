@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -84,7 +83,6 @@ class RutaMap extends StatefulWidget {
 class _RutaMapState extends State<RutaMap> {
   final _controller = MapController();
   bool _listo = false;
-  StreamSubscription<LatLng>? _centrados;
 
   /// Puntos de la línea de la ruta: el trazado por las calles o, si no hay,
   /// los paraderos.
@@ -97,23 +95,33 @@ class _RutaMapState extends State<RutaMap> {
   @override
   void initState() {
     super.initState();
-    _escucharCentrados();
+    widget.ubicacion?.addListener(_centrarEnUbicacion);
   }
 
-  /// "Mi ubicación" pide centrar el mapa en la posición del usuario.
-  void _escucharCentrados() {
-    _centrados?.cancel();
-    _centrados = widget.ubicacion?.centrados.listen((punto) {
-      if (!_listo) return;
-      final zoom = math.max(_controller.camera.zoom, RutaMap.zoomMiUbicacion);
-      _controller.move(punto, zoom);
-    });
+  void _alEstarListo() {
+    _listo = true;
+    // Después del frame, para no quedar debajo del encuadre inicial de la
+    // ruta.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _centrarEnUbicacion());
+  }
+
+  /// Centra el mapa en la posición del usuario si la ubicación lo pidió. El
+  /// pedido queda guardado hasta que el mapa está listo.
+  void _centrarEnUbicacion() {
+    if (!_listo || !mounted) return;
+    final punto = widget.ubicacion?.tomarCentro();
+    if (punto == null) return;
+    final zoom = math.max(_controller.camera.zoom, RutaMap.zoomMiUbicacion);
+    _controller.move(punto, zoom);
   }
 
   @override
   void didUpdateWidget(RutaMap anterior) {
     super.didUpdateWidget(anterior);
-    if (anterior.ubicacion != widget.ubicacion) _escucharCentrados();
+    if (anterior.ubicacion != widget.ubicacion) {
+      anterior.ubicacion?.removeListener(_centrarEnUbicacion);
+      widget.ubicacion?.addListener(_centrarEnUbicacion);
+    }
     if (!listEquals(anterior.encuadre, widget.encuadre)) {
       // El controlador se usa después del frame, cuando el mapa ya se dibujó.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,7 +132,7 @@ class _RutaMapState extends State<RutaMap> {
 
   @override
   void dispose() {
-    _centrados?.cancel();
+    widget.ubicacion?.removeListener(_centrarEnUbicacion);
     _controller.dispose();
     super.dispose();
   }
@@ -176,7 +184,7 @@ class _RutaMapState extends State<RutaMap> {
                 : iniciales.first,
             initialZoom: iniciales.isEmpty ? 14 : RutaMap.zoomPuntoUnico,
             initialCameraFit: _encuadre(),
-            onMapReady: () => _listo = true,
+            onMapReady: _alEstarListo,
             onTap: alTocar == null ? null : (_, punto) => alTocar(punto),
             minZoom: 5,
             maxZoom: 19,
@@ -383,29 +391,48 @@ class _AvisoUbicacion extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+              // El texto arriba y "Activar ubicación" debajo, para que quepa
+              // también en el celular.
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.location_off_outlined,
-                    size: 18,
-                    color: AppColors.textMuted,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Icon(
+                      Icons.location_off_outlined,
+                      size: 18,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Flexible(
-                    child: Text(
-                      ubicacion.mensajeAviso,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textMuted,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 9),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ubicacion.mensajeAviso,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          if (ubicacion.puedeActivar)
+                            TextButton(
+                              onPressed: ubicacion.activar,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              child: const Text('Activar ubicación'),
+                            ),
+                        ],
                       ),
                     ),
                   ),
-                  if (ubicacion.puedeActivar)
-                    TextButton(
-                      onPressed: ubicacion.activar,
-                      child: const Text('Activar ubicación'),
-                    ),
                   IconButton(
                     tooltip: 'Cerrar aviso',
                     iconSize: 16,
