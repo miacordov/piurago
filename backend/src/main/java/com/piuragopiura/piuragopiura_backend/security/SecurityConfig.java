@@ -1,6 +1,7 @@
 package com.piuragopiura.piuragopiura_backend.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,20 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+    }
+
+    /**
+     * JwtAuthFilter es un @Component, así que Spring Boot también lo registraría como
+     * filtro suelto del servlet, fuera de Spring Security. Si ese corre antes que la
+     * cadena de seguridad, autentica en un contexto que la cadena luego reemplaza y la
+     * petición queda anónima. Se desactiva ese registro: el filtro corre solo dentro de
+     * la cadena (addFilterBefore en filterChain).
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthFilter> registroJwtAuthFilter(JwtAuthFilter filtro) {
+        FilterRegistrationBean<JwtAuthFilter> registro = new FilterRegistrationBean<>(filtro);
+        registro.setEnabled(false);
+        return registro;
     }
 
     @Bean
