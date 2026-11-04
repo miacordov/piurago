@@ -421,7 +421,7 @@ Son **interfaces** que extienden `JpaRepository`. Spring genera la implementaci�
 | `UsuarioAnonimoRepository` | `findByDeviceUuid` | Reconocer un dispositivo ya registrado |
 | `RutaRepository` | `findByActivaTrue` | Listar solo las rutas activas |
 | `ParaderoRepository` | `findByRuta_IdRutaOrderByOrdenSecuencialAsc` | Paraderos de una ruta, en orden |
-| `ReporteGpsRepository` | `findByRuta_IdRutaOrderByFechaHoraDesc(idRuta, Pageable)`, `findByRuta_IdRutaAndFechaHoraAfterOrderByFechaHoraDesc(idRuta, desde, Pageable)`, `findByUsuario_IdUsuarioOrderByFechaHoraDesc` | Últimos reportes de una ruta (ETA), reportes de una ventana de tiempo (congestión) y reportes de un usuario |
+| `ReporteGpsRepository` | `findByRuta_IdRutaOrderByFechaHoraDesc(idRuta, Pageable)`, `findByRuta_IdRutaAndFechaHoraAfterOrderByFechaHoraDesc(idRuta, desde, Pageable)`, `findByUsuario_IdUsuarioOrderByFechaHoraDesc`, `findUltimaPorColaborador(idRuta, desde)` (`@Query` en JPQL) | Últimos reportes de una ruta (ETA), reportes de una ventana de tiempo (congestión), reportes de un usuario y el último reporte de cada colaborador de una ruta (posiciones) |
 | `HistoricoCongestionRepository` | `findByRuta_IdRutaOrderByFechaCalculoDesc`, `findByRuta_IdRutaAndFranjaHorariaAndDiaSemanaAndParaderoIsNull` | Historial de una ruta y búsqueda de un registro por ruta, franja y día (para actualizarlo en vez de duplicarlo) |
 
 `Pageable` permite pedir "solo los primeros N resultados" (por ejemplo, los 2 últimos reportes), en vez de traer toda la tabla.
@@ -449,6 +449,8 @@ Un DTO define exactamente qué datos viajan por la red. Las clases con `record` 
 | `ParaderoResponseDTO` | `idParadero`, `nombre`, `latitud`, `longitud`, `ordenSecuencial` |
 | `ReporteGpsResponseDTO` | `idReporte`, `idUsuario`, `idRuta`, `latitud`, `longitud`, `fechaHora` |
 | `EtaResponseDTO` | `idRuta`, `idParadero`, `minutosEstimados`, `velocidadPromedioKmh`, `origen` (`REAL` o `SIMULADO`) |
+| `PosicionesRutaResponseDTO` | `idRuta`, `ventanaMinutos`, `colaboradoresActivos`, `posiciones` (lista de `PosicionColaboradorDTO`) |
+| `PosicionColaboradorDTO` | `latitud`, `longitud`, `fechaHora`. **Sin** `idUsuario` ni `idReporte`: no identifica al pasajero |
 | `HistoricoCongestionResponseDTO` | `idHistorico`, `idRuta`, `idParadero` (puede ser `null`), `franjaHoraria`, `tiempoDia`, `diaSemana`, `nivelCongestion`, `demoraPromedio`, `velocidadPromedio`, `cantidadPuntosCriticos`, `fechaCalculo` |
 
 Cada DTO de salida tiene un método estático `desde(entidad)` que convierte la entidad en DTO.
@@ -475,6 +477,17 @@ La interfaz define **qué** se puede hacer y `impl` define **cómo**.
   2. Verifica que el usuario y la ruta existan.
   3. Guarda el reporte.
 - `obtenerUltimos(idRuta, limite)`: los últimos N reportes de una ruta, del más nuevo al más viejo.
+
+#### `PosicionesService` / `PosicionesServiceImpl`: posiciones y cobertura (RF-06, RF-08)
+
+`obtenerPosiciones(idRuta)`:
+
+1. Si la ruta no existe, lanza `RecursoNoEncontradoException` (404).
+2. Toma la ventana reciente: los últimos `piurago.posiciones.ventana-minutos` minutos (2 por defecto; se acepta de 1 a 60, si no, el backend no arranca).
+3. Pide al repository el **último reporte de cada colaborador** en esa ventana. Si un colaborador tiene dos reportes con la misma hora, se queda uno solo.
+4. Devuelve las posiciones de la más nueva a la más vieja, con solo latitud, longitud y hora, y `colaboradoresActivos` = cuántos colaboradores reportaron en la ventana.
+
+La hora se toma con un `Clock` (el del sistema en la app, uno fijo en las pruebas), así el test no depende de cuándo se ejecuta.
 
 #### `EtaService` / `EtaServiceImpl`: el ETA
 
@@ -561,6 +574,20 @@ La app genera un UUID aleatorio **una sola vez**, lo guarda en el dispositivo y 
 | `GET /api/rutas` | Lista de `RutaResponseDTO` (rutas activas) |
 | `GET /api/rutas/{id}` | Una `RutaResponseDTO`; 400 si no existe |
 | `GET /api/rutas/{id}/paraderos` | Lista de `ParaderoResponseDTO` en orden (vacía hoy) |
+| `GET /api/rutas/{id}/posiciones` | `PosicionesRutaResponseDTO`: última posición de cada colaborador en la ventana reciente y cuántos hay; **404** si la ruta no existe |
+
+```json
+// GET /api/rutas/1/posiciones — Respuesta 200
+{
+  "idRuta": 1,
+  "ventanaMinutos": 2,
+  "colaboradoresActivos": 2,
+  "posiciones": [
+    { "latitud": -5.180000, "longitud": -80.640000, "fechaHora": "2026-11-04T08:00:13" },
+    { "latitud": -5.195000, "longitud": -80.633000, "fechaHora": "2026-11-04T07:59:20" }
+  ]
+}
+```
 
 #### `ReporteGpsController` (`/api/reportes-gps`)
 
@@ -596,10 +623,10 @@ Los parámetros de `recalcular` van **en la URL**, no en el cuerpo. Un anónimo 
 | Archivo | Qué hace |
 |---|---|
 | `JwtUtil` | Crea y valida los tokens. `generarToken(email, idUsuario)` para registrados y `generarTokenAnonimo(deviceUuid, idUsuario)` para anónimos (el "sujeto" del token es `anon:<deviceUuid>`). Cada token lleva: sujeto, `idUsuario`, `tipo` (`REGISTRADO` o `ANONIMO`), fecha de emisión y expiración. Firma con HMAC usando `jwt.secret`. `esValido(token)` devuelve `false` si el token está alterado, vencido, firmado con otra clave o no es un token |
-| `JwtAuthFilter` | Filtro que corre **en cada petición**. Lee `Authorization: Bearer <token>`. Si el token es válido, carga al usuario con `CustomUserDetailsService` y lo deja autenticado en esa petición. Si no hay token o es inválido, deja pasar la petición sin autenticar; después `SecurityConfig` decide si la rechaza |
+| `JwtAuthFilter` | Filtro que corre **en cada petición**, dentro de la cadena de Spring Security. Lee `Authorization: Bearer <token>`. Si el token es válido, carga al usuario con `CustomUserDetailsService` y lo deja autenticado en esa petición. Si no hay token o es inválido, deja pasar la petición sin autenticar; después `SecurityConfig` decide si la rechaza |
 | `CustomUserDetailsService` | Puente entre la base de datos y Spring Security. Si el nombre empieza con `anon:`, busca el dispositivo por `deviceUuid` y le da el rol `ROLE_ANONIMO`. Si no, busca por email y le da `ROLE_REGISTRADO`. Devuelve un `UsuarioAutenticado` |
 | `UsuarioAutenticado` | Extiende el `User` de Spring Security y agrega `idUsuario`. Los controllers lo reciben con `@AuthenticationPrincipal` para saber quién hace la petición sin confiar en el JSON |
-| `SecurityConfig` | Reglas generales: sesiones sin estado (sin cookies), BCrypt como codificador de contraseñas, CORS con orígenes configurables, 401 cuando no hay autenticación, qué endpoints son públicos y registro del filtro JWT |
+| `SecurityConfig` | Reglas generales: sesiones sin estado (sin cookies), BCrypt como codificador de contraseñas, CORS con orígenes configurables, 401 cuando no hay autenticación, qué endpoints son públicos y registro del filtro JWT. Como `JwtAuthFilter` es un `@Component`, Spring Boot también lo registraría como filtro suelto del servlet; `registroJwtAuthFilter` desactiva ese registro para que corra **solo** dentro de la cadena de seguridad (si el suelto corría antes, la petición quedaba anónima) |
 
 ### 6.8 `config/`
 
@@ -614,6 +641,7 @@ Los parámetros de `recalcular` van **en la URL**, no en el cuerpo. Un anónimo 
 | `IllegalArgumentException` (reglas de negocio: ruta inexistente, email repetido, franja inválida...) | 400 con `{"error": "mensaje"}` |
 | `MethodArgumentNotValidException` (falla `@Valid` en un DTO) | 400 con `{"campo": "mensaje"}` por cada campo inválido |
 | `BadCredentialsException` (contraseña incorrecta) | 401 con `{"error": "Credenciales inválidas"}` |
+| `RecursoNoEncontradoException` (el recurso pedido no existe; hoy, la ruta de `/posiciones`) | 404 con `{"error": "mensaje"}` |
 
 Los errores que ocurren **dentro de un filtro** (como `JwtAuthFilter`) no pasan por este manejador.
 
@@ -629,6 +657,7 @@ Los errores que ocurren **dentro de un filtro** (como `JwtAuthFilter`) no pasan 
 | `jwt.secret` | Clave de firma de tokens (mínimo 32 caracteres) |
 | `jwt.expiration-ms` | Vida del token: 86400000 ms = 24 horas |
 | `app.cors.allowed-origin-patterns` | Orígenes que pueden llamar a la API desde un navegador |
+| `piurago.posiciones.ventana-minutos` | Minutos que cuentan como "reciente" en `GET /api/rutas/{id}/posiciones` (2 por defecto, de 1 a 60) |
 
 **`logback-spring.xml`**: logs en consola y en un archivo rotado diariamente (`logs/piuragopiura-backend.log`, 14 días de historial).
 
@@ -644,7 +673,7 @@ Todo usuario necesita un token. La única forma de obtener uno es registrarse, h
 |---|---|---|---|
 | `POST /api/auth/registro`, `POST /api/auth/login` | ✅ | ✅ | ✅ |
 | `POST /api/usuarios/anonimo` | ✅ | ✅ | ✅ |
-| `GET /api/rutas`, `/{id}`, `/{id}/paraderos` | 401 | ✅ | ✅ |
+| `GET /api/rutas`, `/{id}`, `/{id}/paraderos`, `/{id}/posiciones` | 401 | ✅ | ✅ |
 | `POST /api/reportes-gps`, `GET /api/reportes-gps/eta/{id}` | 401 | ✅ | ✅ |
 | `GET /api/historico-congestion/ruta/{id}` | 401 | ✅ | ✅ |
 | `POST /api/historico-congestion/recalcular` | 401 | **403** | ✅ |
@@ -674,6 +703,7 @@ Los valores marcados como **supuesto** no vienen de datos reales: son decisiones
 | Caché de ETA | 10 s, máximo 200 rutas | `CacheConfig` |
 | Frecuencia de paso por defecto | 12 min (**supuesto**) | `EtaServiceImpl` |
 | Antigüedad máxima de un reporte para ETA real | 5 min (**supuesto**) | `EtaServiceImpl` |
+| Ventana de "colaborador activo" en posiciones | 2 min (**supuesto**, configurable de 1 a 60) | `application.properties`, `PosicionesServiceImpl` |
 | Franja `MANANA_PICO` | 06:00 a 09:59 | `HistoricoCongestionServiceImpl` |
 | Franja `MEDIO_DIA` | 10:00 a 16:59 | idem |
 | Franja `TARDE_PICO` | 17:00 a 20:59 | idem |
@@ -694,6 +724,7 @@ Los valores marcados como **supuesto** no vienen de datos reales: son decisiones
 |---|---|---|
 | 200 | Todo bien | |
 | 400 | Datos mal enviados o regla de negocio incumplida | Campo inválido, ruta inexistente, email repetido, franja inválida, coordenadas fuera de Perú, "No hay reportes GPS válidos" |
+| 404 | El recurso no existe | Ruta inexistente en `GET /api/rutas/{id}/posiciones` (los endpoints anteriores siguen respondiendo 400) |
 | 401 | No autenticado | Sin token, token alterado o vencido; contraseña incorrecta en el login |
 | 403 | Autenticado pero sin permiso | Un anónimo llama a `recalcular`; origen CORS no permitido |
 | 500 | Error inesperado del servidor | Un fallo no controlado; revisar el log |
@@ -713,6 +744,7 @@ No se conectan a Neon ni levantan Spring: usan simulaciones (mocks) de los repos
 | `ReporteGpsServiceImplTest` | Coordenadas fuera de Perú, usuario o ruta inexistentes, guardado correcto | 6 |
 | `EtaServiceImplTest` | ETA real y simulado, cuándo se cae al simulado, caché | 9 |
 | `HistoricoCongestionServiceImplTest` | Filtro por franja y día, cálculo por usuario, datos descartados, actualización sin duplicar | 14 |
+| `PosicionesServiceImplTest` | Ruta inexistente (404), ventana por defecto y configurable, una posición por colaborador y en orden, empates, sin datos del usuario, ventana inválida | 7 |
 
 Comando: `.\mvnw.cmd test "-Dtest=JwtUtilTest,*ServiceImplTest"`.
 
@@ -733,7 +765,9 @@ Orden obligatorio: las carpetas dependen unas de otras. Cada ejecución crea un 
 
 ### 10.3 Pruebas de controllers y de seguridad
 
-No hay pruebas unitarias para los controllers, `JwtAuthFilter`, `SecurityConfig` ni `GlobalExceptionHandler`: se cubren con la colección de Postman. Tampoco hay medición de cobertura de código (si el docente la pide, se agrega JaCoCo al `pom.xml`).
+`RutaControllerPosicionesTest` (`@WebMvcTest`) prueba `GET /api/rutas/{id}/posiciones` con la seguridad real (`SecurityConfig` y `JwtAuthFilter`) y el JWT simulado: 401 sin token, 200 con la forma del JSON y 404 con una ruta inexistente. No necesita base de datos. El CI todavía no la corre (su patrón es `JwtUtilTest,*ServiceImplTest`); localmente: `.\mvnw.cmd test "-Dtest=*ControllerPosicionesTest"`.
+
+El resto de los controllers, `SecurityConfig` y `GlobalExceptionHandler` se cubren con la colección de Postman. Tampoco hay medición de cobertura de código (si el docente la pide, se agrega JaCoCo al `pom.xml`).
 
 ---
 
