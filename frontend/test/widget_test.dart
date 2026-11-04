@@ -56,10 +56,10 @@ void main() {
 
     expect(find.text('Ingresa un correo válido'), findsOneWidget);
     expect(find.text('Ingresa tu contraseña'), findsOneWidget);
-    expect(find.text('Activa tu ubicación'), findsNothing);
+    expect(find.text('Encuentra tu ruta'), findsNothing);
   });
 
-  testWidgets('con datos válidos pasa a activar la ubicación', (tester) async {
+  testWidgets('con datos válidos va directo a la lista de rutas', (tester) async {
     fijarPantalla(tester, escritorio);
     await abrirApp(tester);
 
@@ -69,7 +69,8 @@ void main() {
     await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
+    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('Activa tu ubicación'), findsNothing);
   });
 
   testWidgets('el pasajero anónimo llega a la lista de rutas', (tester) async {
@@ -80,10 +81,7 @@ void main() {
     await tester.ensureVisible(anonimo);
     await tester.tap(anonimo);
     await tester.pumpAndSettle();
-    expect(find.text('Activa tu ubicación'), findsOneWidget);
-
-    await tester.tap(find.text('Continuar sin activar ubicación'));
-    await tester.pumpAndSettle();
     expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('Activa tu ubicación'), findsNothing);
   });
 }
