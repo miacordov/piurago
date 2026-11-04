@@ -9,7 +9,6 @@ import 'data/rutas_repository.dart';
 import 'data/ubicacion/servicio_ubicacion.dart';
 import 'features/auth/login_page.dart';
 import 'features/congestion/congestion_page.dart';
-import 'features/location/location_page.dart';
 import 'features/map/map_page.dart';
 import 'features/routes/routes_page.dart';
 
@@ -61,7 +60,6 @@ class PiuraGoApp extends StatelessWidget {
           : AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),
-        AppRoutes.ubicacion: (_) => LocationPage(servicioUbicacion: ubicacion),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),
         AppRoutes.mapa: (context) {
           final idRuta = ModalRoute.of(context)?.settings.arguments as int?;
