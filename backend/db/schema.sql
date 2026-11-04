@@ -79,6 +79,8 @@ CREATE TABLE reporte_gps (
 
 CREATE INDEX idx_reporte_gps_ruta_fecha ON reporte_gps (id_ruta, fecha_hora DESC);
 CREATE INDEX idx_reporte_gps_usuario    ON reporte_gps (id_usuario);
+-- Retención (RNF-08): la tarea diaria borra por fecha. Ver db/migraciones/002.
+CREATE INDEX idx_reporte_gps_fecha      ON reporte_gps (fecha_hora);
 
 CREATE TABLE historico_congestion (
     id_historico             BIGSERIAL PRIMARY KEY,

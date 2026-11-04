@@ -41,7 +41,8 @@ public class HistoricoCongestionServiceImpl implements HistoricoCongestionServic
     private static final double UMBRAL_CONGESTION_MEDIA_KMH = 18.0;   // por debajo: congestión MEDIA
     private static final double MAX_VELOCIDAD_PLAUSIBLE_KMH = 100.0;  // por encima: ruido de GPS, se descarta
     private static final long MAX_SEGUNDOS_ENTRE_REPORTES = 600;      // más separación: son viajes distintos
-    private static final int VENTANA_DIAS = 28;
+    /** Días de reportes que analiza la congestión. La retención GPS no puede ser menor. */
+    static final int VENTANA_DIAS = 28;
     private static final int MAX_REPORTES_A_ANALIZAR = 5000;
     private static final double MAX_METROS_AL_TRAMO = 300.0;          // más lejos: el reporte no cae en ningún tramo
     private static final int MAX_TRAMOS_CRITICOS = 5;
