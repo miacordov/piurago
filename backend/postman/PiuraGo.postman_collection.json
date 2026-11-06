@@ -1,0 +1,1014 @@
+{
+  "info": {
+    "name": "PiuraGo API",
+    "description": "Endpoints del backend de PiuraGo. Variables: `baseUrl` (por defecto http://localhost:8080) y `token` (se llena solo con \"Usuario anónimo\"). Ejecuta las carpetas en orden: las siguientes usan el token, el idRuta y el token de registrado que guardan las anteriores. El correo y la contraseña del usuario de prueba se generan al azar en cada ejecución. No guardes tokens reales en el archivo exportado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Datos de prueba al azar (no son credenciales reales).",
+          "if (!pm.collectionVariables.get('deviceUuid')) {",
+          "  pm.collectionVariables.set('deviceUuid', pm.variables.replaceIn('{{$guid}}'));",
+          "}",
+          "if (!pm.collectionVariables.get('emailPrueba')) {",
+          "  const sufijo = Date.now();",
+          "  pm.collectionVariables.set('emailPrueba', `postman${sufijo}@prueba.piurago`);",
+          "  pm.collectionVariables.set('passwordPrueba', `Prueba-${sufijo}`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "tokenRegistrado",
+      "value": ""
+    },
+    {
+      "key": "idRuta",
+      "value": "1"
+    },
+    {
+      "key": "deviceUuid",
+      "value": ""
+    },
+    {
+      "key": "emailPrueba",
+      "value": ""
+    },
+    {
+      "key": "passwordPrueba",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Salud (Actuator)",
+      "description": "Health es público (para un monitor externo); info pide token.",
+      "item": [
+        {
+          "name": "Health (público)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('está UP y sin detalles', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.status).to.eql('UP');",
+                  "  pm.expect(r).to.not.have.property('components');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Info sin token: 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 Acceso",
+      "description": "Usuario anónimo (guarda {{token}}), registro y login (guarda {{tokenRegistrado}}).",
+      "item": [
+        {
+          "name": "Usuario anónimo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('devuelve token e idUsuario', () => {",
+                  "  pm.expect(r.token).to.be.a('string').and.not.empty;",
+                  "  pm.expect(r.idUsuario).to.be.a('number');",
+                  "});",
+                  "pm.collectionVariables.set('token', r.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios/anonimo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "anonimo"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceUuid\": \"{{deviceUuid}}\",\n  \"tipoDispositivo\": \"WEB\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Registro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('devuelve token', () => pm.expect(pm.response.json().token).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registro"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Postman\",\n  \"email\": \"{{emailPrueba}}\",\n  \"password\": \"{{passwordPrueba}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Registro repetido: 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registro"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Postman\",\n  \"email\": \"{{emailPrueba}}\",\n  \"password\": \"{{passwordPrueba}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('devuelve token', () => pm.expect(r.token).to.be.a('string'));",
+                  "pm.collectionVariables.set('tokenRegistrado', r.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailPrueba}}\",\n  \"password\": \"{{passwordPrueba}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Login con contraseña incorrecta: 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailPrueba}}\",\n  \"password\": \"no-es-la-clave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Rutas",
+      "description": "Rutas activas, paraderos y posiciones de colaboradores (RF-06, RF-08).",
+      "item": [
+        {
+          "name": "Rutas sin token: 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Rutas activas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const rutas = pm.response.json();",
+                  "pm.test('es una lista', () => pm.expect(rutas).to.be.an('array'));",
+                  "if (rutas.length) pm.collectionVariables.set('idRuta', rutas[0].idRuta);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Una ruta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('es la ruta pedida', () => pm.expect(String(pm.response.json().idRuta)).to.eql(String(pm.collectionVariables.get('idRuta'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas/{{idRuta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas",
+                "{{idRuta}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Paraderos de la ruta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('es una lista', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas/{{idRuta}}/paraderos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas",
+                "{{idRuta}}",
+                "paraderos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Posiciones de colaboradores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('trae la ventana y los colaboradores activos', () => {",
+                  "  pm.expect(r.ventanaMinutos).to.be.a('number');",
+                  "  pm.expect(r.colaboradoresActivos).to.eql(r.posiciones.length);",
+                  "});",
+                  "pm.test('no identifica a los colaboradores', () => r.posiciones.forEach(p => {",
+                  "  pm.expect(Object.keys(p).sort()).to.eql(['fechaHora', 'latitud', 'longitud']);",
+                  "}));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas/{{idRuta}}/posiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas",
+                "{{idRuta}}",
+                "posiciones"
+              ]
+            },
+            "description": "Requiere el PR de posiciones (GET /api/rutas/{id}/posiciones)."
+          }
+        },
+        {
+          "name": "Posiciones de una ruta inexistente: 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rutas/999999/posiciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rutas",
+                "999999",
+                "posiciones"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Reportes GPS",
+      "description": "Reporte de posición (el usuario sale del token) y ETA.",
+      "item": [
+        {
+          "name": "Reportar posición",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('el reporte es del dueño del token', () => pm.expect(pm.response.json().idUsuario).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reportes-gps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reportes-gps"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idRuta\": {{idRuta}},\n  \"latitud\": -5.1945,\n  \"longitud\": -80.6328\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reporte fuera de Perú: 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reportes-gps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reportes-gps"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idRuta\": {{idRuta}},\n  \"latitud\": 10.0,\n  \"longitud\": -80.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "ETA de la ruta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('origen REAL o SIMULADO', () => pm.expect(['REAL', 'SIMULADO']).to.include(pm.response.json().origen));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reportes-gps/eta/{{idRuta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reportes-gps",
+                "eta",
+                "{{idRuta}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Congestión",
+      "description": "Histórico, resumen, Excel y recálculo (solo registrados).",
+      "item": [
+        {
+          "name": "Histórico de la ruta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('es una lista', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/ruta/{{idRuta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "ruta",
+                "{{idRuta}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen de la ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "resumen"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen por franja y día",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/resumen?franjaHoraria=MANANA_PICO&diaSemana=LUN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "resumen"
+              ],
+              "query": [
+                {
+                  "key": "franjaHoraria",
+                  "value": "MANANA_PICO"
+                },
+                {
+                  "key": "diaSemana",
+                  "value": "LUN"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Exportar a Excel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('es un Excel', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('spreadsheetml'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/exportar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "exportar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recalcular como anónimo: 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/recalcular?idRuta={{idRuta}}&franjaHoraria=MANANA_PICO&diaSemana=LUN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "recalcular"
+              ],
+              "query": [
+                {
+                  "key": "idRuta",
+                  "value": "{{idRuta}}"
+                },
+                {
+                  "key": "franjaHoraria",
+                  "value": "MANANA_PICO"
+                },
+                {
+                  "key": "diaSemana",
+                  "value": "LUN"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recalcular una ruta (registrado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// 400 si todavía no hay reportes GPS válidos para esa franja y día.",
+                  "pm.test('responde 200 o 400', () => pm.expect([200, 400]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/recalcular?idRuta={{idRuta}}&franjaHoraria=MANANA_PICO&diaSemana=LUN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "recalcular"
+              ],
+              "query": [
+                {
+                  "key": "idRuta",
+                  "value": "{{idRuta}}"
+                },
+                {
+                  "key": "franjaHoraria",
+                  "value": "MANANA_PICO"
+                },
+                {
+                  "key": "diaSemana",
+                  "value": "LUN"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRegistrado}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recalcular todas (registrado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('dice cuántos registros guardó', () => pm.expect(pm.response.json().registrosGuardados).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/historico-congestion/recalcular-todas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "historico-congestion",
+                "recalcular-todas"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRegistrado}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Salud con token",
+      "description": "Info con un token válido.",
+      "item": [
+        {
+          "name": "Info con token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('dice qué app es', () => pm.expect(pm.response.json().app.nombre).to.eql('PiuraGo backend'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "info"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

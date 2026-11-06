@@ -65,6 +65,7 @@ El proyecto se compone de tres piezas:
 | Seguridad | Spring Security, JWT con JJWT 0.12.6, contraseñas con BCrypt |
 | Librerías del sílabo | Guava 33.3.1 (caché), Apache Commons Lang3 3.17.0 (validación), Logback (logs) |
 | Pruebas | JUnit 5, Mockito, AssertJ (unitarias); Postman (punta a punta) |
+| Monitoreo | Spring Boot Actuator: solo `/actuator/health` (público) e `/actuator/info` (con token) |
 
 ---
 
@@ -627,6 +628,7 @@ Los errores que ocurren **dentro de un filtro** (como `JwtAuthFilter`) no pasan 
 | `spring.jpa.hibernate.ddl-auto=validate` | Hibernate solo valida, no modifica tablas (sección 5.4) |
 | `spring.jpa.show-sql=true` | Imprime el SQL en consola (útil en desarrollo; **quitar en producción**) |
 | `jwt.secret` | Clave de firma de tokens (mínimo 32 caracteres) |
+| `management.endpoints.web.exposure.include=health,info` | Actuator expone solo esos dos endpoints. `management.endpoint.health.show-details` y `show-components` en `never`: health responde solo `{"status":"UP"}` o `DOWN`, sin datos de la base. `info.app.*` es lo que muestra `/actuator/info` |
 | `jwt.expiration-ms` | Vida del token: 86400000 ms = 24 horas |
 | `app.cors.allowed-origin-patterns` | Orígenes que pueden llamar a la API desde un navegador |
 
@@ -648,6 +650,8 @@ Todo usuario necesita un token. La única forma de obtener uno es registrarse, h
 | `POST /api/reportes-gps`, `GET /api/reportes-gps/eta/{id}` | 401 | ✅ | ✅ |
 | `GET /api/historico-congestion/ruta/{id}` | 401 | ✅ | ✅ |
 | `POST /api/historico-congestion/recalcular` | 401 | **403** | ✅ |
+| `GET /actuator/health` (y `/actuator/health/**`) | ✅ | ✅ | ✅ |
+| `GET /actuator/info` | 401 | ✅ | ✅ |
 
 **401 y 403, la diferencia:**
 
@@ -718,18 +722,20 @@ Comando: `.\mvnw.cmd test "-Dtest=JwtUtilTest,*ServiceImplTest"`.
 
 **Sobre TDD:** estas pruebas se escribieron **después** del código (*test-after*), no antes. El ciclo TDD completo es: escribir un test que falla (rojo), escribir el mínimo código para que pase (verde) y limpiar (refactor). Para la evidencia del curso, muestra el ciclo con una prueba: rompe a propósito una regla (por ejemplo, comenta la comprobación de email repetido en `UsuarioServiceImpl.registrar`), corre el test, toma captura del fallo, restaura el código y toma captura de que vuelve a pasar. Para cada servicio **nuevo**, escribe el test primero.
 
-### 10.2 Pruebas de punta a punta (Postman): 30 requests, 58 comprobaciones
+### 10.2 Pruebas de punta a punta (Postman)
 
-Archivo: `PiuraGo_E2E.postman_collection.json` (se importa en Postman y se ejecuta con **Run collection**). Recorre registro, login, usuario anónimo, rutas, reportes GPS (incluida la suplantación bloqueada), ETA, congestión y seguridad/CORS, pasando tokens e ids solos de un paso al siguiente.
+Archivo: [`backend/postman/PiuraGo.postman_collection.json`](../backend/postman/PiuraGo.postman_collection.json). Se importa en Postman y se ejecuta con **Run collection**, o desde la terminal con Newman:
 
-Antes de ejecutarla:
+```bash
+npx newman run backend/postman/PiuraGo.postman_collection.json --env-var baseUrl=http://localhost:8080
+```
 
-1. Backend corriendo en `http://localhost:8080`.
-2. Las 10 rutas cargadas en Neon.
-3. Sin paradero de prueba en RD-11 (`DELETE FROM paradero WHERE nombre = 'PRUEBA';`).
-4. Los datos semilla de congestión (reportes de un lunes a las 7:00 y un sábado a las 22:00) insertados en `reporte_gps`. Pídeselos a Isa o consúltalos en la carpeta `05` de la colección.
+- **Variables:** `baseUrl` (por defecto `http://localhost:8080`) y `token`. La petición "Usuario anónimo" llena `token` sola, y "Login" llena `tokenRegistrado`, que se usa para recalcular la congestión. El correo y la contraseña del usuario de prueba se generan al azar en cada ejecución.
+- **Qué cubre:** 24 peticiones con 39 comprobaciones, en carpetas que se ejecutan en orden: salud (Actuator), acceso (anónimo, registro, login), rutas (incluidas las posiciones de colaboradores y el 404), reportes GPS y ETA, congestión (incluido el 403 de un anónimo) e info con token.
+- **Seguridad:** el archivo no lleva tokens ni credenciales (`token` está vacío). Si exportas la colección desde Postman después de usarla, borra antes los valores actuales de las variables.
+- `ColeccionPostmanTest` revisa que la colección cubra todos los endpoints de los controllers, que use `{{baseUrl}}` y `{{token}}` y que no traiga tokens.
 
-Orden obligatorio: las carpetas dependen unas de otras. Cada ejecución crea un usuario registrado y uno anónimo con prefijo `e2e`, que se pueden borrar al terminar.
+La primera colección del equipo (`PiuraGo_E2E`, 58 comprobaciones) nunca se subió al repositorio; esta la reemplaza.
 
 ### 10.3 Pruebas de controllers y de seguridad
 
@@ -772,7 +778,8 @@ Sigue siempre este orden. Cada paso depende del anterior:
 | Diagrama BPM | ✅ |
 | Mockup UX/UI en Lovable | ✅ |
 | 39 pruebas unitarias | Entregadas; ejecutarlas con el comando de la sección 10.1 y guardar la evidencia |
-| Colección Postman E2E (58 comprobaciones) | Entregada; ejecutarla y guardar la captura del Runner |
+| Colección Postman (`backend/postman/`, 24 peticiones, 39 comprobaciones) | ✅ en el repo; falta guardar la captura del Runner en `docs/evidencias/` |
+| Actuator: health público e info con token | ✅ (falta configurar el monitor externo, por ejemplo UptimeRobot, sobre `/actuator/health`) |
 | Cliente Flutter | ❌ |
 | Despliegue | ❌ |
 
@@ -833,6 +840,7 @@ Sigue siempre este orden. Cada paso depende del anterior:
 5. **CORS en producción.** Poner en `app.cors.allowed-origin-patterns` solo el dominio real del cliente web, si lo hay. Las apps móviles no lo necesitan.
 6. **Limpieza de configuración.** Quitar `spring.jpa.show-sql=true` y, si se agregó, `logging.level.org.springframework.security=DEBUG`.
 7. **Opcional:** GitHub Actions para compilar y correr las pruebas unitarias en cada subida, como evidencia de automatización para el sílabo.
+8. **Monitoreo.** Apuntar un monitor externo (por ejemplo, UptimeRobot) a `GET /actuator/health`: es público, responde `{"status":"UP"}` y no muestra datos de la base. Si la base no responde, devuelve `DOWN` con código 503.
 
 ### 13.4 Limitaciones del diseño actual
 
