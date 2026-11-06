@@ -426,6 +426,8 @@ Son **interfaces** que extienden `JpaRepository`. Spring genera la implementaci�
 
 `Pageable` permite pedir "solo los primeros N resultados" (por ejemplo, los 2 últimos reportes), en vez de traer toda la tabla.
 
+`ReporteGpsRepository` tiene además `borrarAnterioresA(limite)`: un `DELETE` masivo en JPQL (`@Modifying`) que borra de una vez los reportes con fecha anterior al límite, sin cargarlos uno por uno. Lo usa la retención (sección 6.5).
+
 ### 6.4 `dto/`: lo que entra y sale por la API
 
 Un DTO define exactamente qué datos viajan por la red. Las clases con `record` son inmutables y generan solas el constructor y los getters.
@@ -493,6 +495,12 @@ La interfaz define **qué** se puede hacer y `impl` define **cómo**.
 Si el cálculo real lanza una excepción inesperada, se registra en el log y se devuelve el simulado.
 
 > **Limitaciones conocidas del ETA real:** toma el **primer paradero** de la ruta como "el siguiente", y mezcla las posiciones si varias combis de la misma ruta reportan a la vez, porque usa los dos últimos reportes de la ruta sin importar quién los envió.
+
+#### `RetencionGpsService` / `RetencionGpsServiceImpl`: retención de reportes GPS (RNF-08)
+
+- `borrarReportesAntiguos()`: borra los reportes con más de `piurago.gps.retencion-dias` días (30 por defecto) y devuelve cuántos borró.
+- El plazo **no puede ser menor que 28 días**, la ventana que analiza la congestión (`HistoricoCongestionServiceImpl.VENTANA_DIAS`): con menos, el backend no arranca. La decisión y su razón están en [`docs/retencion-reportes-gps.md`](retencion-reportes-gps.md).
+- Lo ejecuta la tarea `tarea/RetencionGpsProgramada` todos los días a las 03:30 de Lima (`piurago.gps.retencion-cron`). Se apaga con `piurago.gps.retencion-automatica=false`. Si una ejecución falla, lo anota en el log y la siguiente corre normalmente.
 
 #### `HistoricoCongestionService` / `HistoricoCongestionServiceImpl`: la congestión
 
@@ -625,6 +633,7 @@ Los errores que ocurren **dentro de un filtro** (como `JwtAuthFilter`) no pasan 
 |---|---|
 | `spring.datasource.*` | Conexión a Neon |
 | `spring.jpa.hibernate.ddl-auto=validate` | Hibernate solo valida, no modifica tablas (sección 5.4) |
+| `piurago.gps.retencion-dias`, `piurago.gps.retencion-cron`, `piurago.gps.retencion-automatica` | Plazo de retención de los reportes GPS (30 días, mínimo 28), cuándo corre la tarea que los borra (03:30 de Lima) y si está encendida |
 | `spring.jpa.show-sql=true` | Imprime el SQL en consola (útil en desarrollo; **quitar en producción**) |
 | `jwt.secret` | Clave de firma de tokens (mínimo 32 caracteres) |
 | `jwt.expiration-ms` | Vida del token: 86400000 ms = 24 horas |
@@ -684,6 +693,7 @@ Los valores marcados como **supuesto** no vienen de datos reales: son decisiones
 | Separación máxima entre reportes de un tramo | 10 min | idem |
 | Velocidad máxima plausible | 100 km/h | idem |
 | Ventana de análisis | 28 días, máximo 5000 reportes | idem |
+| Retención de reportes GPS | 30 días (mínimo 28); se borran a diario a las 03:30 | `application.properties`, `RetencionGpsServiceImpl` |
 | Zona horaria | `America/Lima` | `PiuragopiuraBackendApplication`, `EtaServiceImpl` |
 
 ---
@@ -711,10 +721,13 @@ No se conectan a Neon ni levantan Spring: usan simulaciones (mocks) de los repos
 | `JwtUtilTest` | Token válido; token alterado, vencido o firmado con otra clave se rechaza | 6 |
 | `UsuarioServiceImplTest` | Email repetido, contraseña hasheada, anónimo nuevo y existente | 4 |
 | `ReporteGpsServiceImplTest` | Coordenadas fuera de Perú, usuario o ruta inexistentes, guardado correcto | 6 |
+| `RetencionGpsServiceImplTest` | Plazo de 30 días por defecto y configurable, rechazo de menos de 28 días | 4 |
 | `EtaServiceImplTest` | ETA real y simulado, cuándo se cae al simulado, caché | 9 |
 | `HistoricoCongestionServiceImplTest` | Filtro por franja y día, cálculo por usuario, datos descartados, actualización sin duplicar | 14 |
 
 Comando: `.\mvnw.cmd test "-Dtest=JwtUtilTest,*ServiceImplTest"`.
+
+También hay dos pruebas fuera de ese patrón (el CI no las corre): `RetencionGpsProgramadaTest` (la tarea llama al servicio, no se detiene si falla y corre a las 03:30 de Lima) y `MigracionesTest` (la migración 002 crea el índice por fecha, `schema.sql` lo trae y el perfil `carga` la aplica). Comando: `.\mvnw.cmd test "-Dtest=RetencionGpsProgramadaTest,MigracionesTest"`.
 
 **Sobre TDD:** estas pruebas se escribieron **después** del código (*test-after*), no antes. El ciclo TDD completo es: escribir un test que falla (rojo), escribir el mínimo código para que pase (verde) y limpiar (refactor). Para la evidencia del curso, muestra el ciclo con una prueba: rompe a propósito una regla (por ejemplo, comenta la comprobación de email repetido en `UsuarioServiceImpl.registrar`), corre el test, toma captura del fallo, restaura el código y toma captura de que vuelve a pasar. Para cada servicio **nuevo**, escribe el test primero.
 
@@ -768,6 +781,7 @@ Sigue siempre este orden. Cada paso depende del anterior:
 | Seguridad JWT (registrados y anónimos), roles, 401/403, CORS | ✅ probado manualmente en Postman |
 | ETA real y simulado, caché Guava | ✅ |
 | Congestión por franja, día y usuario | ✅ |
+| Retención de reportes GPS: 30 días, borrado diario (RNF-08) | ✅ (falta ejecutar la migración 002 en la base de producción) |
 | Librerías del sílabo: Guava, Commons, Logback | ✅ |
 | Diagrama BPM | ✅ |
 | Mockup UX/UI en Lovable | ✅ |
