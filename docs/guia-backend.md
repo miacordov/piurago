@@ -658,6 +658,7 @@ Otros detalles:
 
 - El token dura **24 horas**. Un token anónimo se renueva solo (la app vuelve a llamar a `/api/usuarios/anonimo`); un registrado debe volver a hacer login, porque no existe refresh token.
 - No existe un rol de administrador: "registrado" es el único nivel por encima de anónimo.
+- **El pase interno a `/error` no pide token.** Cuando algo responde 403 o 404, Tomcat hace un segundo pase interno a `/error` (dispatch de tipo `ERROR`) para armar la respuesta. Como la API no tiene sesión, ese pase llega sin token; si se le exigiera autenticación, el cliente recibiría 401 en lugar del error real. `SecurityConfig` libera solo ese pase interno (`dispatcherTypeMatchers(DispatcherType.ERROR)`); una petición normal a `/error` sigue pidiendo token. Lo prueba `SeguridadDispatchErrorTest`.
 - **CORS** solo importa si pruebas Flutter en el navegador (`flutter run -d chrome`). Las apps de Android e iOS y Postman no pasan por CORS. Los orígenes permitidos se configuran en `app.cors.allowed-origin-patterns`; en producción hay que poner el dominio real y **nunca `*`**.
 
 ---

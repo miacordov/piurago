@@ -1,5 +1,6 @@
 package com.piuragopiura.piuragopiura_backend.security;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,6 +65,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
+                        // Pase interno de Tomcat a /error tras un 403 o un 404: llega sin token
+                        // (la API no tiene sesión) y, si se exigiera autenticación, el cliente
+                        // recibiría 401 en lugar del error real. Una petición normal a /error
+                        // sigue pidiendo token.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/usuarios/anonimo",
