@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.piuragopiura</groupId>
@@ -72,13 +72,13 @@
 		<dependency>
     <groupId>com.google.guava</groupId>
     <artifactId>guava</artifactId>
-    <version>33.3.1-jre</version>
+    <version>33.7.2-jre</version>
 </dependency>
 
 <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-lang3</artifactId>
-    <version>3.17.0</version>
+    <version>3.21.0</version>
 </dependency>
 <!-- Apache POI: exportar el histórico de congestión a Excel (.xlsx) -->
 <dependency>
@@ -94,18 +94,18 @@
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-api</artifactId>
-    <version>0.12.6</version>
+    <version>0.13.0</version>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-impl</artifactId>
-    <version>0.12.6</version>
+    <version>0.13.0</version>
     <scope>runtime</scope>
 </dependency>
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
     <artifactId>jjwt-jackson</artifactId>
-    <version>0.12.6</version>
+    <version>0.13.0</version>
     <scope>runtime</scope>
 </dependency>
 		<dependency>
