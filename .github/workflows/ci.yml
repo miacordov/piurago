@@ -25,7 +25,7 @@ jobs:
         working-directory: backend
         run: |
           chmod +x mvnw
-          ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest'
+          ./mvnw test -Dtest='JwtUtilTest,*ServiceImplTest,SwaggerDocsTest'
 
   frontend-test:
     name: Frontend Tests (Flutter)
