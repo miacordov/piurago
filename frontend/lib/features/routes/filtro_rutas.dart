@@ -105,3 +105,31 @@ Map<TipoServicio?, int> contarPorTipo(List<Ruta> rutas) {
   }
   return cuenta;
 }
+
+/// Las líneas de una empresa. [empresa] es null para las líneas sin empresa
+/// registrada.
+class GrupoEmpresa {
+  const GrupoEmpresa(this.empresa, this.rutas);
+
+  final String? empresa;
+  final List<RutaFiltrada> rutas;
+}
+
+/// Agrupa [rutas] por empresa, porque en Piura el transporte se reconoce
+/// por el nombre de la empresa. Las empresas van en orden alfabético (sin
+/// importar tildes ni mayúsculas) y las líneas sin empresa, al final; dentro
+/// de cada grupo se respeta el orden de [rutas].
+List<GrupoEmpresa> agruparPorEmpresa(List<RutaFiltrada> rutas) {
+  final grupos = <String?, List<RutaFiltrada>>{};
+  for (final r in rutas) {
+    final empresa = r.ruta.empresa?.trim();
+    final clave = (empresa == null || empresa.isEmpty) ? null : empresa;
+    grupos.putIfAbsent(clave, () => []).add(r);
+  }
+  final empresas = [...grupos.keys.nonNulls]
+    ..sort((a, b) => _plano(a).compareTo(_plano(b)));
+  return [
+    for (final e in empresas) GrupoEmpresa(e, grupos[e]!),
+    if (grupos.containsKey(null)) GrupoEmpresa(null, grupos[null]!),
+  ];
+}

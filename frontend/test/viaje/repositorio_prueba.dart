@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
 import 'package:piurago/data/lugares/buscador_lugares.dart';
+import 'package:piurago/data/models/eta.dart';
 import 'package:piurago/data/models/lugar.dart';
 import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
@@ -101,6 +102,25 @@ class RepositorioPrueba implements RutasRepository {
 
   @override
   bool get esDemostracion => true;
+}
+
+/// Repositorio de prueba que además da la próxima unidad de cada línea,
+/// como el que llama al backend. Anota las líneas que se le piden.
+class RepositorioConEta extends RepositorioPrueba implements FuenteEta {
+  RepositorioConEta(this.etas);
+
+  final Map<int, Eta> etas;
+  final pedidos = <int>[];
+
+  /// Si es true, cada pedido de ETA falla (sin conexión).
+  bool fallarEta = false;
+
+  @override
+  Future<Eta?> eta(int idRuta) async {
+    pedidos.add(idRuta);
+    if (fallarEta) throw Exception('sin conexión');
+    return etas[idRuta];
+  }
 }
 
 /// Buscador de lugares en línea falso (sin red): anota lo que se le pide y

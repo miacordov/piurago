@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../data/models/eta.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
@@ -36,8 +37,8 @@ enum PasoViaje {
 
 /// Estado del buscador "¿A dónde vas?". Pide las rutas y los paraderos de
 /// todas ellas una sola vez (en paralelo) y los guarda en memoria. Primero se
-/// pide el destino y luego el origen; con los dos, busca sola y elige la
-/// mejor línea. Solo depende de la interfaz RutasRepository.
+/// pide el destino y luego el origen (si hay GPS, el origen es la ubicación
+/// actual); con los dos, busca sola y elige la mejor línea. Solo depende de la interfaz RutasRepository.
 class PlanificadorViaje extends ChangeNotifier {
   PlanificadorViaje(this._repository, {this.lugaresConocidos = const []})
     : _calles = [
@@ -67,6 +68,27 @@ class PlanificadorViaje extends ChangeNotifier {
   List<OpcionViaje> _opciones = const [];
   bool _muyCerca = false;
   OpcionViaje? _elegida;
+
+  /// Próxima unidad de cada línea ya pedida (null si el backend no la dio)
+  /// y las que se están pidiendo.
+  final Map<int, Eta?> _etas = {};
+  final Set<int> _pidiendoEta = {};
+
+  /// El mapa se cerró: lo que llegue después ya no se muestra.
+  bool _descartado = false;
+
+  @override
+  void dispose() {
+    _descartado = true;
+    super.dispose();
+  }
+
+  /// Última posición del GPS del pasajero (null si no hay permiso o señal).
+  LatLng? _ubicacionActual;
+
+  /// true si el pasajero tocó el origen (lo eligió, lo borró o lo cambió):
+  /// desde entonces el GPS ya no lo reemplaza, hasta [limpiar].
+  bool _origenManual = false;
   PasoViaje? _paso;
 
   EstadoViaje get estado => _estado;
@@ -141,7 +163,21 @@ class PlanificadorViaje extends ChangeNotifier {
   }
 
   void fijarOrigen(Lugar? lugar) {
+    _origenManual = true;
     _origen = lugar;
+    _actualizar();
+  }
+
+  /// Recibe la posición del GPS. Mientras el pasajero no elija otro origen,
+  /// se usa como "Tu ubicación": así basta con escribir el destino. Con el
+  /// destino ya elegido solo se guarda: el viaje buscado, la línea elegida
+  /// y la guía no cambian mientras el pasajero camina.
+  void usarUbicacionActual(LatLng punto) {
+    _ubicacionActual = punto;
+    if (_origenManual || _destino != null && _origen != null) return;
+    final origen = _origen;
+    if (origen != null && origen.posicion == punto) return;
+    _origen = Lugar(nombreUbicacionActual, punto);
     _actualizar();
   }
 
@@ -156,6 +192,7 @@ class PlanificadorViaje extends ChangeNotifier {
     if (_campoActivo == CampoViaje.hasta) {
       _destino = lugar;
     } else {
+      _origenManual = true;
       _origen = lugar;
     }
     _actualizar();
@@ -183,14 +220,19 @@ class PlanificadorViaje extends ChangeNotifier {
   }
 
   void intercambiar() {
+    _origenManual = true;
     final origen = _origen;
     _origen = _destino;
     _destino = origen;
     _actualizar();
   }
 
+  /// Deja todo como al inicio: sin destino y, si se conoce, con la
+  /// ubicación actual como origen.
   void limpiar() {
-    _origen = null;
+    _origenManual = false;
+    final aqui = _ubicacionActual;
+    _origen = aqui == null ? null : Lugar(nombreUbicacionActual, aqui);
     _destino = null;
     _actualizar();
   }
@@ -242,14 +284,53 @@ class PlanificadorViaje extends ChangeNotifier {
         destino: destino.posicion,
         rutas: _rutas,
         paraderos: _paraderos,
+        trazados: _trazados,
       );
-      _opciones = resultado.opciones;
+      _opciones = [
+        for (final o in resultado.opciones) o.conEta(_etas[o.ruta.idRuta]),
+      ];
       _muyCerca = resultado.muyCerca;
       _elegida = _opciones.firstOrNull;
+      _pedirEtas();
       _estado = _opciones.isEmpty
           ? EstadoViaje.sinResultados
           : EstadoViaje.conResultados;
     }
+    notifyListeners();
+  }
+
+  /// Pide al backend la próxima unidad de las líneas que sirven y que aún no
+  /// se pidieron; al llegar, se suma a la espera de cada opción.
+  Future<void> _pedirEtas() async {
+    final repo = _repository;
+    if (repo is! FuenteEta) return;
+    final fuente = repo as FuenteEta;
+    final ids = [
+      for (final o in _opciones)
+        if (!_etas.containsKey(o.ruta.idRuta) &&
+            _pidiendoEta.add(o.ruta.idRuta))
+          o.ruta.idRuta,
+    ];
+    if (ids.isEmpty) return;
+    // Un pedido que falla no se guarda: se vuelve a pedir en la próxima
+    // búsqueda.
+    final etas = await Future.wait(
+      ids.map(
+        (id) => fuente
+            .eta(id)
+            .then<(bool, Eta?)>((eta) => (true, eta))
+            .catchError((Object _) => (false, null)),
+      ),
+    );
+    for (final (i, id) in ids.indexed) {
+      final (llego, eta) = etas[i];
+      if (llego) _etas[id] = eta;
+      _pidiendoEta.remove(id);
+    }
+    if (_descartado) return;
+    final elegida = _elegida?.ruta.idRuta;
+    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])];
+    _elegida = _opciones.where((o) => o.ruta.idRuta == elegida).firstOrNull;
     notifyListeners();
   }
 }

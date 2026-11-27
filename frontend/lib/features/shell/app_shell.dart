@@ -88,16 +88,16 @@ class SideNav extends StatelessWidget {
             ),
           ),
           _NavItem(
-            icon: Icons.alt_route,
-            label: 'Rutas',
-            selected: seccion == SeccionApp.rutas,
-            onTap: () => _ir(context, AppRoutes.rutas),
-          ),
-          _NavItem(
             icon: Icons.map_outlined,
             label: 'Mapa',
             selected: seccion == SeccionApp.mapa,
             onTap: () => _ir(context, AppRoutes.mapa),
+          ),
+          _NavItem(
+            icon: Icons.directions_bus,
+            label: 'Empresas',
+            selected: seccion == SeccionApp.rutas,
+            onTap: () => _ir(context, AppRoutes.rutas),
           ),
           _NavItem(
             icon: Icons.traffic,

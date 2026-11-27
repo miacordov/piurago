@@ -130,14 +130,14 @@ void main() {
     expect(find.text('Piura - Catacaos'), findsOneWidget);
   });
 
-  testWidgets('la barra lateral lleva del mapa a las rutas', (tester) async {
+  testWidgets('la barra lateral lleva del mapa a las empresas', (tester) async {
     fijarPantalla(tester, escritorio);
     await irAlMapa(tester, idRuta: 1);
 
-    await tester.tap(find.text('Rutas'));
+    await tester.tap(find.text('Empresas'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('Empresas de transporte'), findsOneWidget);
   });
 
   testWidgets('en el celular el mapa y el panel se apilan', (tester) async {

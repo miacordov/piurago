@@ -3,6 +3,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:piurago/features/viaje/busqueda_viaje.dart';
 import 'package:piurago/features/viaje/planificador_viaje.dart';
 
+import 'package:piurago/data/models/eta.dart';
+
 import 'repositorio_prueba.dart';
 
 Lugar lugar(PlanificadorViaje p, String nombre) =>
@@ -278,5 +280,123 @@ void main() {
       'Mercado Central',
       'Mercado Chico',
     ]);
+  });
+
+  group('la ubicación actual como origen', () {
+    test('se usa como origen y basta con elegir el destino', () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central').posicion;
+
+      p.usarUbicacionActual(mercado);
+
+      expect(p.origen?.nombre, nombreUbicacionActual);
+      expect(p.origen?.posicion, mercado);
+      expect(p.campoActivo, CampoViaje.hasta, reason: 'falta el destino');
+
+      p.fijarDestino(lugar(p, 'Hospital Sur'));
+      expect(p.estado, EstadoViaje.conResultados);
+    });
+
+    test('sigue al usuario mientras sea el origen', () async {
+      final p = await cargado();
+      p.usarUbicacionActual(lugar(p, 'Mercado Central').posicion);
+      final otro = lugar(p, 'Hospital Sur').posicion;
+
+      p.usarUbicacionActual(otro);
+
+      expect(p.origen?.posicion, otro);
+    });
+
+    test('no reemplaza un origen elegido a mano, ni cuando se borra para '
+        'escribir otro', () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central');
+      p.fijarOrigen(mercado);
+
+      p.usarUbicacionActual(lugar(p, 'Hospital Sur').posicion);
+      expect(p.origen, mercado);
+
+      p.fijarOrigen(null);
+      p.usarUbicacionActual(lugar(p, 'Hospital Sur').posicion);
+      expect(p.origen, isNull);
+    });
+
+    test('limpiar vuelve a usar la ubicación actual como origen', () async {
+      final p = await cargado();
+      final aqui = lugar(p, 'Mercado Central').posicion;
+      p
+        ..usarUbicacionActual(aqui)
+        ..fijarOrigen(lugar(p, 'Hospital Sur'))
+        ..limpiar();
+
+      expect(p.origen?.nombre, nombreUbicacionActual);
+      expect(p.origen?.posicion, aqui);
+      expect(p.destino, isNull);
+    });
+  });
+
+  test('pide la próxima unidad solo de las líneas que sirven y la usa como '
+      'espera', () async {
+    final repositorio = RepositorioConEta({
+      1: const Eta(minutos: 3, simulado: false),
+    });
+    final p = await cargado(repositorio);
+
+    p
+      ..fijarDestino(lugar(p, 'Hospital Sur'))
+      ..fijarOrigen(lugar(p, 'Mercado Central'));
+    await pumpEventQueue();
+
+    final idsOpciones = {for (final o in p.opciones) o.ruta.idRuta};
+    expect(repositorio.pedidos.toSet(), idsOpciones);
+    final lineaA = p.opciones.firstWhere((o) => o.ruta.idRuta == 1);
+    expect(lineaA.minutosEspera, 3);
+    expect(lineaA.esperaEnVivo, isTrue);
+    expect(p.elegida?.ruta.idRuta, p.opciones.first.ruta.idRuta);
+
+    // Repetir la búsqueda no vuelve a pedir el mismo ETA.
+    p.intercambiar();
+    p.intercambiar();
+    await pumpEventQueue();
+    expect(repositorio.pedidos.length, idsOpciones.length);
+  });
+
+  test(
+    'el GPS no cambia la línea elegida ni corta la guía del viaje',
+    () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central').posicion;
+      p
+        ..usarUbicacionActual(mercado)
+        ..fijarDestino(lugar(p, 'Hospital Sur'));
+      final otra = p.opciones.last;
+      p
+        ..elegir(otra)
+        ..iniciarViaje();
+
+      // El pasajero camina unos metros hacia el paradero.
+      p.usarUbicacionActual(
+        LatLng(mercado.latitude - 0.0003, mercado.longitude),
+      );
+
+      expect(p.elegida?.ruta.idRuta, otra.ruta.idRuta);
+      expect(p.paso, PasoViaje.caminarAlParadero);
+    },
+  );
+
+  test('si el ETA falla, se vuelve a pedir en la próxima búsqueda', () async {
+    final repositorio = RepositorioConEta(const {})..fallarEta = true;
+    final p = await cargado(repositorio);
+    p
+      ..fijarDestino(lugar(p, 'Hospital Sur'))
+      ..fijarOrigen(lugar(p, 'Mercado Central'));
+    await pumpEventQueue();
+    final primeros = repositorio.pedidos.length;
+
+    repositorio.fallarEta = false;
+    p.intercambiar();
+    await pumpEventQueue();
+
+    expect(repositorio.pedidos.length, greaterThan(primeros));
   });
 }

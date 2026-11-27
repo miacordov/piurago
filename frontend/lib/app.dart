@@ -64,7 +64,7 @@ class PiuraGoApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       initialRoute: (authService?.esRegistrado ?? false)
-          ? AppRoutes.rutas
+          ? AppRoutes.mapa
           : AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),

@@ -21,9 +21,47 @@ String? textoFrecuencia(OpcionViaje o) => o.frecuenciaMinutos == null
     ? null
     : 'Pasa cada ~${o.frecuenciaMinutos} min';
 
-/// Tarjeta de una línea que sirve para el viaje, como en Moovit: arriba la
-/// duración aproximada y el pasaje, luego el recorrido en una tira
-/// (a pie › línea › a pie) y dónde subir y bajar. Un clic la elige (se
+/// Cuánto tarda en venir la unidad: "Llega en ~3 min · en vivo" con
+/// pasajeros compartiendo el GPS, "Espera ~5 min en promedio" con la
+/// frecuencia, o "Llega en ~7 min (estimado)" con el ETA simulado.
+String? textoEspera(OpcionViaje o) {
+  if (o.esperaEnVivo) return 'Llega en ~${o.minutosEspera} min · en vivo';
+  if (o.frecuenciaMinutos != null) {
+    return 'Espera ~${o.minutosEspera} min en promedio';
+  }
+  if (o.eta != null) return 'Llega en ~${o.minutosEspera} min (estimado)';
+  return null;
+}
+
+/// "Pasa por Mercado Modelo · UNP · Real Plaza": lugares conocidos de la
+/// línea (los primeros cuatro), o null si no se conocen.
+String? textoPasaPor(OpcionViaje o) {
+  final lugares = o.ruta.lugaresDestacados;
+  if (lugares.isEmpty) return null;
+  return 'Pasa por ${lugares.take(4).join(' · ')}';
+}
+
+/// "6 paraderos en el camino: P2, P3, P4, P5 y 2 más": los paraderos entre
+/// la subida y la bajada, o null si no hay ninguno.
+String? textoParaderosEnElCamino(OpcionViaje o) {
+  final intermedios = o.paraderosIntermedios;
+  if (intermedios.isEmpty) return null;
+  const nombrados = 4;
+  final cantidad = intermedios.length;
+  final nombres = intermedios.take(nombrados).map((p) => p.nombre).join(', ');
+  final resto = cantidad > nombrados ? ' y ${cantidad - nombrados} más' : '';
+  final titulo = cantidad == 1 ? '1 paradero' : '$cantidad paraderos';
+  return '$titulo en el camino: $nombres$resto';
+}
+
+/// "En bus ~9 min": cuánto dura el tramo a bordo.
+String textoEnBus(OpcionViaje o) => 'En bus ~${o.minutosEnBus} min';
+
+/// Tarjeta de una línea que sirve para el viaje: arriba el nombre de la
+/// empresa (así se reconoce el transporte en Piura), la duración
+/// aproximada y el pasaje; luego cuánto tarda en venir la unidad y cuánto
+/// dura el tramo en bus, el recorrido en una tira (a pie › línea › a pie)
+/// y dónde subir y bajar. Un clic la elige (se
 /// dibuja en el mapa); la elegida se resalta y muestra "Iniciar viaje".
 class OpcionViajeCard extends StatelessWidget {
   const OpcionViajeCard({
@@ -42,12 +80,9 @@ class OpcionViajeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ruta = opcion.ruta;
-    final detalle = [
-      opcion.empresa,
-      opcion.tipoServicio,
-    ].whereType<String>().join(' · ');
+    final empresa = opcion.empresa;
     final frecuencia = textoFrecuencia(opcion);
-    final pasaje = opcion.pasaje;
+    final espera = textoEspera(opcion);
     return Material(
       color: elegida ? AppColors.background : AppColors.surface,
       shape: RoundedRectangleBorder(
@@ -65,54 +100,86 @@ class OpcionViajeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '≈ ${opcion.minutosTotales} min',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.text,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          empresa ?? ruta.nombre,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
                           ),
-                          const TextSpan(
-                            text: '  aprox.',
-                            style: AppText.small,
+                        ),
+                        if (empresa != null)
+                          Text(
+                            ruta.nombre,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.label,
                           ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                        if (opcion.tipoServicio != null)
+                          Text(opcion.tipoServicio!, style: AppText.small),
+                      ],
                     ),
                   ),
-                  if (pasaje != null) ...[
-                    const SizedBox(width: 8),
-                    Text(
-                      'S/ ${pasaje.toStringAsFixed(2)}',
-                      style: AppText.label,
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '≈ ${opcion.minutosTotales} min',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.text,
+                              ),
+                            ),
+                            const TextSpan(
+                              text: '  aprox.',
+                              style: AppText.small,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                      ),
+                      if (opcion.pasaje != null)
+                        Text(
+                          'S/ ${opcion.pasaje!.toStringAsFixed(2)}',
+                          style: AppText.label,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 16,
+                runSpacing: 4,
+                children: [
+                  if (espera != null)
+                    _Dato(
+                      icono: opcion.esperaEnVivo
+                          ? Icons.sensors
+                          : Icons.schedule,
+                      texto: espera,
                     ),
-                  ],
+                  _Dato(
+                    icono: Icons.directions_bus_outlined,
+                    texto: textoEnBus(opcion),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               _Itinerario(opcion: opcion),
-              const SizedBox(height: 10),
-              Text(
-                ruta.nombre,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppText.label,
-              ),
-              if (detalle.isNotEmpty)
-                Text(
-                  detalle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.small,
-                ),
               const SizedBox(height: 8),
               _FilaTramo(
                 icono: Icons.directions_walk,
@@ -131,6 +198,15 @@ class OpcionViajeCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppText.small,
                 ),
+              ],
+              if (elegida) ...[
+                for (final texto in [
+                  textoPasaPor(opcion),
+                  textoParaderosEnElCamino(opcion),
+                ].nonNulls) ...[
+                  const SizedBox(height: 6),
+                  _FilaTramo(icono: Icons.route_outlined, texto: texto),
+                ],
               ],
               if (elegida && onIniciarViaje != null) ...[
                 const SizedBox(height: 12),
@@ -243,6 +319,36 @@ class _FilaTramo extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 13, color: AppColors.text),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dato corto con su ícono ("Espera ~5 min en promedio"), para ponerlo en
+/// una fila que se parte si no entra.
+class _Dato extends StatelessWidget {
+  const _Dato({required this.icono, required this.texto});
+
+  final IconData icono;
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icono, size: 16, color: AppColors.primary),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            texto,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text,
+            ),
           ),
         ),
       ],

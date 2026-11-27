@@ -14,7 +14,8 @@ import 'ruta_card.dart';
 
 /// Lista de líneas, como la de Moovit y la de piuratransporta.com: buscador
 /// (sin tildes, por código, zona, empresa o lugar), filtros por tipo de
-/// servicio y una fila compacta por línea. Arriba, un acceso a Planificar
+/// servicio y las líneas agrupadas bajo el nombre de su empresa. Arriba, un
+/// acceso a Planificar
 /// viaje para quien no sabe qué línea tomar.
 class RoutesPage extends StatefulWidget {
   const RoutesPage({super.key, required this.repository});
@@ -162,24 +163,61 @@ class _RoutesPageState extends State<RoutesPage> {
                 padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 40),
                 sliver: SliverConstrainedCrossAxis(
                   maxExtent: 880,
-                  sliver: SliverList.separated(
-                    itemCount: filtradas.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, indice) {
-                      final r = filtradas[indice];
-                      return RutaCard(
-                        key: ValueKey('ruta-${r.ruta.idRuta}'),
-                        ruta: r.ruta,
-                        lugarCoincidente: r.lugarCoincidente,
-                        eta: _etas[r.ruta.idRuta],
-                      );
-                    },
+                  sliver: SliverList.list(
+                    children: [
+                      for (final grupo in agruparPorEmpresa(filtradas)) ...[
+                        _CabeceraEmpresa(grupo: grupo),
+                        for (final r in grupo.rutas) ...[
+                          RutaCard(
+                            key: ValueKey('ruta-${r.ruta.idRuta}'),
+                            ruta: r.ruta,
+                            lugarCoincidente: r.lugarCoincidente,
+                            eta: _etas[r.ruta.idRuta],
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                    ],
                   ),
                 ),
               ),
           ],
         );
       },
+    );
+  }
+}
+
+/// Nombre de la empresa encima de sus líneas: es como se reconoce el
+/// transporte en Piura.
+class _CabeceraEmpresa extends StatelessWidget {
+  const _CabeceraEmpresa({required this.grupo});
+
+  final GrupoEmpresa grupo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 12, 2, 8),
+      child: Row(
+        children: [
+          const Icon(Icons.directions_bus, size: 20, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(
+                grupo.empresa ?? 'Otras líneas',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -211,7 +249,7 @@ class _Encabezado extends StatelessWidget {
       children: [
         const Text('TRANSPORTE URBANO', style: AppText.eyebrow),
         const SizedBox(height: 6),
-        const Text('Encuentra tu ruta', style: AppText.heading),
+        const Text('Empresas de transporte', style: AppText.heading),
         const SizedBox(height: 16),
         const _AccesoPlanificar(),
         const SizedBox(height: 16),
