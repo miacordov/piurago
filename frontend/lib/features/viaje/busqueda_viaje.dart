@@ -43,6 +43,12 @@ const puntosIgualesMetros = 30.0;
 /// Radio medio de la Tierra usado por la fórmula de Haversine.
 const radioTierraMetros = 6371000.0;
 
+/// Espera que se supone al ordenar las opciones cuando no se conoce la
+/// frecuencia ni el ETA: la mitad de la frecuencia típica de las líneas de
+/// Piura (unos 10 min). No se muestra: solo evita que una línea sin datos
+/// parezca la más rápida.
+const esperaSupuestaMinutos = 5;
+
 /// Si el paradero queda más lejos que esto del trazado de su línea, el
 /// trazado no se usa para medir el tramo en bus.
 const paraderoFueraDelTrazadoMetros = 200.0;
@@ -231,6 +237,14 @@ class OpcionViaje {
   int get minutosTotales =>
       minutosSubida + minutosEspera + minutosEnBus + minutosBajada;
 
+  /// Se conoce cuánto tarda en venir la unidad (ETA o frecuencia).
+  bool get conoceEspera => eta != null || ruta.frecuenciaMinutos != null;
+
+  /// Duración para ordenar: si no se conoce la espera, se suma
+  /// [esperaSupuestaMinutos].
+  int get minutosParaOrdenar =>
+      minutosTotales + (conoceEspera ? 0 : esperaSupuestaMinutos);
+
   double? get pasaje => ruta.pasaje;
   int? get frecuenciaMinutos => ruta.frecuenciaMinutos;
   String? get empresa => ruta.empresa;
@@ -249,8 +263,7 @@ class ResultadoBusqueda {
 }
 
 /// Busca las líneas activas que pasan a menos de [caminataMaximaMetros] del
-/// origen y del destino. Se ordenan por caminata total y, a igual caminata,
-/// por frecuencia, pasaje (los datos que faltan van al final) y nombre.
+/// origen y del destino, ordenadas con [compararOpciones].
 ResultadoBusqueda buscarOpciones({
   required LatLng origen,
   required LatLng destino,
@@ -297,13 +310,18 @@ ResultadoBusqueda buscarOpciones({
       ),
     );
   }
-  opciones.sort(_compararOpciones);
+  opciones.sort(compararOpciones);
   return ResultadoBusqueda(opciones);
 }
 
-int _compararOpciones(OpcionViaje a, OpcionViaje b) {
-  // Las que no atienden a esta hora, al final.
+/// Orden de las opciones: primero las que atienden a esta hora; luego la
+/// más rápida de puerta a puerta ([OpcionViaje.minutosParaOrdenar]) y, a
+/// igual tiempo, la de menos caminata, la más frecuente, la más barata (los
+/// datos que faltan van al final) y por nombre.
+int compararOpciones(OpcionViaje a, OpcionViaje b) {
   if (a.fueraDeHorario != b.fueraDeHorario) return a.fueraDeHorario ? 1 : -1;
+  final porTiempo = a.minutosParaOrdenar.compareTo(b.minutosParaOrdenar);
+  if (porTiempo != 0) return porTiempo;
   final porCaminata = a.metrosTotales.compareTo(b.metrosTotales);
   if (porCaminata != 0) return porCaminata;
   final porFrecuencia = _compararNulosAlFinal(

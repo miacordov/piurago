@@ -341,8 +341,11 @@ class PlanificadorViaje extends ChangeNotifier {
       _pidiendoEta.remove(id);
     }
     if (_descartado) return;
+    // Con la espera real el orden puede cambiar; la elegida se mantiene para
+    // no mover lo que el pasajero está mirando.
     final elegida = _elegida?.ruta.idRuta;
-    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])];
+    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])]
+      ..sort(compararOpciones);
     _elegida = _opciones.where((o) => o.ruta.idRuta == elegida).firstOrNull;
     notifyListeners();
   }
