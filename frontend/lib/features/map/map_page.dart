@@ -95,6 +95,7 @@ class _MapPageState extends State<MapPage> {
       widget.servicioUbicacion,
       sesion: widget.sesionUbicacion,
     )..iniciar();
+    _ubicacion.addListener(_pasarUbicacionAlPlanificador);
     if (widget.idRuta == null) {
       _iniciarPlanificador();
     } else {
@@ -102,8 +103,15 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  /// El planificador toma la posición del GPS como origen.
+  void _pasarUbicacionAlPlanificador() {
+    final posicion = _ubicacion.posicion;
+    if (posicion != null) _planificador?.usarUbicacionActual(posicion.punto);
+  }
+
   @override
   void dispose() {
+    _ubicacion.removeListener(_pasarUbicacionAlPlanificador);
     _planificador?.dispose();
     _ubicacion.dispose();
     super.dispose();
@@ -114,6 +122,7 @@ class _MapPageState extends State<MapPage> {
       widget.repository,
       lugaresConocidos: widget.lugaresConocidos,
     )..cargar();
+    _pasarUbicacionAlPlanificador();
   }
 
   void _planificarViaje() {

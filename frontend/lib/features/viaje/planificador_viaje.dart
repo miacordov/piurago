@@ -36,8 +36,8 @@ enum PasoViaje {
 
 /// Estado del buscador "¿A dónde vas?". Pide las rutas y los paraderos de
 /// todas ellas una sola vez (en paralelo) y los guarda en memoria. Primero se
-/// pide el destino y luego el origen; con los dos, busca sola y elige la
-/// mejor línea. Solo depende de la interfaz RutasRepository.
+/// pide el destino y luego el origen (si hay GPS, el origen es la ubicación
+/// actual); con los dos, busca sola y elige la mejor línea. Solo depende de la interfaz RutasRepository.
 class PlanificadorViaje extends ChangeNotifier {
   PlanificadorViaje(this._repository, {this.lugaresConocidos = const []})
     : _calles = [
@@ -67,6 +67,13 @@ class PlanificadorViaje extends ChangeNotifier {
   List<OpcionViaje> _opciones = const [];
   bool _muyCerca = false;
   OpcionViaje? _elegida;
+
+  /// Última posición del GPS del pasajero (null si no hay permiso o señal).
+  LatLng? _ubicacionActual;
+
+  /// true si el pasajero tocó el origen (lo eligió, lo borró o lo cambió):
+  /// desde entonces el GPS ya no lo reemplaza, hasta [limpiar].
+  bool _origenManual = false;
   PasoViaje? _paso;
 
   EstadoViaje get estado => _estado;
@@ -141,7 +148,19 @@ class PlanificadorViaje extends ChangeNotifier {
   }
 
   void fijarOrigen(Lugar? lugar) {
+    _origenManual = true;
     _origen = lugar;
+    _actualizar();
+  }
+
+  /// Recibe la posición del GPS. Mientras el pasajero no elija otro origen,
+  /// se usa como "Tu ubicación": así basta con escribir el destino.
+  void usarUbicacionActual(LatLng punto) {
+    _ubicacionActual = punto;
+    if (_origenManual) return;
+    final origen = _origen;
+    if (origen != null && origen.posicion == punto) return;
+    _origen = Lugar(nombreUbicacionActual, punto);
     _actualizar();
   }
 
@@ -156,6 +175,7 @@ class PlanificadorViaje extends ChangeNotifier {
     if (_campoActivo == CampoViaje.hasta) {
       _destino = lugar;
     } else {
+      _origenManual = true;
       _origen = lugar;
     }
     _actualizar();
@@ -183,14 +203,19 @@ class PlanificadorViaje extends ChangeNotifier {
   }
 
   void intercambiar() {
+    _origenManual = true;
     final origen = _origen;
     _origen = _destino;
     _destino = origen;
     _actualizar();
   }
 
+  /// Deja todo como al inicio: sin destino y, si se conoce, con la
+  /// ubicación actual como origen.
   void limpiar() {
-    _origen = null;
+    _origenManual = false;
+    final aqui = _ubicacionActual;
+    _origen = aqui == null ? null : Lugar(nombreUbicacionActual, aqui);
     _destino = null;
     _actualizar();
   }

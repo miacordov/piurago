@@ -45,6 +45,9 @@ const radioTierraMetros = 6371000.0;
 /// Nombre de un punto tocado en el mapa lejos de toda calle conocida.
 const nombrePuntoEnMapa = 'Punto en el mapa';
 
+/// Nombre del origen cuando se toma del GPS del pasajero.
+const nombreUbicacionActual = 'Tu ubicación';
+
 /// Un punto tocado a menos de esta distancia del centro de una calle conocida
 /// se llama "Cerca de {calle}".
 const distanciaNombreCalleMetros = 250.0;

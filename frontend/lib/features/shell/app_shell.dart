@@ -88,16 +88,16 @@ class SideNav extends StatelessWidget {
             ),
           ),
           _NavItem(
-            icon: Icons.alt_route,
-            label: 'Rutas',
-            selected: seccion == SeccionApp.rutas,
-            onTap: () => _ir(context, AppRoutes.rutas),
-          ),
-          _NavItem(
             icon: Icons.map_outlined,
             label: 'Mapa',
             selected: seccion == SeccionApp.mapa,
             onTap: () => _ir(context, AppRoutes.mapa),
+          ),
+          _NavItem(
+            icon: Icons.directions_bus,
+            label: 'Empresas',
+            selected: seccion == SeccionApp.rutas,
+            onTap: () => _ir(context, AppRoutes.rutas),
           ),
           _NavItem(
             icon: Icons.traffic,
@@ -194,16 +194,9 @@ class TopBar extends StatelessWidget {
               color: AppColors.text,
             ),
           ),
-          const Icon(
-            Icons.chevron_right,
-            size: 18,
-            color: AppColors.textMuted,
-          ),
+          const Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
           const Spacer(),
-          if (esDemostracion) ...[
-            const DemoPill(),
-            const SizedBox(width: 12),
-          ],
+          if (esDemostracion) ...[const DemoPill(), const SizedBox(width: 12)],
           const UserAvatar(),
         ],
       ),

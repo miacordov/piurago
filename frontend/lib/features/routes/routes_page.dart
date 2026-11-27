@@ -249,7 +249,7 @@ class _Encabezado extends StatelessWidget {
       children: [
         const Text('TRANSPORTE URBANO', style: AppText.eyebrow),
         const SizedBox(height: 6),
-        const Text('Encuentra tu ruta', style: AppText.heading),
+        const Text('Empresas de transporte', style: AppText.heading),
         const SizedBox(height: 16),
         const _AccesoPlanificar(),
         const SizedBox(height: 16),

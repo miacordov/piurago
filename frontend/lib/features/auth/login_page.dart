@@ -39,10 +39,11 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  /// El permiso de ubicación lo pide el sistema desde el mapa, así que
-  /// después del acceso se va directo a la lista de rutas.
+  /// Después del acceso se va directo a "¿A dónde vas?": quien no conoce
+  /// el transporte solo escribe su destino. El permiso de ubicación lo pide
+  /// el sistema desde el mapa.
   void _avanzar() {
-    Navigator.of(context).pushReplacementNamed(AppRoutes.rutas);
+    Navigator.of(context).pushReplacementNamed(AppRoutes.mapa);
   }
 
   Future<void> _entrar() async {
