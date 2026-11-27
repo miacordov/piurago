@@ -52,7 +52,13 @@ class Backend {
   );
 }
 
-Future<void> abrir(WidgetTester tester, AuthService auth) async {
+/// Abre la app (que empieza en "¿A dónde vas?") y, si [irAlLogin], toca el
+/// avatar para ir a "Inicia sesión".
+Future<void> abrir(
+  WidgetTester tester,
+  AuthService auth, {
+  bool irAlLogin = true,
+}) async {
   await tester.pumpWidget(
     PiuraGoApp(
       authService: auth,
@@ -61,6 +67,10 @@ Future<void> abrir(WidgetTester tester, AuthService auth) async {
     ),
   );
   await tester.pumpAndSettle();
+  if (irAlLogin) {
+    await tester.tap(find.byTooltip('Iniciar sesión'));
+    await tester.pumpAndSettle();
+  }
 }
 
 final campoCorreo = find.byKey(const ValueKey('campo-correo'));
@@ -202,7 +212,7 @@ void main() {
 
       final auth = backend.auth(almacen);
       await auth.restaurarSesion();
-      await abrir(tester, auth);
+      await abrir(tester, auth, irAlLogin: false);
 
       expect(find.text('¿A dónde vas?'), findsOneWidget);
       expect(find.text('Inicia sesión'), findsNothing);
@@ -211,5 +221,22 @@ void main() {
 
   test('el ETA se redondea a minutos enteros', () {
     expect(const Eta(minutos: 4, simulado: true).minutos, 4);
+  });
+
+  testWidgets('sin sesión, abre directo en ¿A dónde vas? sin pasar por el '
+      'login', (tester) async {
+    fijarPantalla(tester);
+    await abrir(tester, Backend().auth(), irAlLogin: false);
+
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
+    expect(find.text('Inicia sesión'), findsNothing);
+  });
+
+  testWidgets('el avatar lleva a "Inicia sesión"', (tester) async {
+    fijarPantalla(tester);
+    await abrir(tester, Backend().auth());
+
+    expect(find.text('Inicia sesión'), findsOneWidget);
+    expect(find.text('Continuar como pasajero anónimo'), findsOneWidget);
   });
 }

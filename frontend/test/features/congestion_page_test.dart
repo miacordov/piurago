@@ -263,11 +263,7 @@ void main() {
 
   testWidgets('la barra lateral permite navegar a Congestión', (tester) async {
     fijarPantalla(tester, escritorio);
-    await tester.pumpWidget(const PiuraGoApp());
-    await tester.pumpAndSettle();
-
-    // Desde login entrar como anónimo: llega directo a la lista de rutas.
-    await tester.tap(find.text('Continuar como pasajero anónimo'));
+    await tester.pumpWidget(const PiuraGoApp(mostrarMapaBase: false));
     await tester.pumpAndSettle();
 
     // En la barra lateral tocar "Congestión"

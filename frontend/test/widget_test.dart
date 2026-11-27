@@ -10,10 +10,16 @@ void fijarPantalla(WidgetTester tester, Size tamano) {
   addTearDown(tester.view.reset);
 }
 
+/// Abre la app (empieza en "¿A dónde vas?") y va al login con el avatar.
 Future<void> abrirApp(WidgetTester tester) async {
   await tester.pumpWidget(
-    const PiuraGoApp(rutasRepository: FakeRutasRepository()),
+    const PiuraGoApp(
+      rutasRepository: FakeRutasRepository(),
+      mostrarMapaBase: false,
+    ),
   );
+  await tester.pumpAndSettle();
+  await tester.tap(find.byTooltip('Iniciar sesión'));
   await tester.pumpAndSettle();
 }
 
