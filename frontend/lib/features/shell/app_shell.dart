@@ -248,10 +248,15 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CircleAvatar(
-      radius: 17,
-      backgroundColor: AppColors.blueTile,
-      child: Icon(Icons.person_outline, size: 18, color: AppColors.primary),
+    return IconButton(
+      tooltip: 'Iniciar sesión',
+      padding: EdgeInsets.zero,
+      onPressed: () => Navigator.of(context).pushNamed(AppRoutes.login),
+      icon: const CircleAvatar(
+        radius: 17,
+        backgroundColor: AppColors.blueTile,
+        child: Icon(Icons.person_outline, size: 18, color: AppColors.primary),
+      ),
     );
   }
 }
