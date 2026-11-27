@@ -153,6 +153,7 @@ class OpcionViaje {
     required this.metrosBajada,
     this.metrosPorTrazado,
     this.eta,
+    this.paraderosIntermedios = const [],
   });
 
   final Ruta ruta;
@@ -166,6 +167,10 @@ class OpcionViaje {
   /// Próxima unidad de la línea según el backend, si se conoce.
   final Eta? eta;
 
+  /// Paraderos por los que pasa entre [sube] y [baja], en el orden del
+  /// viaje (ver [paraderosEntre]).
+  final List<Paradero> paraderosIntermedios;
+
   /// La misma opción con la próxima unidad [eta].
   OpcionViaje conEta(Eta? eta) => OpcionViaje(
     ruta: ruta,
@@ -175,6 +180,7 @@ class OpcionViaje {
     metrosBajada: metrosBajada,
     metrosPorTrazado: metrosPorTrazado,
     eta: eta,
+    paraderosIntermedios: paraderosIntermedios,
   );
 
   /// Caminata del origen al paradero de subida.
@@ -269,6 +275,7 @@ ResultadoBusqueda buscarOpciones({
           posicionDe(sube),
           posicionDe(baja),
         ),
+        paraderosIntermedios: paraderosEntre(lista, sube, baja),
       ),
     );
   }
@@ -326,4 +333,22 @@ double? metrosSobreTrazado(List<LatLng> trazado, LatLng desde, LatLng hasta) {
     metros += distanciaMetros(trazado[i], trazado[i + 1]);
   }
   return metros;
+}
+
+/// Paraderos de [paraderos] entre [sube] y [baja] (sin incluirlos), según
+/// su orden en la línea y en el sentido del viaje: si se sube después de
+/// donde se baja, se recorren al revés.
+List<Paradero> paraderosEntre(
+  List<Paradero> paraderos,
+  Paradero sube,
+  Paradero baja,
+) {
+  final ordenados = [...paraderos]
+    ..sort((a, b) => a.ordenSecuencial.compareTo(b.ordenSecuencial));
+  final i = ordenados.indexWhere((p) => p.idParadero == sube.idParadero);
+  final j = ordenados.indexWhere((p) => p.idParadero == baja.idParadero);
+  if (i < 0 || j < 0) return const [];
+  return i < j
+      ? ordenados.sublist(i + 1, j)
+      : ordenados.sublist(j + 1, i).reversed.toList();
 }

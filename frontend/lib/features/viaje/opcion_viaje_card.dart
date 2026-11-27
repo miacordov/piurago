@@ -33,6 +33,27 @@ String? textoEspera(OpcionViaje o) {
   return null;
 }
 
+/// "Pasa por Mercado Modelo · UNP · Real Plaza": lugares conocidos de la
+/// línea (los primeros cuatro), o null si no se conocen.
+String? textoPasaPor(OpcionViaje o) {
+  final lugares = o.ruta.lugaresDestacados;
+  if (lugares.isEmpty) return null;
+  return 'Pasa por ${lugares.take(4).join(' · ')}';
+}
+
+/// "6 paraderos en el camino: P2, P3, P4, P5 y 2 más": los paraderos entre
+/// la subida y la bajada, o null si no hay ninguno.
+String? textoParaderosEnElCamino(OpcionViaje o) {
+  final intermedios = o.paraderosIntermedios;
+  if (intermedios.isEmpty) return null;
+  const nombrados = 4;
+  final cantidad = intermedios.length;
+  final nombres = intermedios.take(nombrados).map((p) => p.nombre).join(', ');
+  final resto = cantidad > nombrados ? ' y ${cantidad - nombrados} más' : '';
+  final titulo = cantidad == 1 ? '1 paradero' : '$cantidad paraderos';
+  return '$titulo en el camino: $nombres$resto';
+}
+
 /// "En bus ~9 min": cuánto dura el tramo a bordo.
 String textoEnBus(OpcionViaje o) => 'En bus ~${o.minutosEnBus} min';
 
@@ -177,6 +198,15 @@ class OpcionViajeCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppText.small,
                 ),
+              ],
+              if (elegida) ...[
+                for (final texto in [
+                  textoPasaPor(opcion),
+                  textoParaderosEnElCamino(opcion),
+                ].nonNulls) ...[
+                  const SizedBox(height: 6),
+                  _FilaTramo(icono: Icons.route_outlined, texto: texto),
+                ],
               ],
               if (elegida && onIniciarViaje != null) ...[
                 const SizedBox(height: 12),
