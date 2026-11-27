@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../data/models/eta.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
 import '../../data/rutas_repository.dart';
@@ -67,6 +68,20 @@ class PlanificadorViaje extends ChangeNotifier {
   List<OpcionViaje> _opciones = const [];
   bool _muyCerca = false;
   OpcionViaje? _elegida;
+
+  /// Próxima unidad de cada línea ya pedida (null si el backend no la dio)
+  /// y las que se están pidiendo.
+  final Map<int, Eta?> _etas = {};
+  final Set<int> _pidiendoEta = {};
+
+  /// El mapa se cerró: lo que llegue después ya no se muestra.
+  bool _descartado = false;
+
+  @override
+  void dispose() {
+    _descartado = true;
+    super.dispose();
+  }
 
   /// Última posición del GPS del pasajero (null si no hay permiso o señal).
   LatLng? _ubicacionActual;
@@ -267,14 +282,45 @@ class PlanificadorViaje extends ChangeNotifier {
         destino: destino.posicion,
         rutas: _rutas,
         paraderos: _paraderos,
+        trazados: _trazados,
       );
-      _opciones = resultado.opciones;
+      _opciones = [
+        for (final o in resultado.opciones) o.conEta(_etas[o.ruta.idRuta]),
+      ];
       _muyCerca = resultado.muyCerca;
       _elegida = _opciones.firstOrNull;
+      _pedirEtas();
       _estado = _opciones.isEmpty
           ? EstadoViaje.sinResultados
           : EstadoViaje.conResultados;
     }
+    notifyListeners();
+  }
+
+  /// Pide al backend la próxima unidad de las líneas que sirven y que aún no
+  /// se pidieron; al llegar, se suma a la espera de cada opción.
+  Future<void> _pedirEtas() async {
+    final repo = _repository;
+    if (repo is! FuenteEta) return;
+    final fuente = repo as FuenteEta;
+    final ids = [
+      for (final o in _opciones)
+        if (!_etas.containsKey(o.ruta.idRuta) &&
+            _pidiendoEta.add(o.ruta.idRuta))
+          o.ruta.idRuta,
+    ];
+    if (ids.isEmpty) return;
+    final etas = await Future.wait(
+      ids.map((id) => fuente.eta(id).catchError((Object _) => null)),
+    );
+    for (final (i, id) in ids.indexed) {
+      _etas[id] = etas[i];
+      _pidiendoEta.remove(id);
+    }
+    if (_descartado) return;
+    final elegida = _elegida?.ruta.idRuta;
+    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])];
+    _elegida = _opciones.where((o) => o.ruta.idRuta == elegida).firstOrNull;
     notifyListeners();
   }
 }

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:latlong2/latlong.dart';
 
 import '../../data/lugares/indice_lugares.dart';
+import '../../data/models/eta.dart';
 import '../../data/models/lugar.dart';
 import '../../data/models/paradero.dart';
 import '../../data/models/ruta.dart';
@@ -41,6 +42,10 @@ const puntosIgualesMetros = 30.0;
 
 /// Radio medio de la Tierra usado por la fórmula de Haversine.
 const radioTierraMetros = 6371000.0;
+
+/// Si el paradero queda más lejos que esto del trazado de su línea, el
+/// trazado no se usa para medir el tramo en bus.
+const paraderoFueraDelTrazadoMetros = 200.0;
 
 /// Nombre de un punto tocado en el mapa lejos de toda calle conocida.
 const nombrePuntoEnMapa = 'Punto en el mapa';
@@ -146,11 +151,31 @@ class OpcionViaje {
     required this.baja,
     required this.metrosSubida,
     required this.metrosBajada,
+    this.metrosPorTrazado,
+    this.eta,
   });
 
   final Ruta ruta;
   final Paradero sube;
   final Paradero baja;
+
+  /// Tramo en bus medido sobre el recorrido de la línea por las calles, si
+  /// se conoce (ver [metrosSobreTrazado]).
+  final double? metrosPorTrazado;
+
+  /// Próxima unidad de la línea según el backend, si se conoce.
+  final Eta? eta;
+
+  /// La misma opción con la próxima unidad [eta].
+  OpcionViaje conEta(Eta? eta) => OpcionViaje(
+    ruta: ruta,
+    sube: sube,
+    baja: baja,
+    metrosSubida: metrosSubida,
+    metrosBajada: metrosBajada,
+    metrosPorTrazado: metrosPorTrazado,
+    eta: eta,
+  );
 
   /// Caminata del origen al paradero de subida.
   final double metrosSubida;
@@ -162,17 +187,28 @@ class OpcionViaje {
   int get minutosSubida => minutosAPie(metrosSubida);
   int get minutosBajada => minutosAPie(metrosBajada);
 
-  /// Espera promedio en el paradero: la mitad de la frecuencia (0 si no se
-  /// conoce).
-  int get minutosEspera => ((ruta.frecuenciaMinutos ?? 0) / 2).ceil();
+  /// La espera viene de unidades en vivo (pasajeros compartiendo el GPS).
+  bool get esperaEnVivo => eta != null && !eta!.simulado;
 
-  /// Tramo en bus, estimado con [factorRecorridoBus] y
-  /// [velocidadBusMetrosPorMinuto]: es aproximado.
-  int get minutosEnBus =>
-      (distanciaMetros(posicionDe(sube), posicionDe(baja)) *
-              factorRecorridoBus /
-              velocidadBusMetrosPorMinuto)
-          .ceil();
+  /// Cuánto tarda en venir la unidad: el ETA real si hay unidades en vivo;
+  /// si no, la espera promedio (la mitad de la frecuencia); si tampoco se
+  /// conoce la frecuencia, el ETA simulado del backend; si no, 0.
+  int get minutosEspera {
+    final eta = this.eta;
+    if (eta != null && !eta.simulado) return eta.minutos;
+    final frecuencia = ruta.frecuenciaMinutos;
+    if (frecuencia != null) return (frecuencia / 2).ceil();
+    return eta?.minutos ?? 0;
+  }
+
+  /// Tramo en bus: sobre el trazado si se conoce; si no, la línea recta
+  /// entre paraderos por [factorRecorridoBus] (aproximado).
+  double get metrosEnBus =>
+      metrosPorTrazado ??
+      distanciaMetros(posicionDe(sube), posicionDe(baja)) * factorRecorridoBus;
+
+  /// Minutos del tramo en bus a [velocidadBusMetrosPorMinuto].
+  int get minutosEnBus => (metrosEnBus / velocidadBusMetrosPorMinuto).ceil();
 
   /// Duración aproximada de todo el viaje, de puerta a puerta.
   int get minutosTotales =>
@@ -203,6 +239,7 @@ ResultadoBusqueda buscarOpciones({
   required LatLng destino,
   required List<Ruta> rutas,
   required Map<int, List<Paradero>> paraderos,
+  Map<int, List<LatLng>> trazados = const {},
 }) {
   if (distanciaMetros(origen, destino) < distanciaParaCaminarMetros) {
     return const ResultadoBusqueda([], muyCerca: true);
@@ -227,6 +264,11 @@ ResultadoBusqueda buscarOpciones({
         baja: baja,
         metrosSubida: metrosSubida,
         metrosBajada: metrosBajada,
+        metrosPorTrazado: metrosSobreTrazado(
+          trazados[ruta.idRuta] ?? const <LatLng>[],
+          posicionDe(sube),
+          posicionDe(baja),
+        ),
       ),
     );
   }
@@ -252,4 +294,36 @@ int _compararNulosAlFinal(num? a, num? b) {
   if (a == null) return 1;
   if (b == null) return -1;
   return a.compareTo(b);
+}
+
+/// Metros que recorre la línea por su [trazado] entre los puntos del
+/// trazado más cercanos a [desde] y a [hasta]. Las líneas son de ida y
+/// vuelta y no se conoce el sentido, así que se mide el tramo entre esos
+/// dos puntos. Devuelve null si no hay trazado o si alguno de los paraderos
+/// queda a más de [paraderoFueraDelTrazadoMetros] de él.
+double? metrosSobreTrazado(List<LatLng> trazado, LatLng desde, LatLng hasta) {
+  if (trazado.length < 2) return null;
+  int? masCercano(LatLng punto) {
+    var indice = 0;
+    var mejor = double.infinity;
+    for (final (i, p) in trazado.indexed) {
+      final d = distanciaMetros(punto, p);
+      if (d < mejor) {
+        mejor = d;
+        indice = i;
+      }
+    }
+    return mejor <= paraderoFueraDelTrazadoMetros ? indice : null;
+  }
+
+  final a = masCercano(desde);
+  final b = masCercano(hasta);
+  if (a == null || b == null) return null;
+  final inicio = math.min(a, b);
+  final fin = math.max(a, b);
+  var metros = 0.0;
+  for (var i = inicio; i < fin; i++) {
+    metros += distanciaMetros(trazado[i], trazado[i + 1]);
+  }
+  return metros;
 }
