@@ -194,9 +194,16 @@ class TopBar extends StatelessWidget {
               color: AppColors.text,
             ),
           ),
-          const Icon(Icons.chevron_right, size: 18, color: AppColors.textMuted),
+          const Icon(
+            Icons.chevron_right,
+            size: 18,
+            color: AppColors.textMuted,
+          ),
           const Spacer(),
-          if (esDemostracion) ...[const DemoPill(), const SizedBox(width: 12)],
+          if (esDemostracion) ...[
+            const DemoPill(),
+            const SizedBox(width: 12),
+          ],
           const UserAvatar(),
         ],
       ),
