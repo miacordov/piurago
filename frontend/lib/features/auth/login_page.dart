@@ -39,11 +39,17 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  /// Después del acceso se va directo a "¿A dónde vas?": quien no conoce
-  /// el transporte solo escribe su destino. El permiso de ubicación lo pide
-  /// el sistema desde el mapa.
+  /// Después del acceso se va a "¿A dónde vas?": quien no conoce el
+  /// transporte solo escribe su destino. Si se llegó desde el avatar, vuelve
+  /// al mapa de antes en lugar de apilar otro. El permiso de ubicación lo
+  /// pide el sistema desde el mapa.
   void _avanzar() {
-    Navigator.of(context).pushReplacementNamed(AppRoutes.mapa);
+    final navegador = Navigator.of(context);
+    if (navegador.canPop()) {
+      navegador.pop();
+    } else {
+      navegador.pushReplacementNamed(AppRoutes.mapa);
+    }
   }
 
   Future<void> _entrar() async {

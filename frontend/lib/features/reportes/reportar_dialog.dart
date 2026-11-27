@@ -62,7 +62,10 @@ class _ReportarDialogState extends State<_ReportarDialog> {
 
   final _descripcion = TextEditingController();
   TipoReporte _tipo = TipoReporte.rutaCambio;
-  late int? _idRuta = widget.idRuta;
+  // Solo una línea que esté en la lista: otro valor rompe el desplegable.
+  late int? _idRuta = widget.rutas.any((r) => r.idRuta == widget.idRuta)
+      ? widget.idRuta
+      : null;
   bool _incluirUbicacion = false;
   bool _enviando = false;
   String? _errorDescripcion;
