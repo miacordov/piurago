@@ -88,7 +88,8 @@ void main() {
   testWidgets('muestra las líneas de Piura en una lista compacta', (
     tester,
   ) async {
-    fijarPantalla(tester, escritorio);
+    // Alta para que entren todas las empresas (EMTRUBAPI va por la E).
+    fijarPantalla(tester, const Size(1366, 2400));
     await abrir(tester, const FakeRutasRepository());
 
     expect(find.text('Encuentra tu ruta'), findsOneWidget);
@@ -346,7 +347,8 @@ void main() {
         );
         await abrir(tester, repo);
 
-        expect(find.text('I-18'), findsOneWidget);
+        // La primera empresa de los datos de prueba, por orden alfabético.
+        expect(find.text('3W Tours'), findsOneWidget);
         expect(find.text('Modo demostración'), findsOneWidget);
       },
     );

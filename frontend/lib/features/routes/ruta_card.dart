@@ -7,7 +7,7 @@ import '../../data/models/eta.dart';
 import '../../data/models/ruta.dart';
 
 /// Fila de una línea en la lista de rutas, como en la lista de líneas de
-/// Moovit: el código con su color, el nombre, la empresa y el tipo, por
+/// Moovit: el código con su color, el nombre y el tipo, por
 /// dónde pasa, y a la derecha la frecuencia y el pasaje. Tocarla abre la
 /// línea en el mapa.
 class RutaCard extends StatelessWidget {
@@ -31,10 +31,8 @@ class RutaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colores = ColoresDeTono.de(ruta.tono);
-    final detalle = [
-      ruta.empresa,
-      ruta.tipoServicio,
-    ].whereType<String>().join(' · ');
+    // La empresa va en la cabecera de su grupo, no se repite en la fila.
+    final detalle = ruta.tipoServicio ?? '';
     final lugares = ruta.lugaresDestacados.isNotEmpty
         ? ruta.lugaresDestacados.take(3).join(' · ')
         : [ruta.puntoInicio, ruta.puntoFinal].whereType<String>().join(' → ');
