@@ -112,9 +112,13 @@ class RepositorioConEta extends RepositorioPrueba implements FuenteEta {
   final Map<int, Eta> etas;
   final pedidos = <int>[];
 
+  /// Si es true, cada pedido de ETA falla (sin conexión).
+  bool fallarEta = false;
+
   @override
   Future<Eta?> eta(int idRuta) async {
     pedidos.add(idRuta);
+    if (fallarEta) throw Exception('sin conexión');
     return etas[idRuta];
   }
 }

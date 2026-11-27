@@ -360,4 +360,43 @@ void main() {
     await pumpEventQueue();
     expect(repositorio.pedidos.length, idsOpciones.length);
   });
+
+  test(
+    'el GPS no cambia la línea elegida ni corta la guía del viaje',
+    () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central').posicion;
+      p
+        ..usarUbicacionActual(mercado)
+        ..fijarDestino(lugar(p, 'Hospital Sur'));
+      final otra = p.opciones.last;
+      p
+        ..elegir(otra)
+        ..iniciarViaje();
+
+      // El pasajero camina unos metros hacia el paradero.
+      p.usarUbicacionActual(
+        LatLng(mercado.latitude - 0.0003, mercado.longitude),
+      );
+
+      expect(p.elegida?.ruta.idRuta, otra.ruta.idRuta);
+      expect(p.paso, PasoViaje.caminarAlParadero);
+    },
+  );
+
+  test('si el ETA falla, se vuelve a pedir en la próxima búsqueda', () async {
+    final repositorio = RepositorioConEta(const {})..fallarEta = true;
+    final p = await cargado(repositorio);
+    p
+      ..fijarDestino(lugar(p, 'Hospital Sur'))
+      ..fijarOrigen(lugar(p, 'Mercado Central'));
+    await pumpEventQueue();
+    final primeros = repositorio.pedidos.length;
+
+    repositorio.fallarEta = false;
+    p.intercambiar();
+    await pumpEventQueue();
+
+    expect(repositorio.pedidos.length, greaterThan(primeros));
+  });
 }
