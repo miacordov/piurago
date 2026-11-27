@@ -23,6 +23,7 @@ import '../viaje/planificar_panel.dart';
 import 'confirmar_abordaje_dialog.dart';
 import 'ruta_map.dart';
 import 'ruta_panel.dart';
+import '../reportes/reportar_dialog.dart';
 import 'ubicacion_usuario.dart';
 import 'viaje_en_vivo_panel.dart';
 import 'viaje_finalizado_dialog.dart';
@@ -104,6 +105,15 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  void _reportarDesdePlanificador(PlanificadorViaje planificador) {
+    mostrarReportarDialog(
+      context,
+      rutas: planificador.rutas,
+      fuente: fuenteReportesDe(widget.repository),
+      ubicacion: _ubicacion.posicion?.punto,
+    );
+  }
+
   /// Aviso para bajarse: vibra y suena para que no haga falta mirar la
   /// pantalla.
   void _avisarBajada(AvisoBajada _) {
@@ -182,12 +192,14 @@ class _MapPageState extends State<MapPage> {
             planificador: planificador,
             buscadorLugares: widget.buscadorLugares,
             esDemostracion: widget.repository.esDemostracion,
+            onReportar: () => _reportarDesdePlanificador(planificador),
           ),
           panelEnHoja: (controlador) => PlanificarPanel(
             planificador: planificador,
             buscadorLugares: widget.buscadorLugares,
             esDemostracion: widget.repository.esDemostracion,
             controladorScroll: controlador,
+            onReportar: () => _reportarDesdePlanificador(planificador),
           ),
         ),
       );
@@ -269,6 +281,24 @@ class _Contenido extends StatefulWidget {
 class _ContenidoState extends State<_Contenido> {
   bool _enViaje = false;
 
+  /// Abre "Reportar un cambio" con esta línea ya elegida.
+  Future<void> _reportar() async {
+    List<Ruta> rutas;
+    try {
+      rutas = await widget.repository.listar();
+    } catch (_) {
+      rutas = [widget.ruta];
+    }
+    if (!mounted) return;
+    await mostrarReportarDialog(
+      context,
+      rutas: rutas,
+      fuente: fuenteReportesDe(widget.repository),
+      idRuta: widget.ruta.idRuta,
+      ubicacion: widget.ubicacion.posicion?.punto,
+    );
+  }
+
   Future<void> _iniciarViaje() async {
     final confirmado = await ConfirmarAbordajeDialog.mostrar(
       context,
@@ -334,6 +364,7 @@ class _ContenidoState extends State<_Contenido> {
             paraderos: widget.paraderos,
             onPlanificarViaje: widget.onPlanificarViaje,
             onCompartirRuta: _iniciarViaje,
+            onReportar: _reportar,
           );
 
     return _Disposicion(mapa: mapa, panel: panel);

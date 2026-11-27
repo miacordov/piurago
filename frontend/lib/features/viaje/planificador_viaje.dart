@@ -127,6 +127,9 @@ class PlanificadorViaje extends ChangeNotifier {
   CampoViaje get campoActivo => _campoActivo;
   List<Lugar> get catalogo => _catalogo;
 
+  /// Rutas ya cargadas (para elegir la línea al reportar un cambio).
+  List<Ruta> get rutas => _rutas;
+
   /// Lugares por los que pasan más líneas, para elegirlos con un clic.
   List<Lugar> get frecuentes => _frecuentes;
   List<OpcionViaje> get opciones => _opciones;

@@ -20,7 +20,7 @@ import 'auth_service.dart';
 /// locales: para usar el trazado oficial o los paraderos locales de una ruta
 /// se busca la misma línea por su código (RD-12, I-18...).
 class HttpRutasRepository
-    implements RutasRepository, FuenteEta, FuenteCongestion {
+    implements RutasRepository, FuenteEta, FuenteCongestion, FuenteReportes {
   HttpRutasRepository({
     http.Client? cliente,
     Uri? baseUrl,
@@ -137,6 +137,35 @@ class HttpRutasRepository
   Future<List<LatLng>> trazado(int idRuta) async {
     final local = await _idLocal(idRuta);
     return local == null ? const <LatLng>[] : fallback.trazado(local);
+  }
+
+  /// Envía un reporte de la comunidad (`POST /api/reportes-comunidad`).
+  @override
+  Future<bool> reportar(NuevoReporte reporte) async {
+    try {
+      final token = await authService.obtenerToken();
+      final url = _baseUrl.replace(path: '/api/reportes-comunidad');
+      final ubicacion = reporte.ubicacion;
+      final respuesta = await _cliente.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'tipo': reporte.tipo.valor,
+          'idRuta': ?reporte.idRuta,
+          'descripcion': reporte.descripcion,
+          if (ubicacion != null) ...{
+            'latitud': ubicacion.latitude,
+            'longitud': ubicacion.longitude,
+          },
+        }),
+      );
+      return respuesta.statusCode == 200 || respuesta.statusCode == 201;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Envía un reporte GPS al backend durante el viaje en vivo.

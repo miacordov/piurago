@@ -23,7 +23,11 @@ class PlanificarPanel extends StatefulWidget {
     this.buscadorLugares,
     this.esDemostracion = false,
     this.controladorScroll,
+    this.onReportar,
   });
+
+  /// Abre "Reportar un cambio" (null: no se muestra el botón).
+  final VoidCallback? onReportar;
 
   final PlanificadorViaje planificador;
 
@@ -314,6 +318,17 @@ class _PlanificarPanelState extends State<PlanificarPanel> {
           ),
         ],
         ..._resultados(),
+        if (widget.onReportar != null) ...[
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: widget.onReportar,
+              icon: const Icon(Icons.flag_outlined, size: 18),
+              label: const Text('Reportar un cambio'),
+            ),
+          ),
+        ],
       ],
     );
   }
