@@ -97,7 +97,8 @@ void main() {
       find.text('Terminal Satélite (Piura) - Terminal La Unión'),
       findsOneWidget,
     );
-    expect(find.text('EMTRUBAPI · Interurbana'), findsOneWidget);
+    expect(find.text('EMTRUBAPI'), findsOneWidget);
+    expect(find.text('Interurbana'), findsWidgets);
     expect(find.text('S/ 3.00'), findsWidgets);
     expect(find.text('cada ~10 min'), findsWidgets);
     expect(find.text('24 líneas'), findsOneWidget);
@@ -107,6 +108,25 @@ void main() {
       tester.getSize(find.byKey(const ValueKey('ruta-1'))).height,
       lessThan(130),
     );
+  });
+
+  testWidgets('lo primero que se ve de cada línea es el nombre de su empresa', (
+    tester,
+  ) async {
+    fijarPantalla(tester, const Size(1366, 2400));
+    await abrir(tester, const FakeRutasRepository());
+
+    // Una sola cabecera por empresa, encima de todas sus líneas.
+    expect(find.text('6M Buss SAA'), findsOneWidget);
+    final cabecera = tester.getTopLeft(find.text('6M Buss SAA')).dy;
+    final siguiente = tester.getTopLeft(find.text('Autogas')).dy;
+    for (final codigo in ['I-19', 'RD-07', 'RD-08', 'RD-21']) {
+      final y = tester.getTopLeft(find.text(codigo)).dy;
+      expect(y, greaterThan(cabecera), reason: codigo);
+      expect(y, lessThan(siguiente), reason: codigo);
+    }
+    // La empresa no se repite dentro de la fila: va en la cabecera.
+    expect(find.text('6M Buss SAA · Regulada'), findsNothing);
   });
 
   testWidgets('los filtros por tipo muestran cuántas líneas hay', (

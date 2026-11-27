@@ -88,4 +88,30 @@ void main() {
     expect(cuenta[TipoServicio.regulada], 1);
     expect(cuenta[TipoServicio.interurbana], 1);
   });
+
+  test('agrupa las líneas por empresa, en orden alfabético y sin empresa al final', () {
+    const lineas = [
+      Ruta(idRuta: 1, codigo: 'RD-07', nombre: 'A', empresa: '6M Buss SAA'),
+      Ruta(idRuta: 2, codigo: 'U-03', nombre: 'B'),
+      Ruta(idRuta: 3, codigo: 'RD-12', nombre: 'C', empresa: 'Autogas'),
+      Ruta(idRuta: 4, codigo: 'I-19', nombre: 'D', empresa: '6M Buss SAA'),
+      Ruta(idRuta: 5, codigo: 'RD-16', nombre: 'E', empresa: 'Álamo Bus'),
+    ];
+
+    final grupos = agruparPorEmpresa([
+      for (final r in lineas) RutaFiltrada(r),
+    ]);
+
+    expect([for (final g in grupos) g.empresa], [
+      '6M Buss SAA',
+      'Álamo Bus',
+      'Autogas',
+      null,
+    ]);
+    expect([for (final r in grupos.first.rutas) r.ruta.codigo], [
+      'RD-07',
+      'I-19',
+    ]);
+    expect(grupos.last.rutas.single.ruta.codigo, 'U-03');
+  });
 }
