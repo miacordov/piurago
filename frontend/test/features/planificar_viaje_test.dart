@@ -377,6 +377,8 @@ void main() {
     // Cuánto tarda en venir la unidad y cuánto dura el tramo en bus.
     expect(enTarjetaA('Espera ~5 min en promedio'), findsOneWidget);
     expect(enTarjetaA('En bus ~9 min'), findsOneWidget);
+    // La elegida dice por dónde pasa en el camino.
+    expect(enTarjetaA('1 paradero en el camino: Plaza Norte'), findsOneWidget);
     // Los campos se resumen en una barra.
     expect(campoHasta, findsNothing);
     expect(enResumen('Desde  Mercado Central'), findsOneWidget);

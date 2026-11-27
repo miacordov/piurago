@@ -530,4 +530,31 @@ void main() {
       expect(o.esperaEnVivo, isFalse);
     });
   });
+
+  group('por dónde pasa', () {
+    final tresParaderos = {
+      1: [
+        paraderoPrueba(1, 'Norte', -5.2010),
+        paraderoPrueba(2, 'Centro', -5.2100),
+        paraderoPrueba(3, 'Sur', -5.2190),
+      ],
+    };
+
+    test('guarda los paraderos entre la subida y la bajada, en orden', () {
+      final ida = buscar([ruta(1, 'Línea')], tresParaderos).opciones.single;
+      expect([for (final p in ida.paraderosIntermedios) p.nombre], ['Centro']);
+
+      // De vuelta (del sur al norte) se recorren al revés.
+      final vuelta = buscar(
+        [ruta(1, 'Línea')],
+        tresParaderos,
+        desde: destino,
+        hasta: origen,
+      ).opciones.single;
+      expect(
+        [for (final p in vuelta.paraderosIntermedios) p.nombre],
+        ['Centro'],
+      );
+    });
+  });
 }
