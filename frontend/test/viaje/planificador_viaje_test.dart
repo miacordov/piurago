@@ -399,4 +399,19 @@ void main() {
 
     expect(repositorio.pedidos.length, greaterThan(primeros));
   });
+
+  test('usa la hora actual para marcar las líneas fuera de horario', () async {
+    final p = PlanificadorViaje(
+      RepositorioPrueba(),
+      reloj: () => DateTime(2026, 11, 27, 23),
+    );
+    await p.cargar();
+    p
+      ..fijarDestino(lugar(p, 'Hospital Sur'))
+      ..fijarOrigen(lugar(p, 'Mercado Central'));
+
+    // La Línea A atiende de 06:00 a 22:00.
+    final lineaA = p.opciones.firstWhere((o) => o.ruta.idRuta == 1);
+    expect(lineaA.fueraDeHorario, isTrue);
+  });
 }

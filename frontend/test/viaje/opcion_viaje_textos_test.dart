@@ -48,4 +48,38 @@ void main() {
       '6 paraderos en el camino: P2, P3, P4, P5 y 2 más',
     );
   });
+
+  test('dice qué letrero buscar y avisa si la línea no atiende', () {
+    const ruta = Ruta(
+      idRuta: 1,
+      nombre: 'Línea',
+      puntoInicio: 'Piura',
+      puntoFinal: 'Catacaos',
+      horario: '06:00–21:00',
+    );
+    final o = OpcionViaje(
+      ruta: ruta,
+      sube: paraderoPrueba(1, 'Norte', -5.2010),
+      baja: paraderoPrueba(2, 'Sur', -5.2190),
+      metrosSubida: 0,
+      metrosBajada: 0,
+      haciaDonde: 'Catacaos',
+    );
+    expect(textoDireccion(o), 'Toma la que va hacia Catacaos');
+    expect(textoFueraDeHorario(o), isNull);
+
+    final cerrada = OpcionViaje(
+      ruta: ruta,
+      sube: o.sube,
+      baja: o.baja,
+      metrosSubida: 0,
+      metrosBajada: 0,
+      fueraDeHorario: true,
+    );
+    expect(textoDireccion(cerrada), isNull);
+    expect(
+      textoFueraDeHorario(cerrada),
+      'Fuera de horario · atiende 06:00–21:00',
+    );
+  });
 }
