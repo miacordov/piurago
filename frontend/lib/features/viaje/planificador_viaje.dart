@@ -40,11 +40,15 @@ enum PasoViaje {
 /// pide el destino y luego el origen (si hay GPS, el origen es la ubicación
 /// actual); con los dos, busca sola y elige la mejor línea. Solo depende de la interfaz RutasRepository.
 class PlanificadorViaje extends ChangeNotifier {
-  PlanificadorViaje(this._repository, {this.lugaresConocidos = const []})
-    : _calles = [
-        for (final l in lugaresConocidos)
-          if (l.tipo == TipoLugar.calle) l,
-      ];
+  PlanificadorViaje(
+    this._repository, {
+    this.lugaresConocidos = const [],
+    DateTime Function()? reloj,
+  }) : _reloj = reloj ?? relojPorDefecto,
+       _calles = [
+         for (final l in lugaresConocidos)
+           if (l.tipo == TipoLugar.calle) l,
+       ];
 
   /// Base propia de calles y lugares de Piura que se suma a los paraderos
   /// en las sugerencias (lib/data/lugares/lugares_piura.dart).
@@ -52,6 +56,14 @@ class PlanificadorViaje extends ChangeNotifier {
   final List<Lugar> _calles;
 
   final RutasRepository _repository;
+
+  /// Hora actual, para saber qué líneas atienden.
+  final DateTime Function() _reloj;
+
+  /// Reloj que usan los planificadores creados sin uno propio. Las pruebas
+  /// lo fijan (test/flutter_test_config.dart) para no depender de la hora
+  /// en que se corren.
+  static DateTime Function() relojPorDefecto = DateTime.now;
 
   List<Ruta> _rutas = const [];
   Map<int, List<Paradero>> _paraderos = const {};
@@ -285,6 +297,7 @@ class PlanificadorViaje extends ChangeNotifier {
         rutas: _rutas,
         paraderos: _paraderos,
         trazados: _trazados,
+        ahora: _reloj(),
       );
       _opciones = [
         for (final o in resultado.opciones) o.conEta(_etas[o.ruta.idRuta]),

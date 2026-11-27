@@ -154,6 +154,8 @@ class OpcionViaje {
     this.metrosPorTrazado,
     this.eta,
     this.paraderosIntermedios = const [],
+    this.haciaDonde,
+    this.fueraDeHorario = false,
   });
 
   final Ruta ruta;
@@ -171,6 +173,13 @@ class OpcionViaje {
   /// viaje (ver [paraderosEntre]).
   final List<Paradero> paraderosIntermedios;
 
+  /// Terminal hacia el que va la unidad que hay que tomar (el letrero de la
+  /// combi), según el sentido del viaje en el orden de los paraderos.
+  final String? haciaDonde;
+
+  /// La línea no atiende a la hora de la búsqueda (ver [enServicio]).
+  final bool fueraDeHorario;
+
   /// La misma opción con la próxima unidad [eta].
   OpcionViaje conEta(Eta? eta) => OpcionViaje(
     ruta: ruta,
@@ -181,6 +190,8 @@ class OpcionViaje {
     metrosPorTrazado: metrosPorTrazado,
     eta: eta,
     paraderosIntermedios: paraderosIntermedios,
+    haciaDonde: haciaDonde,
+    fueraDeHorario: fueraDeHorario,
   );
 
   /// Caminata del origen al paradero de subida.
@@ -246,6 +257,7 @@ ResultadoBusqueda buscarOpciones({
   required List<Ruta> rutas,
   required Map<int, List<Paradero>> paraderos,
   Map<int, List<LatLng>> trazados = const {},
+  DateTime? ahora,
 }) {
   if (distanciaMetros(origen, destino) < distanciaParaCaminarMetros) {
     return const ResultadoBusqueda([], muyCerca: true);
@@ -276,6 +288,12 @@ ResultadoBusqueda buscarOpciones({
           posicionDe(baja),
         ),
         paraderosIntermedios: paraderosEntre(lista, sube, baja),
+        // Los paraderos van del inicio al final de la línea: si se sube antes
+        // de donde se baja, se toma la que va hacia el final.
+        haciaDonde: sube.ordenSecuencial <= baja.ordenSecuencial
+            ? ruta.puntoFinal
+            : ruta.puntoInicio,
+        fueraDeHorario: ahora != null && enServicio(ruta, ahora) == false,
       ),
     );
   }
@@ -284,6 +302,8 @@ ResultadoBusqueda buscarOpciones({
 }
 
 int _compararOpciones(OpcionViaje a, OpcionViaje b) {
+  // Las que no atienden a esta hora, al final.
+  if (a.fueraDeHorario != b.fueraDeHorario) return a.fueraDeHorario ? 1 : -1;
   final porCaminata = a.metrosTotales.compareTo(b.metrosTotales);
   if (porCaminata != 0) return porCaminata;
   final porFrecuencia = _compararNulosAlFinal(
@@ -351,4 +371,25 @@ List<Paradero> paraderosEntre(
   return i < j
       ? ordenados.sublist(i + 1, j)
       : ordenados.sublist(j + 1, i).reversed.toList();
+}
+
+/// Si [ruta] atiende a la hora de [ahora], según su horario ("06:00–21:00",
+/// con raya o guion; si el cierre es antes que la apertura, pasa la
+/// medianoche). Devuelve null si no tiene horario o no se entiende.
+bool? enServicio(Ruta ruta, DateTime ahora) {
+  final horario = ruta.horario;
+  if (horario == null) return null;
+  final partes = RegExp(
+    r'^\s*(\d{1,2}):(\d{2})\s*[–—-]\s*(\d{1,2}):(\d{2})\s*$',
+  ).firstMatch(horario);
+  if (partes == null) return null;
+  int minutos(int grupo) =>
+      int.parse(partes.group(grupo)!) * 60 +
+      int.parse(partes.group(grupo + 1)!);
+  final abre = minutos(1);
+  final cierra = minutos(3);
+  final hora = ahora.hour * 60 + ahora.minute;
+  return abre <= cierra
+      ? hora >= abre && hora <= cierra
+      : hora >= abre || hora <= cierra;
 }

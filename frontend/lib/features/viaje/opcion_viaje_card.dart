@@ -54,6 +54,23 @@ String? textoParaderosEnElCamino(OpcionViaje o) {
   return '$titulo en el camino: $nombres$resto';
 }
 
+/// "Toma la que va hacia Catacaos": el letrero de la combi que hay que
+/// tomar. Null si no se conoce o si la línea no atiende a esta hora.
+String? textoDireccion(OpcionViaje o) {
+  final hacia = o.haciaDonde;
+  if (hacia == null || o.fueraDeHorario) return null;
+  return 'Toma la que va hacia $hacia';
+}
+
+/// "Fuera de horario · atiende 06:00–21:00", o null si atiende.
+String? textoFueraDeHorario(OpcionViaje o) {
+  if (!o.fueraDeHorario) return null;
+  final horario = o.ruta.horario;
+  return horario == null
+      ? 'Fuera de horario'
+      : 'Fuera de horario · atiende $horario';
+}
+
 /// "En bus ~9 min": cuánto dura el tramo a bordo.
 String textoEnBus(OpcionViaje o) => 'En bus ~${o.minutosEnBus} min';
 
@@ -83,6 +100,8 @@ class OpcionViajeCard extends StatelessWidget {
     final empresa = opcion.empresa;
     final frecuencia = textoFrecuencia(opcion);
     final espera = textoEspera(opcion);
+    final direccion = textoDireccion(opcion);
+    final fueraDeHorario = textoFueraDeHorario(opcion);
     return Material(
       color: elegida ? AppColors.background : AppColors.surface,
       shape: RoundedRectangleBorder(
@@ -160,6 +179,17 @@ class OpcionViajeCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (fueraDeHorario != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  fueraDeHorario,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.danger,
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
               Wrap(
                 spacing: 16,
@@ -176,6 +206,8 @@ class OpcionViajeCard extends StatelessWidget {
                     icono: Icons.directions_bus_outlined,
                     texto: textoEnBus(opcion),
                   ),
+                  if (direccion != null)
+                    _Dato(icono: Icons.signpost_outlined, texto: direccion),
                 ],
               ),
               const SizedBox(height: 8),
