@@ -136,4 +136,18 @@ void main() {
     );
     expect(enviar.onPressed, isNull);
   });
+
+  testWidgets('si la línea elegida no está en la lista, no falla y queda '
+      'sin línea', (tester) async {
+    final fuente = _FuenteFalsa();
+    await abrir(tester, fuente: fuente, idRuta: 99);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Ninguna en particular'), findsOneWidget);
+    await tester.enterText(campoDescripcion, 'Cambió el recorrido');
+    await tester.tap(find.text('Enviar'));
+    await tester.pumpAndSettle();
+
+    expect(fuente.enviados.single.idRuta, isNull);
+  });
 }

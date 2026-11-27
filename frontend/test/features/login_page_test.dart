@@ -9,6 +9,7 @@ import 'package:piurago/data/api/almacen_sesion.dart';
 import 'package:piurago/data/api/auth_service.dart';
 import 'package:piurago/data/models/eta.dart';
 import 'package:piurago/data/rutas_repository.dart';
+import 'package:piurago/features/map/map_page.dart';
 
 void fijarPantalla(WidgetTester tester) {
   tester.view.physicalSize = const Size(1366, 900);
@@ -100,6 +101,8 @@ void main() {
     expect(backend.pedidos, contains('/api/auth/login'));
     expect(auth.esRegistrado, isTrue);
     expect(find.text('¿A dónde vas?'), findsOneWidget);
+    // Vuelve al mapa del que vino: no apila un segundo mapa.
+    expect(find.byType(MapPage, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('con credenciales incorrectas avisa y no avanza', (tester) async {
@@ -152,6 +155,8 @@ void main() {
     expect(backend.pedidos, contains('/api/auth/registro'));
     expect(auth.esRegistrado, isTrue);
     expect(find.text('¿A dónde vas?'), findsOneWidget);
+    // Vuelve al mapa del que vino: no apila un segundo mapa.
+    expect(find.byType(MapPage, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('si el registro falla lo explica', (tester) async {
