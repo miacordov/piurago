@@ -169,10 +169,12 @@ class PlanificadorViaje extends ChangeNotifier {
   }
 
   /// Recibe la posición del GPS. Mientras el pasajero no elija otro origen,
-  /// se usa como "Tu ubicación": así basta con escribir el destino.
+  /// se usa como "Tu ubicación": así basta con escribir el destino. Con el
+  /// destino ya elegido solo se guarda: el viaje buscado, la línea elegida
+  /// y la guía no cambian mientras el pasajero camina.
   void usarUbicacionActual(LatLng punto) {
     _ubicacionActual = punto;
-    if (_origenManual) return;
+    if (_origenManual || _destino != null && _origen != null) return;
     final origen = _origen;
     if (origen != null && origen.posicion == punto) return;
     _origen = Lugar(nombreUbicacionActual, punto);
@@ -310,11 +312,19 @@ class PlanificadorViaje extends ChangeNotifier {
           o.ruta.idRuta,
     ];
     if (ids.isEmpty) return;
+    // Un pedido que falla no se guarda: se vuelve a pedir en la próxima
+    // búsqueda.
     final etas = await Future.wait(
-      ids.map((id) => fuente.eta(id).catchError((Object _) => null)),
+      ids.map(
+        (id) => fuente
+            .eta(id)
+            .then<(bool, Eta?)>((eta) => (true, eta))
+            .catchError((Object _) => (false, null)),
+      ),
     );
     for (final (i, id) in ids.indexed) {
-      _etas[id] = etas[i];
+      final (llego, eta) = etas[i];
+      if (llego) _etas[id] = eta;
       _pidiendoEta.remove(id);
     }
     if (_descartado) return;
