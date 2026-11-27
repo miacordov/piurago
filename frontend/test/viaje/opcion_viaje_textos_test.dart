@@ -3,6 +3,7 @@ import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
 import 'package:piurago/features/viaje/busqueda_viaje.dart';
 import 'package:piurago/features/viaje/opcion_viaje_card.dart';
+import 'package:piurago/features/viaje/planificador_viaje.dart';
 
 import 'repositorio_prueba.dart';
 
@@ -81,5 +82,31 @@ void main() {
       textoFueraDeHorario(cerrada),
       'Fuera de horario · atiende 06:00–21:00',
     );
+  });
+
+  group('textos a bordo', () {
+    final o = opcion();
+
+    test('sin GPS solo dice dónde bajarse', () {
+      expect(textosABordo(o, null, null), (
+        'Vas a bordo',
+        'Bájate cerca de Sur',
+      ));
+    });
+
+    test('con GPS cuenta los paraderos que faltan', () {
+      expect(textosABordo(o, 3, null), (
+        'Vas a bordo',
+        'Faltan 3 paraderos · bájate en Sur',
+      ));
+      expect(textosABordo(o, 1, AvisoBajada.proxima), (
+        'Bájate en la próxima',
+        'Prepárate: tu paradero es Sur',
+      ));
+      expect(textosABordo(o, 0, AvisoBajada.aqui), (
+        'Bájate aquí',
+        'Estás llegando a Sur',
+      ));
+    });
   });
 }

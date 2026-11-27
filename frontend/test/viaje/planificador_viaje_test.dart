@@ -434,4 +434,79 @@ void main() {
       expect(p.elegida?.ruta.idRuta, 1, reason: 'no se mueve lo que se ve');
     },
   );
+
+  group('aviso para bajarse', () {
+    /// Viaje Mercado Central -> Hospital Sur en la Línea A, ya a bordo.
+    /// Paraderos: Mercado Central (-5.2010), Plaza Norte (-5.2100) y
+    /// Hospital Sur (-5.2190).
+    Future<(PlanificadorViaje, List<AvisoBajada>)> aBordo() async {
+      final p = await conResultados();
+      final avisos = <AvisoBajada>[];
+      p
+        ..alAvisar = avisos.add
+        ..elegir(p.opciones.firstWhere((o) => o.ruta.idRuta == 1))
+        ..iniciarViaje()
+        ..avanzarPaso()
+        ..avanzarPaso();
+      expect(p.paso, PasoViaje.aBordo);
+      return (p, avisos);
+    }
+
+    test('sin GPS o antes de subir no cuenta paraderos', () async {
+      final p = await conResultados();
+      p
+        ..elegir(p.opciones.first)
+        ..iniciarViaje();
+      p.usarUbicacionActual(const LatLng(-5.2010, -80.63));
+      expect(p.paraderosRestantes, isNull);
+      expect(p.avisoBajada, isNull);
+    });
+
+    test('a bordo cuenta los paraderos que faltan', () async {
+      final (p, avisos) = await aBordo();
+
+      p.usarUbicacionActual(const LatLng(-5.2012, -80.63));
+
+      expect(p.paraderosRestantes, 2);
+      expect(p.avisoBajada, isNull);
+      expect(avisos, isEmpty);
+    });
+
+    test(
+      'un paradero antes avisa "bájate en la próxima" una sola vez',
+      () async {
+        final (p, avisos) = await aBordo();
+
+        p.usarUbicacionActual(const LatLng(-5.2100, -80.63));
+        p.usarUbicacionActual(const LatLng(-5.2105, -80.63));
+
+        expect(p.paraderosRestantes, 1);
+        expect(p.avisoBajada, AvisoBajada.proxima);
+        expect(avisos, [AvisoBajada.proxima]);
+      },
+    );
+
+    test('cerca del paradero de bajada avisa "bájate aquí"', () async {
+      expect(distanciaParaBajarseMetros, 150);
+      final (p, avisos) = await aBordo();
+
+      p.usarUbicacionActual(const LatLng(-5.2100, -80.63));
+      // Unos 55 m antes de Hospital Sur.
+      p.usarUbicacionActual(const LatLng(-5.2185, -80.63));
+
+      expect(p.paraderosRestantes, 0);
+      expect(p.avisoBajada, AvisoBajada.aqui);
+      expect(avisos, [AvisoBajada.proxima, AvisoBajada.aqui]);
+    });
+
+    test('el GPS a bordo no repite la búsqueda ni cambia de paso', () async {
+      final (p, _) = await aBordo();
+      final elegida = p.elegida;
+
+      p.usarUbicacionActual(const LatLng(-5.2100, -80.63));
+
+      expect(p.elegida, same(elegida));
+      expect(p.paso, PasoViaje.aBordo);
+    });
+  });
 }
