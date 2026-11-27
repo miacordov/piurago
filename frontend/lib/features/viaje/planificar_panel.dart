@@ -859,7 +859,9 @@ class _Error extends StatelessWidget {
 }
 
 /// Guía del viaje: el pasajero avanza cada paso a mano ("Ya llegué",
-/// "Ya subí", "Ya bajé"). No usa el GPS ni comparte la ubicación.
+/// "Ya subí", "Ya bajé"). A bordo, si hay permiso de ubicación, cuenta los
+/// paraderos que faltan y avisa cuándo bajarse; la ubicación se usa solo en
+/// el teléfono, no se comparte.
 class _GuiaViaje extends StatelessWidget {
   const _GuiaViaje({required this.planificador, required this.esDemostracion});
 
@@ -876,6 +878,12 @@ class _GuiaViaje extends StatelessWidget {
     final destino = planificador.destino!.nombre;
     final codigo = o.ruta.codigo ?? o.ruta.nombre;
     final frecuencia = o.frecuenciaMinutos;
+    final aviso = planificador.avisoBajada;
+    final (tituloABordo, detalleABordo) = textosABordo(
+      o,
+      planificador.paraderosRestantes,
+      aviso,
+    );
     final (titulo, detalle, boton, icono) = switch (paso) {
       PasoViaje.caminarAlParadero => (
         'Camina a la parada',
@@ -893,10 +901,12 @@ class _GuiaViaje extends StatelessWidget {
         Icons.directions_bus_outlined,
       ),
       PasoViaje.aBordo => (
-        'Vas a bordo',
-        'Bájate cerca de ${o.baja.nombre}',
+        tituloABordo,
+        detalleABordo,
         'Ya bajé',
-        Icons.event_seat_outlined,
+        aviso == null
+            ? Icons.event_seat_outlined
+            : Icons.notifications_active_outlined,
       ),
       PasoViaje.caminarAlDestino => (
         'Camina a tu destino',
@@ -952,7 +962,11 @@ class _GuiaViaje extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: llegaste ? AppColors.greenTile : AppColors.etaBox,
+            color: llegaste
+                ? AppColors.greenTile
+                : paso == PasoViaje.aBordo && aviso != null
+                ? AppColors.orangeTile
+                : AppColors.etaBox,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(

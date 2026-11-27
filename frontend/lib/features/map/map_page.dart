@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -103,6 +104,13 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  /// Aviso para bajarse: vibra y suena para que no haga falta mirar la
+  /// pantalla.
+  void _avisarBajada(AvisoBajada _) {
+    HapticFeedback.heavyImpact();
+    SystemSound.play(SystemSoundType.alert);
+  }
+
   /// El planificador toma la posición del GPS como origen.
   void _pasarUbicacionAlPlanificador() {
     final posicion = _ubicacion.posicion;
@@ -118,10 +126,13 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _iniciarPlanificador() {
-    _planificador = PlanificadorViaje(
-      widget.repository,
-      lugaresConocidos: widget.lugaresConocidos,
-    )..cargar();
+    _planificador =
+        PlanificadorViaje(
+            widget.repository,
+            lugaresConocidos: widget.lugaresConocidos,
+          )
+          ..alAvisar = _avisarBajada
+          ..cargar();
     _pasarUbicacionAlPlanificador();
   }
 

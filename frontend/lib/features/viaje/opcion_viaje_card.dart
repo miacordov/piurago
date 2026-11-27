@@ -5,6 +5,7 @@ import '../../core/theme/app_styles.dart';
 import '../../core/theme/app_text.dart';
 import '../routes/ruta_card.dart';
 import 'busqueda_viaje.dart';
+import 'planificador_viaje.dart';
 
 /// "Sube en Mercado Modelo · 120 m a pie (2 min)".
 String textoSubida(OpcionViaje o) =>
@@ -69,6 +70,29 @@ String? textoFueraDeHorario(OpcionViaje o) {
   return horario == null
       ? 'Fuera de horario'
       : 'Fuera de horario · atiende $horario';
+}
+
+/// Título y detalle del paso "a bordo" de la guía. Con GPS cuenta los
+/// paraderos que faltan ([restantes]) y muestra el [aviso] para bajarse.
+(String, String) textosABordo(
+  OpcionViaje o,
+  int? restantes,
+  AvisoBajada? aviso,
+) {
+  final baja = o.baja.nombre;
+  return switch (aviso) {
+    AvisoBajada.aqui => ('Bájate aquí', 'Estás llegando a $baja'),
+    AvisoBajada.proxima => (
+      'Bájate en la próxima',
+      'Prepárate: tu paradero es $baja',
+    ),
+    null when restantes == null => ('Vas a bordo', 'Bájate cerca de $baja'),
+    null => (
+      'Vas a bordo',
+      '${restantes == 1 ? 'Falta 1 paradero' : 'Faltan $restantes paraderos'}'
+          ' · bájate en $baja',
+    ),
+  };
 }
 
 /// "En bus ~9 min": cuánto dura el tramo a bordo.
