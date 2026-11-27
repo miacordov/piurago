@@ -75,7 +75,7 @@ Future<void> tocar(WidgetTester tester, Finder finder) async {
 }
 
 void main() {
-  testWidgets('iniciar sesión con el backend va directo a la lista de rutas', (
+  testWidgets('iniciar sesión con el backend va directo a ¿A dónde vas?', (
     tester,
   ) async {
     fijarPantalla(tester);
@@ -89,7 +89,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/auth/login'));
     expect(auth.esRegistrado, isTrue);
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
   });
 
   testWidgets('con credenciales incorrectas avisa y no avanza', (tester) async {
@@ -102,7 +102,7 @@ void main() {
     await tocar(tester, find.text('Iniciar sesión').last);
 
     expect(find.text('Correo o contraseña incorrectos.'), findsOneWidget);
-    expect(find.text('Encuentra tu ruta'), findsNothing);
+    expect(find.text('¿A dónde vas?'), findsNothing);
   });
 
   testWidgets('sin conexión con el servidor lo dice', (tester) async {
@@ -141,7 +141,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/auth/registro'));
     expect(auth.esRegistrado, isTrue);
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
   });
 
   testWidgets('si el registro falla lo explica', (tester) async {
@@ -176,7 +176,7 @@ void main() {
 
     expect(backend.pedidos, contains('/api/usuarios/anonimo'));
     expect(auth.estaAutenticado, isTrue);
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
   });
 
   testWidgets('sin servidor, el pasajero anónimo entra igual (modo demo)', (
@@ -188,25 +188,26 @@ void main() {
 
     await tocar(tester, find.text('Continuar como pasajero anónimo'));
 
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
   });
 
-  testWidgets('con una sesión registrada guardada abre directo en Rutas', (
-    tester,
-  ) async {
-    fijarPantalla(tester);
-    final almacen = AlmacenSesionMemoria();
-    final backend = Backend();
-    final antes = backend.auth(almacen);
-    await antes.login('ana@correo.com', 'clave123');
+  testWidgets(
+    'con una sesión registrada guardada abre directo en ¿A dónde vas?',
+    (tester) async {
+      fijarPantalla(tester);
+      final almacen = AlmacenSesionMemoria();
+      final backend = Backend();
+      final antes = backend.auth(almacen);
+      await antes.login('ana@correo.com', 'clave123');
 
-    final auth = backend.auth(almacen);
-    await auth.restaurarSesion();
-    await abrir(tester, auth);
+      final auth = backend.auth(almacen);
+      await auth.restaurarSesion();
+      await abrir(tester, auth);
 
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
-    expect(find.text('Inicia sesión'), findsNothing);
-  });
+      expect(find.text('¿A dónde vas?'), findsOneWidget);
+      expect(find.text('Inicia sesión'), findsNothing);
+    },
+  );
 
   test('el ETA se redondea a minutos enteros', () {
     expect(const Eta(minutos: 4, simulado: true).minutos, 4);

@@ -92,7 +92,7 @@ void main() {
     fijarPantalla(tester, const Size(1366, 2400));
     await abrir(tester, const FakeRutasRepository());
 
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('Empresas de transporte'), findsOneWidget);
     expect(find.text('I-18'), findsOneWidget);
     expect(
       find.text('Terminal Satélite (Piura) - Terminal La Unión'),
@@ -271,7 +271,7 @@ void main() {
     fijarPantalla(tester, celular);
     await abrir(tester, const FakeRutasRepository());
 
-    expect(find.text('Encuentra tu ruta'), findsOneWidget);
+    expect(find.text('Empresas de transporte'), findsOneWidget);
     expect(find.text('Modo demostración'), findsNothing);
 
     await tester.tap(find.byTooltip('Open navigation menu'));

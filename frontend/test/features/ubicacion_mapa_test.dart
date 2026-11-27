@@ -472,6 +472,22 @@ void main() {
       });
     }
 
+    testWidgets('concedido: el planificador usa la ubicación como origen', (
+      tester,
+    ) async {
+      fijarPantalla(tester, const Size(1366, 768));
+      final fake = FakeServicioUbicacion(
+        estadoInicial: EstadoPermisoUbicacion.concedido,
+        posicionAlEscuchar: _enPiura,
+      );
+      await abrirMapa(tester, fake);
+
+      final desde = tester.widget<TextField>(
+        find.byKey(const ValueKey('campo-desde')),
+      );
+      expect(desde.controller?.text, 'Tu ubicación');
+    });
+
     testWidgets('concedido: marcador y centrado sin pedir', (tester) async {
       fijarPantalla(tester, const Size(1366, 768));
       final fake = FakeServicioUbicacion(

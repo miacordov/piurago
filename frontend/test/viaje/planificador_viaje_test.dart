@@ -279,4 +279,57 @@ void main() {
       'Mercado Chico',
     ]);
   });
+
+  group('la ubicación actual como origen', () {
+    test('se usa como origen y basta con elegir el destino', () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central').posicion;
+
+      p.usarUbicacionActual(mercado);
+
+      expect(p.origen?.nombre, nombreUbicacionActual);
+      expect(p.origen?.posicion, mercado);
+      expect(p.campoActivo, CampoViaje.hasta, reason: 'falta el destino');
+
+      p.fijarDestino(lugar(p, 'Hospital Sur'));
+      expect(p.estado, EstadoViaje.conResultados);
+    });
+
+    test('sigue al usuario mientras sea el origen', () async {
+      final p = await cargado();
+      p.usarUbicacionActual(lugar(p, 'Mercado Central').posicion);
+      final otro = lugar(p, 'Hospital Sur').posicion;
+
+      p.usarUbicacionActual(otro);
+
+      expect(p.origen?.posicion, otro);
+    });
+
+    test('no reemplaza un origen elegido a mano, ni cuando se borra para '
+        'escribir otro', () async {
+      final p = await cargado();
+      final mercado = lugar(p, 'Mercado Central');
+      p.fijarOrigen(mercado);
+
+      p.usarUbicacionActual(lugar(p, 'Hospital Sur').posicion);
+      expect(p.origen, mercado);
+
+      p.fijarOrigen(null);
+      p.usarUbicacionActual(lugar(p, 'Hospital Sur').posicion);
+      expect(p.origen, isNull);
+    });
+
+    test('limpiar vuelve a usar la ubicación actual como origen', () async {
+      final p = await cargado();
+      final aqui = lugar(p, 'Mercado Central').posicion;
+      p
+        ..usarUbicacionActual(aqui)
+        ..fijarOrigen(lugar(p, 'Hospital Sur'))
+        ..limpiar();
+
+      expect(p.origen?.nombre, nombreUbicacionActual);
+      expect(p.origen?.posicion, aqui);
+      expect(p.destino, isNull);
+    });
+  });
 }
