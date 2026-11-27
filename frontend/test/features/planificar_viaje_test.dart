@@ -343,7 +343,15 @@ void main() {
     await viajar(tester, 'Hospital Sur', 'Mercado Central');
 
     expect(find.text('Línea A'), findsOneWidget);
-    expect(find.text('Empresa A · Urbana'), findsOneWidget);
+    // Lo primero de la tarjeta es la empresa, como se reconoce en Piura.
+    expect(
+      find.descendant(of: tarjeta('Línea A'), matching: find.text('Empresa A')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getTopLeft(find.text('Empresa A')).dy,
+      lessThan(tester.getTopLeft(find.text('Línea A')).dy),
+    );
     expect(
       find.text('Sube en Mercado Central · 0 m a pie (0 min)'),
       findsOneWidget,
@@ -366,6 +374,9 @@ void main() {
     expect(enTarjetaA('S/ 1.50'), findsOneWidget);
     expect(enTarjetaA('A-01'), findsOneWidget);
     expect(enTarjetaA('Pasa cada ~10 min'), findsOneWidget);
+    // Cuánto tarda en venir la unidad y cuánto dura el tramo en bus.
+    expect(enTarjetaA('Espera ~5 min en promedio'), findsOneWidget);
+    expect(enTarjetaA('En bus ~9 min'), findsOneWidget);
     // Los campos se resumen en una barra.
     expect(campoHasta, findsNothing);
     expect(enResumen('Desde  Mercado Central'), findsOneWidget);

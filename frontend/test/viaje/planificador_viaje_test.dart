@@ -3,6 +3,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:piurago/features/viaje/busqueda_viaje.dart';
 import 'package:piurago/features/viaje/planificador_viaje.dart';
 
+import 'package:piurago/data/models/eta.dart';
+
 import 'repositorio_prueba.dart';
 
 Lugar lugar(PlanificadorViaje p, String nombre) =>
@@ -331,5 +333,31 @@ void main() {
       expect(p.origen?.posicion, aqui);
       expect(p.destino, isNull);
     });
+  });
+
+  test('pide la próxima unidad solo de las líneas que sirven y la usa como '
+      'espera', () async {
+    final repositorio = RepositorioConEta({
+      1: const Eta(minutos: 3, simulado: false),
+    });
+    final p = await cargado(repositorio);
+
+    p
+      ..fijarDestino(lugar(p, 'Hospital Sur'))
+      ..fijarOrigen(lugar(p, 'Mercado Central'));
+    await pumpEventQueue();
+
+    final idsOpciones = {for (final o in p.opciones) o.ruta.idRuta};
+    expect(repositorio.pedidos.toSet(), idsOpciones);
+    final lineaA = p.opciones.firstWhere((o) => o.ruta.idRuta == 1);
+    expect(lineaA.minutosEspera, 3);
+    expect(lineaA.esperaEnVivo, isTrue);
+    expect(p.elegida?.ruta.idRuta, p.opciones.first.ruta.idRuta);
+
+    // Repetir la búsqueda no vuelve a pedir el mismo ETA.
+    p.intercambiar();
+    p.intercambiar();
+    await pumpEventQueue();
+    expect(repositorio.pedidos.length, idsOpciones.length);
   });
 }

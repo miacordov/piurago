@@ -4,6 +4,8 @@ import 'package:piurago/data/models/paradero.dart';
 import 'package:piurago/data/models/ruta.dart';
 import 'package:piurago/features/viaje/busqueda_viaje.dart';
 
+import 'package:piurago/data/models/eta.dart';
+
 import 'repositorio_prueba.dart';
 
 Ruta ruta(
@@ -449,5 +451,83 @@ void main() {
     expect(puntosCasiIguales(const [origen]), isTrue);
     expect(puntosCasiIguales(const [origen, LatLng(-5.20005, -80.63)]), isTrue);
     expect(puntosCasiIguales(const [origen, destino]), isFalse);
+  });
+
+  group('tramo en bus por el recorrido de la línea', () {
+    // La línea va al este, baja al sur y vuelve al oeste: unos 4.2 km por
+    // las calles, aunque los paraderos estén a 2 km en línea recta.
+    const trazado = [
+      LatLng(-5.2010, -80.63),
+      LatLng(-5.2010, -80.62),
+      LatLng(-5.2190, -80.62),
+      LatLng(-5.2190, -80.63),
+    ];
+    final paraderos = {
+      1: [
+        paraderoPrueba(1, 'Norte', -5.2010),
+        paraderoPrueba(2, 'Sur', -5.2190),
+      ],
+    };
+
+    test('con el trazado, mide el tramo sobre las calles', () {
+      final opcion = buscarOpciones(
+        origen: const LatLng(-5.2010, -80.63),
+        destino: const LatLng(-5.2190, -80.63),
+        rutas: [ruta(1, 'Con trazado')],
+        paraderos: paraderos,
+        trazados: const {1: trazado},
+      ).opciones.single;
+
+      expect(opcion.metrosEnBus, closeTo(4218, 20));
+      // 4218 m a 300 m/min: 15 min.
+      expect(opcion.minutosEnBus, 15);
+    });
+
+    test('sin trazado, sigue estimando con la línea recta', () {
+      final opcion = buscarOpciones(
+        origen: const LatLng(-5.2010, -80.63),
+        destino: const LatLng(-5.2190, -80.63),
+        rutas: [ruta(1, 'Sin trazado')],
+        paraderos: paraderos,
+      ).opciones.single;
+
+      expect(opcion.minutosEnBus, 9);
+    });
+  });
+
+  group('espera de la unidad', () {
+    OpcionViaje opcion({int? frecuencia}) => buscar(
+      [ruta(1, 'Línea', frecuencia: frecuencia)],
+      {
+        1: [
+          paraderoPrueba(1, 'Norte', -5.2010),
+          paraderoPrueba(2, 'Sur', -5.2190),
+        ],
+      },
+    ).opciones.single;
+
+    test('con unidades en vivo usa el ETA real', () {
+      final o = opcion(frecuencia: 10)
+          .conEta(const Eta(minutos: 3, simulado: false));
+
+      expect(o.minutosEspera, 3);
+      expect(o.esperaEnVivo, isTrue);
+      expect(o.minutosTotales, 2 + 3 + 9 + 2);
+    });
+
+    test('con un ETA simulado y frecuencia, usa la espera promedio', () {
+      final o = opcion(frecuencia: 10)
+          .conEta(const Eta(minutos: 9, simulado: true));
+
+      expect(o.minutosEspera, 5);
+      expect(o.esperaEnVivo, isFalse);
+    });
+
+    test('sin frecuencia, usa el ETA simulado', () {
+      final o = opcion().conEta(const Eta(minutos: 7, simulado: true));
+
+      expect(o.minutosEspera, 7);
+      expect(o.esperaEnVivo, isFalse);
+    });
   });
 }
