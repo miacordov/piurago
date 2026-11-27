@@ -646,4 +646,42 @@ void main() {
       expect(resultado.opciones.first.fueraDeHorario, isFalse);
     });
   });
+
+  group('orden por tiempo total', () {
+    test('la más rápida va primero aunque se camine un poco más', () {
+      final resultado = buscar(
+        [
+          // Paraderos a 0 m, pero pasa cada 40 min: 20 de espera.
+          ruta(1, 'Lenta', frecuencia: 40),
+          // Unos 220 m más de caminata en total, pero pasa cada 4 min.
+          ruta(2, 'Rápida', frecuencia: 4),
+        ],
+        {
+          1: [paraderoPrueba(1, 'N', -5.2000), paraderoPrueba(2, 'S', -5.2200)],
+          2: [paraderoPrueba(3, 'N', -5.2010), paraderoPrueba(4, 'S', -5.2190)],
+        },
+      );
+
+      final [primera, segunda] = resultado.opciones;
+      expect(primera.ruta.nombre, 'Rápida');
+      expect(primera.metrosTotales, greaterThan(segunda.metrosTotales));
+      expect(primera.minutosTotales, lessThan(segunda.minutosTotales));
+    });
+
+    test('sin dato de espera se supone una espera típica al ordenar', () {
+      expect(esperaSupuestaMinutos, 5);
+      final resultado = buscar(
+        [ruta(1, 'Sin dato'), ruta(2, 'Cada 6', frecuencia: 6)],
+        {
+          1: [paraderoPrueba(1, 'N', -5.2010), paraderoPrueba(2, 'S', -5.2190)],
+          2: [paraderoPrueba(3, 'N', -5.2010), paraderoPrueba(4, 'S', -5.2190)],
+        },
+      );
+      // "Cada 6" espera 3 min; "Sin dato" se ordena como si esperara 5.
+      expect(
+        [for (final o in resultado.opciones) o.ruta.nombre],
+        ['Cada 6', 'Sin dato'],
+      );
+    });
+  });
 }

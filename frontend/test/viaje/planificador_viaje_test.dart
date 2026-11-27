@@ -414,4 +414,24 @@ void main() {
     final lineaA = p.opciones.firstWhere((o) => o.ruta.idRuta == 1);
     expect(lineaA.fueraDeHorario, isTrue);
   });
+
+  test(
+    'al llegar los ETA reordena por tiempo sin cambiar la elegida',
+    () async {
+      // La Línea B pasa justo ahora: queda más rápida que la A.
+      final repositorio = RepositorioConEta({
+        2: const Eta(minutos: 0, simulado: false),
+      });
+      final p = await cargado(repositorio);
+      p
+        ..fijarDestino(lugar(p, 'Hospital Sur'))
+        ..fijarOrigen(lugar(p, 'Mercado Central'));
+      expect(p.opciones.first.ruta.idRuta, 1);
+
+      await pumpEventQueue();
+
+      expect(p.opciones.first.ruta.idRuta, 2);
+      expect(p.elegida?.ruta.idRuta, 1, reason: 'no se mueve lo que se ve');
+    },
+  );
 }
