@@ -35,16 +35,32 @@ enum PasoViaje {
   llegaste,
 }
 
+/// Aviso de la guía cuando el pasajero va a bordo y hay GPS.
+enum AvisoBajada {
+  /// El próximo paradero es donde se baja.
+  proxima,
+
+  /// Está a menos de [distanciaParaBajarseMetros] del paradero de bajada.
+  aqui,
+}
+
+/// Distancia al paradero de bajada a la que se avisa "Bájate aquí".
+const distanciaParaBajarseMetros = 150.0;
+
 /// Estado del buscador "¿A dónde vas?". Pide las rutas y los paraderos de
 /// todas ellas una sola vez (en paralelo) y los guarda en memoria. Primero se
 /// pide el destino y luego el origen (si hay GPS, el origen es la ubicación
 /// actual); con los dos, busca sola y elige la mejor línea. Solo depende de la interfaz RutasRepository.
 class PlanificadorViaje extends ChangeNotifier {
-  PlanificadorViaje(this._repository, {this.lugaresConocidos = const []})
-    : _calles = [
-        for (final l in lugaresConocidos)
-          if (l.tipo == TipoLugar.calle) l,
-      ];
+  PlanificadorViaje(
+    this._repository, {
+    this.lugaresConocidos = const [],
+    DateTime Function()? reloj,
+  }) : _reloj = reloj ?? relojPorDefecto,
+       _calles = [
+         for (final l in lugaresConocidos)
+           if (l.tipo == TipoLugar.calle) l,
+       ];
 
   /// Base propia de calles y lugares de Piura que se suma a los paraderos
   /// en las sugerencias (lib/data/lugares/lugares_piura.dart).
@@ -52,6 +68,14 @@ class PlanificadorViaje extends ChangeNotifier {
   final List<Lugar> _calles;
 
   final RutasRepository _repository;
+
+  /// Hora actual, para saber qué líneas atienden.
+  final DateTime Function() _reloj;
+
+  /// Reloj que usan los planificadores creados sin uno propio. Las pruebas
+  /// lo fijan (test/flutter_test_config.dart) para no depender de la hora
+  /// en que se corren.
+  static DateTime Function() relojPorDefecto = DateTime.now;
 
   List<Ruta> _rutas = const [];
   Map<int, List<Paradero>> _paraderos = const {};
@@ -90,12 +114,21 @@ class PlanificadorViaje extends ChangeNotifier {
   /// desde entonces el GPS ya no lo reemplaza, hasta [limpiar].
   bool _origenManual = false;
   PasoViaje? _paso;
+  int? _restantes;
+  AvisoBajada? _aviso;
+
+  /// Se llama una vez cada vez que aparece un aviso nuevo para bajarse (el
+  /// mapa lo usa para vibrar y sonar).
+  void Function(AvisoBajada aviso)? alAvisar;
 
   EstadoViaje get estado => _estado;
   Lugar? get origen => _origen;
   Lugar? get destino => _destino;
   CampoViaje get campoActivo => _campoActivo;
   List<Lugar> get catalogo => _catalogo;
+
+  /// Rutas ya cargadas (para elegir la línea al reportar un cambio).
+  List<Ruta> get rutas => _rutas;
 
   /// Lugares por los que pasan más líneas, para elegirlos con un clic.
   List<Lugar> get frecuentes => _frecuentes;
@@ -105,6 +138,13 @@ class PlanificadorViaje extends ChangeNotifier {
 
   /// Paso actual de la guía, o null si no hay un viaje iniciado.
   PasoViaje? get paso => _paso;
+
+  /// A bordo y con GPS: paraderos que faltan hasta el de bajada. Null si no
+  /// se va a bordo o no hay ubicación.
+  int? get paraderosRestantes => _restantes;
+
+  /// A bordo y con GPS: aviso para bajarse, o null si todavía falta.
+  AvisoBajada? get avisoBajada => _aviso;
 
   /// Paraderos de una ruta ya cargados en memoria.
   List<Paradero> paraderosDe(int idRuta) =>
@@ -174,6 +214,11 @@ class PlanificadorViaje extends ChangeNotifier {
   /// y la guía no cambian mientras el pasajero camina.
   void usarUbicacionActual(LatLng punto) {
     _ubicacionActual = punto;
+    if (_paso == PasoViaje.aBordo) {
+      _seguirABordo(punto);
+      notifyListeners();
+      return;
+    }
     if (_origenManual || _destino != null && _origen != null) return;
     final origen = _origen;
     if (origen != null && origen.posicion == punto) return;
@@ -246,6 +291,7 @@ class PlanificadorViaje extends ChangeNotifier {
   void iniciarViaje() {
     if (_elegida == null) return;
     _paso = PasoViaje.caminarAlParadero;
+    _limpiarABordo();
     notifyListeners();
   }
 
@@ -253,12 +299,55 @@ class PlanificadorViaje extends ChangeNotifier {
     final paso = _paso;
     if (paso == null || paso == PasoViaje.llegaste) return;
     _paso = PasoViaje.values[paso.index + 1];
+    _limpiarABordo();
+    final aqui = _ubicacionActual;
+    if (_paso == PasoViaje.aBordo && aqui != null) _seguirABordo(aqui);
     notifyListeners();
   }
 
   void salirDelViaje() {
     _paso = null;
+    _limpiarABordo();
     notifyListeners();
+  }
+
+  void _limpiarABordo() {
+    _restantes = null;
+    _aviso = null;
+  }
+
+  /// A bordo: el paradero de la línea más cercano a [punto] dice cuántos
+  /// faltan. Avisa "en la próxima" cuando falta uno y "aquí" cerca del de
+  /// bajada; cada aviso se da una sola vez y no vuelve atrás.
+  void _seguirABordo(LatLng punto) {
+    final o = _elegida;
+    if (o == null) return;
+    final camino = [o.sube, ...o.paraderosIntermedios, o.baja];
+    var cercano = 0;
+    var mejor = double.infinity;
+    for (final (i, p) in camino.indexed) {
+      final d = distanciaMetros(punto, posicionDe(p));
+      if (d < mejor) {
+        mejor = d;
+        cercano = i;
+      }
+    }
+    final cerca =
+        distanciaMetros(punto, posicionDe(o.baja)) <=
+        distanciaParaBajarseMetros;
+    final restantes = cerca ? 0 : camino.length - 1 - cercano;
+    _restantes = restantes;
+    final aviso = cerca
+        ? AvisoBajada.aqui
+        : restantes <= 1
+        ? AvisoBajada.proxima
+        : null;
+    final anterior = _aviso;
+    if (aviso == null || (anterior != null && aviso.index <= anterior.index)) {
+      return;
+    }
+    _aviso = aviso;
+    alAvisar?.call(aviso);
   }
 
   /// Después de cualquier cambio de origen o destino: pasa al campo que
@@ -266,6 +355,7 @@ class PlanificadorViaje extends ChangeNotifier {
   /// línea.
   void _actualizar() {
     _paso = null;
+    _limpiarABordo();
     if (_destino == null) {
       _campoActivo = CampoViaje.hasta;
     } else if (_origen == null) {
@@ -285,6 +375,7 @@ class PlanificadorViaje extends ChangeNotifier {
         rutas: _rutas,
         paraderos: _paraderos,
         trazados: _trazados,
+        ahora: _reloj(),
       );
       _opciones = [
         for (final o in resultado.opciones) o.conEta(_etas[o.ruta.idRuta]),
@@ -328,8 +419,11 @@ class PlanificadorViaje extends ChangeNotifier {
       _pidiendoEta.remove(id);
     }
     if (_descartado) return;
+    // Con la espera real el orden puede cambiar; la elegida se mantiene para
+    // no mover lo que el pasajero está mirando.
     final elegida = _elegida?.ruta.idRuta;
-    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])];
+    _opciones = [for (final o in _opciones) o.conEta(_etas[o.ruta.idRuta])]
+      ..sort(compararOpciones);
     _elegida = _opciones.where((o) => o.ruta.idRuta == elegida).firstOrNull;
     notifyListeners();
   }

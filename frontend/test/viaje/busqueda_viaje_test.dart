@@ -24,6 +24,17 @@ Ruta ruta(
   );
 }
 
+extension on Ruta {
+  Ruta copiaConHorario(String horario) => Ruta(
+    idRuta: idRuta,
+    nombre: nombre,
+    frecuenciaMinutos: frecuenciaMinutos,
+    pasaje: pasaje,
+    activa: activa,
+    horario: horario,
+  );
+}
+
 const origen = LatLng(-5.2000, -80.63);
 const destino = LatLng(-5.2200, -80.63);
 
@@ -554,6 +565,122 @@ void main() {
       expect(
         [for (final p in vuelta.paraderosIntermedios) p.nombre],
         ['Centro'],
+      );
+    });
+  });
+
+  group('sentido del viaje', () {
+    const linea = Ruta(
+      idRuta: 1,
+      nombre: 'Línea',
+      puntoInicio: 'Terminal Norte',
+      puntoFinal: 'Terminal Sur',
+    );
+    final paraderos = {
+      1: [
+        paraderoPrueba(1, 'Norte', -5.2010),
+        paraderoPrueba(2, 'Centro', -5.2100),
+        paraderoPrueba(3, 'Sur', -5.2190),
+      ],
+    };
+
+    test('dice hacia qué terminal va la unidad que hay que tomar', () {
+      final ida = buscar([linea], paraderos).opciones.single;
+      expect(ida.haciaDonde, 'Terminal Sur');
+
+      final vuelta = buscar(
+        [linea],
+        paraderos,
+        desde: destino,
+        hasta: origen,
+      ).opciones.single;
+      expect(vuelta.haciaDonde, 'Terminal Norte');
+    });
+  });
+
+  group('horario de servicio', () {
+    Ruta conHorario(String? horario) =>
+        Ruta(idRuta: 1, nombre: 'Línea', horario: horario);
+    DateTime hora(int h, [int m = 0]) => DateTime(2026, 11, 27, h, m);
+
+    test('sabe si la línea atiende a esa hora', () {
+      expect(enServicio(conHorario('06:00–21:00'), hora(7)), isTrue);
+      expect(enServicio(conHorario('06:00–21:00'), hora(22, 30)), isFalse);
+      expect(enServicio(conHorario('06:00–21:00'), hora(5, 59)), isFalse);
+      // Con guion común también.
+      expect(enServicio(conHorario('05:30-22:00'), hora(5, 30)), isTrue);
+      // Horario que pasa la medianoche.
+      expect(enServicio(conHorario('18:00–02:00'), hora(1)), isTrue);
+      expect(enServicio(conHorario('18:00–02:00'), hora(12)), isFalse);
+      // Sin horario o con un texto que no se entiende: no se sabe.
+      expect(enServicio(conHorario(null), hora(3)), isNull);
+      expect(enServicio(conHorario('24 horas'), hora(3)), isNull);
+    });
+
+    test('las líneas fuera de horario van al final y se marcan', () {
+      final resultado = buscarOpciones(
+        origen: origen,
+        destino: destino,
+        rutas: [
+          ruta(1, 'Cerrada', frecuencia: 5).copiaConHorario('06:00–21:00'),
+          ruta(2, 'Abierta', frecuencia: 20).copiaConHorario('05:00–23:00'),
+        ],
+        paraderos: {
+          1: [
+            paraderoPrueba(1, 'Norte', -5.2010),
+            paraderoPrueba(2, 'Sur', -5.2190),
+          ],
+          2: [
+            paraderoPrueba(3, 'Norte 2', -5.2010),
+            paraderoPrueba(4, 'Sur 2', -5.2190),
+          ],
+        },
+        ahora: hora(22, 30),
+      );
+
+      expect(
+        [for (final o in resultado.opciones) o.ruta.nombre],
+        ['Abierta', 'Cerrada'],
+      );
+      expect(resultado.opciones.last.fueraDeHorario, isTrue);
+      expect(resultado.opciones.first.fueraDeHorario, isFalse);
+    });
+  });
+
+  group('orden por tiempo total', () {
+    test('la más rápida va primero aunque se camine un poco más', () {
+      final resultado = buscar(
+        [
+          // Paraderos a 0 m, pero pasa cada 40 min: 20 de espera.
+          ruta(1, 'Lenta', frecuencia: 40),
+          // Unos 220 m más de caminata en total, pero pasa cada 4 min.
+          ruta(2, 'Rápida', frecuencia: 4),
+        ],
+        {
+          1: [paraderoPrueba(1, 'N', -5.2000), paraderoPrueba(2, 'S', -5.2200)],
+          2: [paraderoPrueba(3, 'N', -5.2010), paraderoPrueba(4, 'S', -5.2190)],
+        },
+      );
+
+      final [primera, segunda] = resultado.opciones;
+      expect(primera.ruta.nombre, 'Rápida');
+      expect(primera.metrosTotales, greaterThan(segunda.metrosTotales));
+      expect(primera.minutosTotales, lessThan(segunda.minutosTotales));
+    });
+
+    test('sin dato de espera se supone una espera típica al ordenar', () {
+      expect(esperaSupuestaMinutos, 5);
+      final resultado = buscar(
+        [ruta(1, 'Sin dato'), ruta(2, 'Cada 6', frecuencia: 6)],
+        {
+          1: [paraderoPrueba(1, 'N', -5.2010), paraderoPrueba(2, 'S', -5.2190)],
+          2: [paraderoPrueba(3, 'N', -5.2010), paraderoPrueba(4, 'S', -5.2190)],
+        },
+      );
+      // "Cada 6" espera 3 min; "Sin dato" se ordena como si esperara 5.
+      expect(
+        [for (final o in resultado.opciones) o.ruta.nombre],
+        ['Cada 6', 'Sin dato'],
       );
     });
   });

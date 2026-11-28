@@ -593,3 +593,42 @@ class FakeRutasRepository implements RutasRepository {
     ),
   ];
 }
+
+/// Qué cambió según el pasajero que reporta (valores del backend).
+enum TipoReporte {
+  rutaCambio('RUTA_CAMBIO', 'La ruta cambió'),
+  paraderoNuevo('PARADERO_NUEVO', 'Hay un paradero nuevo'),
+  paraderoNoExiste('PARADERO_NO_EXISTE', 'Un paradero ya no existe'),
+  otro('OTRO', 'Otro');
+
+  const TipoReporte(this.valor, this.texto);
+
+  /// Valor que espera el backend.
+  final String valor;
+
+  /// Texto para el pasajero.
+  final String texto;
+}
+
+/// Reporte de un pasajero sobre datos desactualizados. La línea y la
+/// ubicación son opcionales; la ubicación solo va si el pasajero la elige.
+class NuevoReporte {
+  const NuevoReporte({
+    required this.tipo,
+    required this.descripcion,
+    this.idRuta,
+    this.ubicacion,
+  });
+
+  final TipoReporte tipo;
+  final String descripcion;
+  final int? idRuta;
+  final LatLng? ubicacion;
+}
+
+/// Destino de los reportes de la comunidad. La implementa el repositorio que
+/// llama al backend; los datos de prueba no pueden enviar reportes.
+abstract class FuenteReportes {
+  /// Envía el reporte; false si el backend lo rechaza o no responde.
+  Future<bool> reportar(NuevoReporte reporte);
+}

@@ -63,9 +63,10 @@ class PiuraGoApp extends StatelessWidget {
       title: 'PiuraGo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      initialRoute: (authService?.esRegistrado ?? false)
-          ? AppRoutes.mapa
-          : AppRoutes.login,
+      // Sin pasar por el login: quien no conoce el transporte solo escribe su
+      // destino. El token anónimo se pide solo al cargar las rutas
+      // (AuthService.obtenerToken) y el login queda en el avatar.
+      initialRoute: AppRoutes.mapa,
       routes: {
         AppRoutes.login: (_) => LoginPage(authService: authService),
         AppRoutes.rutas: (_) => RoutesPage(repository: repository),

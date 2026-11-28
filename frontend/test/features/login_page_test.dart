@@ -9,6 +9,7 @@ import 'package:piurago/data/api/almacen_sesion.dart';
 import 'package:piurago/data/api/auth_service.dart';
 import 'package:piurago/data/models/eta.dart';
 import 'package:piurago/data/rutas_repository.dart';
+import 'package:piurago/features/map/map_page.dart';
 
 void fijarPantalla(WidgetTester tester) {
   tester.view.physicalSize = const Size(1366, 900);
@@ -52,7 +53,13 @@ class Backend {
   );
 }
 
-Future<void> abrir(WidgetTester tester, AuthService auth) async {
+/// Abre la app (que empieza en "¿A dónde vas?") y, si [irAlLogin], toca el
+/// avatar para ir a "Inicia sesión".
+Future<void> abrir(
+  WidgetTester tester,
+  AuthService auth, {
+  bool irAlLogin = true,
+}) async {
   await tester.pumpWidget(
     PiuraGoApp(
       authService: auth,
@@ -61,6 +68,10 @@ Future<void> abrir(WidgetTester tester, AuthService auth) async {
     ),
   );
   await tester.pumpAndSettle();
+  if (irAlLogin) {
+    await tester.tap(find.byTooltip('Iniciar sesión'));
+    await tester.pumpAndSettle();
+  }
 }
 
 final campoCorreo = find.byKey(const ValueKey('campo-correo'));
@@ -90,6 +101,8 @@ void main() {
     expect(backend.pedidos, contains('/api/auth/login'));
     expect(auth.esRegistrado, isTrue);
     expect(find.text('¿A dónde vas?'), findsOneWidget);
+    // Vuelve al mapa del que vino: no apila un segundo mapa.
+    expect(find.byType(MapPage, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('con credenciales incorrectas avisa y no avanza', (tester) async {
@@ -142,6 +155,8 @@ void main() {
     expect(backend.pedidos, contains('/api/auth/registro'));
     expect(auth.esRegistrado, isTrue);
     expect(find.text('¿A dónde vas?'), findsOneWidget);
+    // Vuelve al mapa del que vino: no apila un segundo mapa.
+    expect(find.byType(MapPage, skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('si el registro falla lo explica', (tester) async {
@@ -202,7 +217,7 @@ void main() {
 
       final auth = backend.auth(almacen);
       await auth.restaurarSesion();
-      await abrir(tester, auth);
+      await abrir(tester, auth, irAlLogin: false);
 
       expect(find.text('¿A dónde vas?'), findsOneWidget);
       expect(find.text('Inicia sesión'), findsNothing);
@@ -211,5 +226,22 @@ void main() {
 
   test('el ETA se redondea a minutos enteros', () {
     expect(const Eta(minutos: 4, simulado: true).minutos, 4);
+  });
+
+  testWidgets('sin sesión, abre directo en ¿A dónde vas? sin pasar por el '
+      'login', (tester) async {
+    fijarPantalla(tester);
+    await abrir(tester, Backend().auth(), irAlLogin: false);
+
+    expect(find.text('¿A dónde vas?'), findsOneWidget);
+    expect(find.text('Inicia sesión'), findsNothing);
+  });
+
+  testWidgets('el avatar lleva a "Inicia sesión"', (tester) async {
+    fijarPantalla(tester);
+    await abrir(tester, Backend().auth());
+
+    expect(find.text('Inicia sesión'), findsOneWidget);
+    expect(find.text('Continuar como pasajero anónimo'), findsOneWidget);
   });
 }

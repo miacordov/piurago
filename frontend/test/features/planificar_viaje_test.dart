@@ -577,4 +577,16 @@ void main() {
 
     expect(find.text('¿A dónde vas?'), findsOneWidget);
   });
+
+  testWidgets('desde ¿A dónde vas? se puede reportar un cambio', (
+    tester,
+  ) async {
+    fijarPantalla(tester, escritorio);
+    await irAlMapa(tester);
+
+    await tester.tap(find.text('Reportar un cambio'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('reporte-descripcion')), findsOneWidget);
+  });
 }

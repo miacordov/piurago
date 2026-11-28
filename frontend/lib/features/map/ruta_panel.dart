@@ -17,7 +17,11 @@ class RutaPanel extends StatelessWidget {
     this.eta,
     this.onPlanificarViaje,
     this.onCompartirRuta,
+    this.onReportar,
   });
+
+  /// Abre "Reportar un cambio" con esta línea elegida.
+  final VoidCallback? onReportar;
 
   final Ruta ruta;
   final List<Paradero> paraderos;
@@ -99,6 +103,14 @@ class RutaPanel extends StatelessWidget {
               style: appOutlinedButtonStyle(),
               icon: const Icon(Icons.alt_route, size: 18),
               label: const Text('Planificar viaje'),
+            ),
+          ],
+          if (onReportar != null) ...[
+            const SizedBox(height: 4),
+            TextButton.icon(
+              onPressed: onReportar,
+              icon: const Icon(Icons.flag_outlined, size: 18),
+              label: const Text('Reportar un cambio'),
             ),
           ],
           const SizedBox(height: 24),

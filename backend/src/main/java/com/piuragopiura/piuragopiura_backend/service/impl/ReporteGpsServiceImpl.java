@@ -7,7 +7,6 @@ import com.piuragopiura.piuragopiura_backend.repository.ReporteGpsRepository;
 import com.piuragopiura.piuragopiura_backend.repository.RutaRepository;
 import com.piuragopiura.piuragopiura_backend.repository.UsuarioRepository;
 import com.piuragopiura.piuragopiura_backend.service.ReporteGpsService;
-import org.apache.commons.lang3.Range;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +16,6 @@ import java.util.List;
 
 @Service
 public class ReporteGpsServiceImpl implements ReporteGpsService {
-
-    // Rango aproximado del territorio peruano — descarta reportes GPS claramente corruptos o falsificados.
-    private static final Range<Double> LATITUD_PERU = Range.of(-18.5, 0.0);
-    private static final Range<Double> LONGITUD_PERU = Range.of(-81.5, -68.5);
 
     private final ReporteGpsRepository reporteGpsRepository;
     private final UsuarioRepository usuarioRepository;
@@ -36,7 +31,7 @@ public class ReporteGpsServiceImpl implements ReporteGpsService {
 
     @Override
     public ReporteGps registrarReporte(Long idUsuario, Long idRuta, BigDecimal latitud, BigDecimal longitud) {
-        validarCoordenadas(latitud, longitud);
+        CoordenadasPeru.validar(latitud, longitud);
 
         Usuario usuario = usuarioRepository.findById(idUsuario)
             .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + idUsuario));
@@ -49,15 +44,6 @@ public class ReporteGpsServiceImpl implements ReporteGpsService {
         reporte.setLatitud(latitud);
         reporte.setLongitud(longitud);
         return reporteGpsRepository.save(reporte);
-    }
-
-    private void validarCoordenadas(BigDecimal latitud, BigDecimal longitud) {
-        if (!LATITUD_PERU.contains(latitud.doubleValue())) {
-            throw new IllegalArgumentException("Latitud fuera de rango esperado: " + latitud);
-        }
-        if (!LONGITUD_PERU.contains(longitud.doubleValue())) {
-            throw new IllegalArgumentException("Longitud fuera de rango esperado: " + longitud);
-        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:piurago/data/api/auth_service.dart';
@@ -35,7 +36,7 @@ void main() {
               'activa': true,
               'frecuenciaMinutos': 8,
               'pasaje': 2.50,
-            }
+            },
           ]),
           200,
           headers: {'content-type': 'application/json'},
@@ -80,7 +81,7 @@ void main() {
               'latitud': -5.2000,
               'longitud': -80.6250,
               'ordenSecuencial': 2,
-            }
+            },
           ]),
           200,
           headers: {'content-type': 'application/json'},
@@ -102,47 +103,128 @@ void main() {
       expect(pedidoCapturado.headers['authorization'], 'Bearer jwt-valido');
     });
 
-    test('reportarGps() envía POST /api/reportes-gps con coordenadas y ruta', () async {
-      late http.Request pedidoCapturado;
+    test(
+      'reportarGps() envía POST /api/reportes-gps con coordenadas y ruta',
+      () async {
+        late http.Request pedidoCapturado;
 
-      final cliente = MockClient((request) async {
-        pedidoCapturado = request;
-        return http.Response(
-          jsonEncode({
-            'idReporte': 1001,
-            'idUsuario': 1,
-            'idRuta': 101,
-            'latitud': -5.1944,
-            'longitud': -80.6328,
-            'fechaHora': '2026-10-26T15:30:00Z',
-          }),
-          201,
-          headers: {'content-type': 'application/json'},
+        final cliente = MockClient((request) async {
+          pedidoCapturado = request;
+          return http.Response(
+            jsonEncode({
+              'idReporte': 1001,
+              'idUsuario': 1,
+              'idRuta': 101,
+              'latitud': -5.1944,
+              'longitud': -80.6328,
+              'fechaHora': '2026-10-26T15:30:00Z',
+            }),
+            201,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final repo = HttpRutasRepository(
+          cliente: cliente,
+          baseUrl: Uri.parse('http://localhost:8080'),
+          authService: authFake,
         );
-      });
 
+        final ok = await repo.reportarGps(
+          idRuta: 101,
+          latitud: -5.1944,
+          longitud: -80.6328,
+        );
+
+        expect(ok, isTrue);
+        expect(pedidoCapturado.method, 'POST');
+        expect(pedidoCapturado.url.path, '/api/reportes-gps');
+        expect(pedidoCapturado.headers['authorization'], 'Bearer jwt-valido');
+
+        final body = jsonDecode(pedidoCapturado.body) as Map<String, dynamic>;
+        expect(body['idRuta'], 101);
+        expect(body['latitud'], -5.1944);
+        expect(body['longitud'], -80.6328);
+      },
+    );
+
+    test(
+      'reportar() envía POST /api/reportes-comunidad con el reporte',
+      () async {
+        late http.Request pedido;
+        final cliente = MockClient((request) async {
+          pedido = request;
+          return http.Response('{}', 201);
+        });
+        final repo = HttpRutasRepository(
+          cliente: cliente,
+          baseUrl: Uri.parse('http://localhost:8080'),
+          authService: authFake,
+        );
+
+        final ok = await repo.reportar(
+          const NuevoReporte(
+            tipo: TipoReporte.rutaCambio,
+            idRuta: 7,
+            descripcion: 'Ya no entra por la Av. Grau',
+            ubicacion: LatLng(-5.19, -80.63),
+          ),
+        );
+
+        expect(ok, isTrue);
+        expect(pedido.method, 'POST');
+        expect(pedido.url.path, '/api/reportes-comunidad');
+        expect(pedido.headers['authorization'], 'Bearer jwt-valido');
+        expect(jsonDecode(pedido.body), {
+          'tipo': 'RUTA_CAMBIO',
+          'idRuta': 7,
+          'descripcion': 'Ya no entra por la Av. Grau',
+          'latitud': -5.19,
+          'longitud': -80.63,
+        });
+      },
+    );
+
+    test('reportar() sin ruta ni ubicación no manda esos campos', () async {
+      late http.Request pedido;
       final repo = HttpRutasRepository(
-        cliente: cliente,
+        cliente: MockClient((request) async {
+          pedido = request;
+          return http.Response('{}', 201);
+        }),
         baseUrl: Uri.parse('http://localhost:8080'),
         authService: authFake,
       );
 
-      final ok = await repo.reportarGps(
-        idRuta: 101,
-        latitud: -5.1944,
-        longitud: -80.6328,
+      await repo.reportar(
+        const NuevoReporte(tipo: TipoReporte.otro, descripcion: 'Algo'),
       );
 
-      expect(ok, isTrue);
-      expect(pedidoCapturado.method, 'POST');
-      expect(pedidoCapturado.url.path, '/api/reportes-gps');
-      expect(pedidoCapturado.headers['authorization'], 'Bearer jwt-valido');
-
-      final body = jsonDecode(pedidoCapturado.body) as Map<String, dynamic>;
-      expect(body['idRuta'], 101);
-      expect(body['latitud'], -5.1944);
-      expect(body['longitud'], -80.6328);
+      expect(jsonDecode(pedido.body), {'tipo': 'OTRO', 'descripcion': 'Algo'});
     });
+
+    test(
+      'reportar() devuelve false si el backend rechaza o no responde',
+      () async {
+        Future<bool> con(MockClient cliente) =>
+            HttpRutasRepository(
+              cliente: cliente,
+              baseUrl: Uri.parse('http://localhost:8080'),
+              authService: authFake,
+            ).reportar(
+              const NuevoReporte(tipo: TipoReporte.otro, descripcion: 'x'),
+            );
+
+        expect(
+          await con(MockClient((_) async => http.Response('', 400))),
+          isFalse,
+        );
+        expect(
+          await con(MockClient((_) async => throw http.ClientException('red'))),
+          isFalse,
+        );
+      },
+    );
 
     test('si el backend falla o da error de red, conmuta suavemente al repositorio fallback', () async {
       final clienteError = MockClient((_) async {

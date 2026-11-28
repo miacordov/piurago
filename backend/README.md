@@ -72,6 +72,7 @@ Prueba rapida con la API corriendo (`http://localhost:8080`):
 - `db/schema.sql`: esquema completo. En la base compartida de Neon **ya esta aplicado**; no se ejecuta de nuevo ahi.
 - `db/migraciones/`: cambios posteriores al esquema, un archivo por cambio.
   - `001_ruta_datos_servicio.sql`: agrega a `ruta` el tipo de servicio, horario y pasaje.
+  - `002_reporte_comunidad.sql`: crea `reporte_comunidad` para el botón "Reportar un cambio" de la app. **Aplicarla antes de desplegar** el backend que la usa: con `ddl-auto=validate`, sin esta tabla el backend no arranca. El perfil `carga` la ejecuta.
 - `db/seeds/`: datos iniciales.
   - `001_rutas_paraderos_piuratransporta.sql`: las 20 líneas de https://piuratransporta.com/rutas y 170 paraderos **propuestos** con coordenadas de OpenStreetMap (ver `docs/datos/paraderos-propuestos.md`). Se generó a partir de `docs/datos/*.json`.
 
@@ -90,6 +91,14 @@ El perfil `carga` ejecuta la migración y los seeds antes de que Hibernate valid
 | `db/seeds/001_rutas_paraderos_piuratransporta.sql` | Las 20 líneas de piuratransporta.com con paraderos propuestos. Actualiza las rutas por código, inserta las que falten y solo agrega paraderos a las rutas que no tienen. No borra nada. |
 | `db/seeds/002_rutas_plan_regulador.sql` | Datos de la Municipalidad (Plan Regulador, O.M. 092-02-CMPP): agrega RD-07, RD-12, RD-13 y RD-17. En las 10 rutas con recorrido oficial guarda ese recorrido y **reemplaza sus paraderos** por los del recorrido oficial (solo si todavía no los tiene). Antes borra el histórico de congestión de los paraderos que se quitan; ese histórico se rehace solo en el siguiente recálculo automático (ver "Cómo se calcula la congestión"). Ver `docs/datos/rutas-plan-regulador.md`. |
 - `postman/`: coleccion de pruebas de punta a punta (pendiente de agregar).
+
+## Reportes de la comunidad
+
+Los pasajeros avisan desde la app que una ruta cambió o que un paradero es nuevo o ya no existe. Cada reporte queda `PENDIENTE` para que el equipo lo revise.
+
+| Método | Ruta | Quién | Qué hace |
+|---|---|---|---|
+| POST | `/api/reportes-comunidad` | cualquier usuario con token | Guarda un reporte. Cuerpo: `tipo` (`RUTA_CAMBIO`, `PARADERO_NUEVO`, `PARADERO_NO_EXISTE` u `OTRO`), `descripcion` (obligatoria, hasta 500 caracteres) y, opcionales, `idRuta`, `latitud` y `longitud` (las dos o ninguna, dentro de Perú). Responde `201`. |
 
 ## Cómo se calcula el ETA
 
